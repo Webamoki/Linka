@@ -1,0 +1,19 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <TargetFramework>net8.0</TargetFramework>
+        <ImplicitUsings>enable</ImplicitUsings>
+        <Nullable>enable</Nullable>
+
+        <!-- NuGet package metadata -->
+        <PackageId>Linka</PackageId>
+        <Version>1.0.0</Version>
+        <Authors>YourName</Authors>
+        <Company>YourCompany</Company>
+        <Description>A simple C# ORM for .NET projects</Description>
+        <PackageTags>ORM;Database;CSharp;EFCoreAlternative</PackageTags>
+        <RepositoryUrl>https://github.com/YourUsername/YourRepoName</RepositoryUrl>
+        <PackageLicenseExpression>MIT</PackageLicenseExpression> <!-- or Apache-2.0 -->
+    </PropertyGroup>
+
+</Project>

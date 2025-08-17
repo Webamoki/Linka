@@ -1,0 +1,22 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Linka", "src/Linka/Linka.csproj", "{5D94FCAC-9225-4965-AA89-9E58436818B3}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Linka.Tests", "src\Linka.Tests\Linka.Tests.csproj", "{EB892F43-D7F7-4B9E-939A-49C55EC8F000}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{5D94FCAC-9225-4965-AA89-9E58436818B3}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{5D94FCAC-9225-4965-AA89-9E58436818B3}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{5D94FCAC-9225-4965-AA89-9E58436818B3}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{5D94FCAC-9225-4965-AA89-9E58436818B3}.Release|Any CPU.Build.0 = Release|Any CPU
+		{EB892F43-D7F7-4B9E-939A-49C55EC8F000}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{EB892F43-D7F7-4B9E-939A-49C55EC8F000}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{EB892F43-D7F7-4B9E-939A-49C55EC8F000}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{EB892F43-D7F7-4B9E-939A-49C55EC8F000}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+EndGlobal

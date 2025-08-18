@@ -19,7 +19,11 @@
     </PropertyGroup>
     <ItemGroup>
         <AssemblyAttribute Include="System.Runtime.CompilerServices.InternalsVisibleTo">
-            <_Parameter1>LinkaTests</_Parameter1>
+            <_Parameter1>Linka.Tests</_Parameter1>
         </AssemblyAttribute>
+    </ItemGroup>
+    <ItemGroup>
+      <PackageReference Include="NUnit" Version="4.4.0" />
+      <PackageReference Include="Testcontainers.PostgreSql" Version="4.6.0" />
     </ItemGroup>
 </Project>

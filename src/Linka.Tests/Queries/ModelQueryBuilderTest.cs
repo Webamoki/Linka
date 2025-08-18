@@ -1,12 +1,12 @@
 ﻿using System.Linq.Expressions;
-using LinkaTests.Models;
+using Linka.Tests.Models;
 using NUnit.Framework;
 using Webamoki.Linka.Queries;
 using Webamoki.Linka.TestUtils;
 using Webamoki.TestUtils;
 using Webamoki.Utils;
 
-namespace LinkaTests.Queries;
+namespace Linka.Tests.Queries;
 
 [RegisterSchema<UserDbSchema>]
 public class ModelQueryBuilderTest : ModelTest

@@ -2,7 +2,7 @@
 using Webamoki.Linka.Fields.TextFields;
 using Webamoki.TestUtils;
 
-namespace LinkaTests.Fields;
+namespace Linka.Tests.Fields;
 
 public class ValidatorTest
 {

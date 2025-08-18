@@ -1,7 +1,7 @@
 ﻿using Webamoki.Linka;
 using Webamoki.Linka.Models;
 
-namespace LinkaTests.Models;
+namespace Linka.Tests.Models;
 
 [method: Model<UserModel>]
 [method: Model<IpAddressModel>]

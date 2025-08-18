@@ -2,7 +2,7 @@
 using Webamoki.Linka.Fields.TextFields;
 using Webamoki.TestUtils;
 
-namespace LinkaTests.Fields.TextFields;
+namespace Linka.Tests.Fields.TextFields;
 
 public class EmailDbFieldTest
 {

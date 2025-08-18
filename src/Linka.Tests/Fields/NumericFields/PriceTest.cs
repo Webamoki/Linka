@@ -2,7 +2,7 @@
 using Webamoki.Linka.Fields.NumericFields;
 using Webamoki.TestUtils;
 
-namespace LinkaTests.Fields.NumericFields;
+namespace Linka.Tests.Fields.NumericFields;
 
 public class PriceTests
 {

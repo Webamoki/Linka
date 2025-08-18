@@ -1,8 +1,8 @@
-using LinkaTests.Models;
+using Linka.Tests.Models;
 using NUnit.Framework;
 using Webamoki.Linka;
 
-namespace LinkaTests;
+namespace Linka.Tests;
 
 
 public class TestingArea
@@ -10,7 +10,7 @@ public class TestingArea
     [Test]
     public void TestMethod()
     {
-        Linka.AddConnection("localhost", "u62560199300users", "u62560199300users", "Thb9jbCcgpxRBvBMtfQb");
+        Webamoki.Linka.Linka.AddConnection("localhost", "u62560199300users", "u62560199300users", "Thb9jbCcgpxRBvBMtfQb");
         Linka.Configure<UserDbSchema>();
         using var db = new DbService<UserDbSchema>(true);
 

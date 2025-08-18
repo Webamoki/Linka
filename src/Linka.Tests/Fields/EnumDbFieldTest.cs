@@ -2,7 +2,7 @@
 using Webamoki.Linka.Fields;
 using Webamoki.TestUtils;
 
-namespace LinkaTests.Fields;
+namespace Linka.Tests.Fields;
 
 public enum TestEnum
 {

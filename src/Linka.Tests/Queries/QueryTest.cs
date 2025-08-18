@@ -2,7 +2,7 @@
 using Webamoki.Linka.Queries;
 using Webamoki.TestUtils;
 
-namespace LinkaTests.Queries;
+namespace Linka.Tests.Queries;
 
 public class QueryTest
 {

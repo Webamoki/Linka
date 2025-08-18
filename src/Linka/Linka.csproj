@@ -4,16 +4,22 @@
         <TargetFramework>net8.0</TargetFramework>
         <ImplicitUsings>enable</ImplicitUsings>
         <Nullable>enable</Nullable>
-
+        <AssemblyName>Webamoki.$(MSBuildProjectName)</AssemblyName>
+        <RootNamespace>Webamoki.Linka</RootNamespace>
+        
         <!-- NuGet package metadata -->
         <PackageId>Linka</PackageId>
         <Version>1.0.0</Version>
-        <Authors>YourName</Authors>
-        <Company>YourCompany</Company>
-        <Description>A simple C# ORM for .NET projects</Description>
+        <Authors>Webamoki</Authors>
+        <Company>Webamoki</Company>
+        <Description>A simple C# PostgreSQL ORM for .NET projects</Description>
         <PackageTags>ORM;Database;CSharp;EFCoreAlternative</PackageTags>
         <RepositoryUrl>https://github.com/YourUsername/YourRepoName</RepositoryUrl>
         <PackageLicenseExpression>MIT</PackageLicenseExpression> <!-- or Apache-2.0 -->
     </PropertyGroup>
-
+    <ItemGroup>
+        <AssemblyAttribute Include="System.Runtime.CompilerServices.InternalsVisibleTo">
+            <_Parameter1>LinkaTests</_Parameter1>
+        </AssemblyAttribute>
+    </ItemGroup>
 </Project>

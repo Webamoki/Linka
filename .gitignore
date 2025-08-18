@@ -1,5 +1,15 @@
+# JetBrains IDEs
 .idea/
+
+# Linka project
 src/Linka/bin/
 src/Linka/obj/
+
+# Linka.Tests project
 src/Linka.Tests/bin/
 src/Linka.Tests/obj/
+
+# Optional: Ignore user-specific Visual Studio files
+*.user
+*.suo
+*.vs/

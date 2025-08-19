@@ -1,6 +1,6 @@
 ﻿using Webamoki.Linka.Models;
 
-namespace Webamoki.Linka.TestUtils;
+namespace Webamoki.Linka.Utils.Testing;
 
 public interface IFixture
 {

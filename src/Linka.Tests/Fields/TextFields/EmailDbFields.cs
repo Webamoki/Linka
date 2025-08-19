@@ -1,8 +1,8 @@
 ﻿using NUnit.Framework;
 using Webamoki.Linka.Fields.TextFields;
-using Webamoki.TestUtils;
+using Webamoki.Utils.Testing;
 
-namespace Linka.Tests.Fields.TextFields;
+namespace Tests.Fields.TextFields;
 
 public class EmailDbFieldTest
 {

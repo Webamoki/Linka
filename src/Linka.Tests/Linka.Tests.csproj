@@ -1,13 +1,17 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
     <PropertyGroup>
-        <TargetFramework>net8.0</TargetFramework>
+        <TargetFramework>net9.0</TargetFramework>
         <ImplicitUsings>enable</ImplicitUsings>
         <Nullable>enable</Nullable>
+        <AssemblyName>Tests</AssemblyName>
+        <RootNamespace>Tests</RootNamespace>
     </PropertyGroup>
 
     <ItemGroup>
+      <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.14.1" />
       <PackageReference Include="NUnit" Version="4.4.0" />
+      <PackageReference Include="Webamoki.Utils" Version="1.0.2" />
     </ItemGroup>
 
     <ItemGroup>

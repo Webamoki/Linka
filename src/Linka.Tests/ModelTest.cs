@@ -1,6 +1,6 @@
 ﻿using NUnit.Framework;
 
-namespace Linka.Tests;
+namespace Tests;
 
 public abstract class ModelTest
 {

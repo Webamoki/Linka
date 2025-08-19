@@ -1,7 +1,7 @@
 ﻿using System.Text.RegularExpressions;
-using Webamoki.Linka.Fields;
+using Webamoki.Utils;
 
-namespace Linka.Fields.TextFields;
+namespace Webamoki.Linka.Fields.TextFields;
 
 public class TextValidator : Validator
 {

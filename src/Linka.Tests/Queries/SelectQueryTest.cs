@@ -1,8 +1,8 @@
 ﻿using NUnit.Framework;
 using Webamoki.Linka.Queries;
-using Webamoki.TestUtils;
+using Webamoki.Utils.Testing;
 
-namespace Linka.Tests.Queries;
+namespace Tests.Queries;
 
 public class SelectQueryTest
 {

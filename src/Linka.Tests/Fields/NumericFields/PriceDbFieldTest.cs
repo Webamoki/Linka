@@ -1,8 +1,8 @@
 ﻿using NUnit.Framework;
 using Webamoki.Linka.Fields.NumericFields;
-using Webamoki.TestUtils;
+using Webamoki.Utils.Testing;
 
-namespace Linka.Tests.Fields.NumericFields;
+namespace Tests.Fields.NumericFields;
 
 public class PriceDbFieldTest
 {

@@ -1,8 +1,8 @@
 ﻿using NUnit.Framework;
 using Webamoki.Linka.Fields.TextFields;
-using Webamoki.TestUtils;
+using Webamoki.Utils.Testing;
 
-namespace Linka.Tests.Fields;
+namespace Tests.Fields;
 
 public class ValidatorTest
 {

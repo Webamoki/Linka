@@ -2,7 +2,7 @@
 using Tests.Models;
 using NUnit.Framework;
 using Webamoki.Linka.Queries;
-using Webamoki.Linka.Utils.Testing;
+using Webamoki.Linka.TestUtils;
 using Webamoki.Utils.Testing;
 using Webamoki.Utils;
 

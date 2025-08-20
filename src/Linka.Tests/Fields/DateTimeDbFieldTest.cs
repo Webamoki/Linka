@@ -115,4 +115,216 @@ public class DateTimeDbFieldTest
         field.Value("2021-04-22");
         Ensure.True(field.IsChanged());
     }
+
+    [Test]
+    public void SetNow_SetsCurrentDateTime()
+    {
+        var field = new DateTimeDbField();
+        var beforeCall = DateTime.Now;
+
+        field.SetNow();
+
+        var afterCall = DateTime.Now;
+        var fieldValue = field.Value();
+
+        Ensure.NotNull(fieldValue);
+        Ensure.True(field.IsSet);
+        Ensure.False(field.IsEmpty());
+
+        // Parse the field value to verify it's a valid datetime
+        var parsedDateTime = DateTime.ParseExact(fieldValue!, "yyyy-MM-dd HH:mm:ss", null);
+
+        // Verify the datetime is within a reasonable range (within 1 second of when we called SetNow)
+        Ensure.True(parsedDateTime >= beforeCall.AddSeconds(-1));
+        Ensure.True(parsedDateTime <= afterCall.AddSeconds(1));
+    }
+
+    [Test]
+    public void SetNow_SetsFieldAsChanged_WhenPreviouslySet()
+    {
+        var field = new DateTimeDbField();
+        field.Value("2020-01-01 00:00:00");
+        field.ResetChange(); // Reset change tracking
+
+        Ensure.False(field.IsChanged());
+
+        field.SetNow();
+
+        Ensure.True(field.IsChanged());
+    }
+
+    [Test]
+    public void SetNow_SetsFieldAsNotChanged_WhenFirstTimeSet()
+    {
+        var field = new DateTimeDbField();
+        Ensure.True(field.IsEmpty());
+
+        field.SetNow();
+
+        Ensure.False(field.IsChanged()); // First time setting should not be marked as changed
+        Ensure.True(field.IsSet);
+    }
+
+    [Test]
+    public void SetNow_OverwritesPreviousValue()
+    {
+        var field = new DateTimeDbField();
+        field.Value("2020-01-01 12:00:00");
+        var originalValue = field.Value();
+
+        // Wait a small amount to ensure different timestamp
+        Thread.Sleep(10);
+
+        field.SetNow();
+        var newValue = field.Value();
+
+        Ensure.NotEqual(originalValue, newValue);
+        Ensure.True(field.IsSet);
+    }
+
+    [Test]
+    public void SetNow_ProducesValidStringValue()
+    {
+        var field = new DateTimeDbField();
+        field.SetNow();
+
+        var stringValue = field.StringValue();
+
+        // Verify the string value matches the expected format
+        Ensure.True(DateTime.TryParseExact(stringValue, "yyyy-MM-dd HH:mm:ss", null,
+            System.Globalization.DateTimeStyles.None, out _));
+    }
+
+    [Test]
+    public void SetNow_WorksWithinValidatorConstraints()
+    {
+        var minDate = DateTime.Now.AddDays(-1);
+        var maxDate = DateTime.Now.AddDays(1);
+        var field = new DateTimeDbField(minDate, maxDate);
+
+        field.SetNow();
+
+        Ensure.True(field.IsValid(out var message));
+        Ensure.Null(message);
+    }
+
+    [Test]
+    public void SetNow_FailsValidationIfOutsideConstraints()
+    {
+        // Create a field with constraints that exclude "now"
+        var minDate = DateTime.Now.AddDays(-10);
+        var maxDate = DateTime.Now.AddDays(-5);
+        var field = new DateTimeDbField(minDate, maxDate);
+
+        field.SetNow();
+
+        // The field should be set but validation should fail
+        Ensure.True(field.IsSet);
+        Ensure.False(field.IsValid(out var message));
+        Ensure.Null(message);
+    }
+
+    [Test]
+    public void SetNow_MultipleCallsProduceDifferentValues()
+    {
+        var field = new DateTimeDbField();
+
+        field.SetNow();
+        var firstValue = field.Value();
+
+        // Wait a small amount to ensure different timestamp
+        Thread.Sleep(1000);
+
+        field.SetNow();
+        var secondValue = field.Value();
+
+        // Values should be different 
+        Ensure.NotEqual(firstValue, secondValue);
+    }
+
+    [Test]
+    public void DateDbField_SetNow_SetsCurrentDate()
+    {
+        var field = new DateDbField();
+        var beforeCall = DateTime.Now.Date;
+
+        field.SetNow();
+
+        var afterCall = DateTime.Now.Date;
+        var fieldValue = field.Value();
+
+        Ensure.NotNull(fieldValue);
+        Ensure.True(field.IsSet);
+        Ensure.False(field.IsEmpty());
+
+        // Parse the field value to verify it's a valid date
+        var parsedDate = DateTime.ParseExact(fieldValue!, "yyyy-MM-dd", null);
+
+        // Verify the date is today (should be the same before and after unless we cross midnight)
+        Ensure.True(parsedDate.Date == beforeCall || parsedDate.Date == afterCall);
+    }
+
+    [Test]
+    public void DateDbField_SetNow_UsesDateOnlyFormat()
+    {
+        var field = new DateDbField();
+        field.SetNow();
+
+        var fieldValue = field.Value();
+        var stringValue = field.StringValue();
+
+        // Verify the format is date-only (yyyy-MM-dd)
+        Ensure.Equal(fieldValue, stringValue);
+        Ensure.True(DateTime.TryParseExact(stringValue, "yyyy-MM-dd", null,
+            System.Globalization.DateTimeStyles.None, out _));
+
+        // Ensure it doesn't contain time information
+        Ensure.False(stringValue.Contains(" "));
+        Ensure.False(stringValue.Contains(":"));
+    }
+
+    [Test]
+    public void DateDbField_SetNow_SetsFieldAsChanged_WhenPreviouslySet()
+    {
+        var field = new DateDbField();
+        field.Value("2020-01-01");
+        field.ResetChange(); // Reset change tracking
+
+        Ensure.False(field.IsChanged());
+
+        field.SetNow();
+
+        Ensure.True(field.IsChanged());
+    }
+
+    [Test]
+    public void DateDbField_SetNow_WorksWithinValidatorConstraints()
+    {
+        var minDate = DateTime.Now.AddDays(-1);
+        var maxDate = DateTime.Now.AddDays(1);
+        var field = new DateDbField(minDate, maxDate);
+
+        field.SetNow();
+
+        Ensure.True(field.IsValid(out var message));
+        Ensure.Null(message);
+    }
+
+    [Test]
+    public void DateDbField_SetNow_OverwritesPreviousValue()
+    {
+        var field = new DateDbField();
+        field.Value("2020-01-01");
+        var originalValue = field.Value();
+
+        field.SetNow();
+        var newValue = field.Value();
+
+        Ensure.NotEqual(originalValue, newValue);
+        Ensure.True(field.IsSet);
+
+        // New value should be today's date
+        var today = DateTime.Now.ToString("yyyy-MM-dd");
+        Ensure.Equal(today, newValue);
+    }
 }

@@ -4,7 +4,7 @@ using Webamoki.Linka.Models;
 
 namespace Tests.Models;
 
-internal class IpAddressModel: Model
+public class IpAddressModel(): Model
 {
     [Key]
     public IdDbField UserID { get; } = new();
@@ -16,4 +16,12 @@ internal class IpAddressModel: Model
 
     [PkNavigation(nameof(UserID),NavConstraint.Cascade)]
     public UserModel User = null!;
+    
+    
+    public IpAddressModel(string userID, string ip): this()
+    {
+        UserID.Value(userID);
+        IP.Value(ip);
+        Accessed.SetNow();
+    }
 }

@@ -97,7 +97,7 @@ public class DateTimeDbField : RefDbField<string>
 
     public DateTimeDbField(DateTime? minDate = null, DateTime? maxDate = null) : this(minDate, maxDate, false) { }
     public override string StringValue() => Value() ?? throw new InvalidOperationException("Value is null");
-
+    
     public override void LoadValue(object? value)
     {
         switch (value)
@@ -112,6 +112,11 @@ public class DateTimeDbField : RefDbField<string>
             default:
                 throw new Exception("Value is not a valid datetime string");
         }
+    }
+
+    public void SetNow()
+    {
+        Value(DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss"));
     }
     public static bool operator <=(DateTimeDbField left, string right) =>
         DateTimeValidator.LessThanOrEqual(left.Value() ?? throw new InvalidOperationException("Value is null"), right);
@@ -138,5 +143,10 @@ public class DateDbField(DateTime? minDate = null, DateTime? maxDate = null) : D
         }
 
         throw new Exception("Value is not a valid datetime string");
+    }
+
+    public new void SetNow()
+    {
+        Value(DateTime.Now.ToString("yyyy-MM-dd"));
     }
 }

@@ -9,7 +9,7 @@ using Webamoki.Utils;
 namespace Tests.Queries;
 
 [RegisterSchema<UserDbSchema>]
-public class ModelQueryBuilderTest : ModelTest
+public class ModelQueryBuilderTest
 {
 
     private static string QuoteQuery(string query) =>

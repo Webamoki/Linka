@@ -5,7 +5,7 @@ using Webamoki.Linka.Models;
 
 namespace Tests.Models;
 
-internal class UserModel : Model
+public class UserModel() : Model
 {
     [Key] [Unique] [FullText]
     public IdDbField ID { get; } = new();
@@ -43,4 +43,28 @@ internal class UserModel : Model
 
     [PkNavigationList(nameof(IpAddressModel.UserID))]
     public List<IpAddressModel> IpAddresses = null!;
+
+    public UserModel(
+        string name,
+        string email,
+        string phone,
+        UserRank rank,
+        string password,
+        string cartToken,
+        bool verified,
+        bool login,
+        int credit
+    ): this()
+    {
+        Name.Value(name);
+        Email.Value(email);
+        Phone.Value(phone);
+        Rank.Value(rank);
+        Password.Value(password);
+        CartToken.Value(cartToken);
+        Created.SetNow();
+        Verified.Value(verified);
+        Login.Value(login);
+        Credit.Value(credit);
+    }
 }

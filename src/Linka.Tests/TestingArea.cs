@@ -1,10 +1,12 @@
 using Tests.Models;
 using NUnit.Framework;
+using Tests.Fixtures;
 using Webamoki.Linka;
+using Webamoki.Linka.TestUtils;
 
 namespace Tests;
 
-
+[Fixtures([new UserModelFixture()])]
 public class TestingArea
 {
     [Test]
@@ -18,7 +20,6 @@ public class TestingArea
         
         var memoryBefore = GC.GetTotalMemory(forceFullCollection: true);
         var ip = db.Include<IpAddressModel>(u => u.User).First(u=> u.UserID == "30120320SU");
-        var ip = new IpAddressModel();
         Console.WriteLine(ip.User.Name.Value());
         var user = db.Include<UserModel>(u => u.IpAddresses).First(u=> u.ID == "30120320SU");
         Console.WriteLine("asd1: " + user.IpAddresses);

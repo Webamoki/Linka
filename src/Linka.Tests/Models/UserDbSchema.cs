@@ -5,4 +5,4 @@ namespace Tests.Models;
 
 [method: Model<UserModel>]
 [method: Model<IpAddressModel>]
-internal class UserDbSchema() : DbSchema("u62560199300users", "User");
+internal class UserDbSchema() : DbSchema("users", "User");

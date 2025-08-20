@@ -17,6 +17,7 @@ public interface IDbService
     T Single<T>(Expression<Func<T, bool>> expression) where T : Model, new();
     T? SingleOrNull<T>(Expression<Func<T, bool>> expression) where T : Model, new();
     IncludeQuery<T> Include<T>(Expression<Func<T, object>> expression) where T : Model, new();
+    DatabaseCode Insert<T>(T model) where T : Model;
     DbSchema Schema { get; }
 }
 
@@ -181,7 +182,16 @@ public sealed class DbService<TDbSchema> : IDbService, IDisposable where TDbSche
     public IncludeQuery<T> Include<T>(Expression<Func<T, object>> expression) where T : Model, new() =>
         new(this, expression);
 
-
+    /// <summary>
+    /// Inserts a model instance into the database.
+    /// </summary>
+    /// <typeparam name="T">The type of the model to insert.</typeparam>
+    /// <param name="model">The model instance to insert.</param>
+    /// <returns>DatabaseCode indicating the result of the operation.</returns>
+    public DatabaseCode Insert<T>(T model) where T : Model
+    {
+        return model.Insert(this);
+    }
 }
 
 public enum DatabaseCode

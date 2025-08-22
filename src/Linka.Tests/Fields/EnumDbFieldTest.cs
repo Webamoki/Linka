@@ -70,6 +70,23 @@ public class EnumValidatorTest
     }
 
     [Test]
+    public void EnumDbField_ObjectValue_ReturnsCorrectEnumValue()
+    {
+        var field = new EnumDbField<TestEnum>();
+        Ensure.True(field.IsEmpty());
+        field.Value(TestEnum.Beta);
+        Ensure.Equal(TestEnum.Beta, field.ObjectValue());
+    }
+
+    [Test]
+    public void EnumDbField_ObjectValue_ThrowsIfUnset()
+    {
+        var field = new EnumDbField<TestEnum>();
+        Ensure.True(field.IsEmpty());
+        Ensure.Throws<InvalidOperationException>(() => _ = field.ObjectValue());
+    }
+
+    [Test]
     public void EnumDbField_StringValue_ThrowsWhenUnset()
     {
         var field = new EnumDbField<TestEnum>();

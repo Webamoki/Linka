@@ -46,6 +46,12 @@ public class IntDbField(int min, int max) : StructDbField<int>(IntValidator.Crea
     $"{GetSqlType(min, max)}")
 {
     public override string StringValue() => Value().ToString() ?? throw new InvalidOperationException();
+
+    public override object ObjectValue()
+    {
+        var value = Value() ?? throw new InvalidOperationException("Value is null");
+        return value;
+    }
     
     private static string GetSqlType(int min, int max)
     {

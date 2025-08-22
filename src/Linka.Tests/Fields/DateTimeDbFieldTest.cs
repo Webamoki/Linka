@@ -327,4 +327,38 @@ public class DateTimeDbFieldTest
         var today = DateTime.Now.ToString("yyyy-MM-dd");
         Ensure.Equal(today, newValue);
     }
+
+    [Test]
+    public void DateTimeDbField_ObjectValue_ThrowsIfUnset()
+    {
+        var field = new DateTimeDbField();
+        Ensure.True(field.IsEmpty());
+        Ensure.Throws<InvalidOperationException>(() => _ = field.ObjectValue());
+    }
+
+    [TestCase("2024-01-15 10:30:00")]
+    [TestCase("2023-12-25 00:00:00")]
+    public void DateTimeDbField_ObjectValue_ReturnsSetValue(string value)
+    {
+        var field = new DateTimeDbField();
+        field.Value(value);
+        Ensure.Equal(value, field.ObjectValue());
+    }
+
+    [Test]
+    public void DateDbField_ObjectValue_ThrowsIfUnset()
+    {
+        var field = new DateDbField();
+        Ensure.True(field.IsEmpty());
+        Ensure.Throws<InvalidOperationException>(() => _ = field.ObjectValue());
+    }
+
+    [TestCase("2024-01-15")]
+    [TestCase("2023-12-25")]
+    public void DateDbField_ObjectValue_ReturnsSetValue(string value)
+    {
+        var field = new DateDbField();
+        field.Value(value);
+        Ensure.Equal(value, field.ObjectValue());
+    }
 }

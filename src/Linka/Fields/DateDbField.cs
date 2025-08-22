@@ -97,6 +97,12 @@ public class DateTimeDbField : RefDbField<string>
 
     public DateTimeDbField(DateTime? minDate = null, DateTime? maxDate = null) : this(minDate, maxDate, false) { }
     public override string StringValue() => Value() ?? throw new InvalidOperationException("Value is null");
+
+    public override object ObjectValue()
+    {
+        var value = Value() ?? throw new InvalidOperationException("Value is null");
+        return value;
+    }
     
     public override void LoadValue(object? value)
     {

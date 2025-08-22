@@ -125,4 +125,22 @@ public class RegexValidatorTest
         var validator = PostcodeValidator.Create();
         Ensure.Equal(validator.IsValid(value, out _), expected);
     }
+
+    [Test]
+    public void HexColorDbField_ObjectValue_ThrowsIfUnset()
+    {
+        var field = new HexColorDbField();
+        Ensure.True(field.IsEmpty());
+        Ensure.Throws<InvalidOperationException>(() => _ = field.ObjectValue());
+    }
+
+    [TestCase("ffffff")]
+    [TestCase("000000")]
+    [TestCase("a1b2c3")]
+    public void HexColorDbField_ObjectValue_ReturnsSetValue(string value)
+    {
+        var field = new HexColorDbField();
+        field.Value(value);
+        Ensure.Equal(value, field.ObjectValue());
+    }
 }

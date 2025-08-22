@@ -34,4 +34,10 @@ public class BooleanDbField() : StructDbField<bool>(BooleanValueValidator.Create
         var value = Value() ?? throw new InvalidOperationException("Value is null");
         return value ? "true" : "false";
     }
+
+    public override object ObjectValue()
+    {
+        var value = Value() ?? throw new InvalidOperationException("Value is null");
+        return value;
+    }
 }

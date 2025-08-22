@@ -74,6 +74,8 @@ public class IdDbField(Validator validator, int charSize)
     public IdDbField() : this(10) { }
     public override string StringValue() => Value() ?? string.Empty;
 
+    public override object? ObjectValue() => Value();
+
     public void GenerateValue() => Value(((IdValidator)Validator).GenerateValue());
 }
 

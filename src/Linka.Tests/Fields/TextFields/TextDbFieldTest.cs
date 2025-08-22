@@ -80,4 +80,21 @@ public class TextDbFieldTest
         Ensure.True(nameField.IsEmpty());
         Ensure.Equal("VARCHAR(50)", nameField.SQLType);
     }
+
+    [Test]
+    public void TextDbField_ObjectValue_ThrowsIfUnset()
+    {
+        var field = new TextDbField();
+        Ensure.True(field.IsEmpty());
+        Ensure.Throws<InvalidOperationException>(() => _ = field.ObjectValue());
+    }
+
+    [TestCase("Hello World")]
+    [TestCase("Test String")]
+    public void TextDbField_ObjectValue_ReturnsSetValue(string value)
+    {
+        var field = new TextDbField();
+        field.Value(value);
+        Ensure.Equal(value, field.ObjectValue());
+    }
 }

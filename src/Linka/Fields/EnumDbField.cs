@@ -54,6 +54,12 @@ public class EnumDbField<T>() : StructDbField<T>(EnumValidator<T>.Create(), GetS
         return value.ToString();
     }
 
+    public override object? ObjectValue()
+    {
+        var value = Value() ?? throw new InvalidOperationException("Value is null");
+        return value;
+    }
+
     private static string GetSqlType()
     {
         return $"ENUM ({string.Join(",", Enum.GetNames(typeof(T)).Select(name => $"'{name}'"))})";

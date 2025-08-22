@@ -43,6 +43,30 @@ public class BooleanDbFieldTest
     }
 
     [Test]
+    public void BooleanDbField_ObjectValue_True()
+    {
+        var field = new BooleanDbField();
+        field.Value(true);
+        Ensure.Equal(true, field.ObjectValue());
+    }
+
+    [Test]
+    public void BooleanDbField_ObjectValue_False()
+    {
+        var field = new BooleanDbField();
+        field.Value(false);
+        Ensure.Equal(false, field.ObjectValue());
+    }
+
+    [Test]
+    public void BooleanDbField_ObjectValue_ThrowsIfUnset()
+    {
+        var field = new BooleanDbField();
+        Ensure.True(field.IsEmpty());
+        Ensure.Throws<InvalidOperationException>(() => _ = field.ObjectValue());
+    }
+
+    [Test]
     public void BooleanDbField_StringValue_ThrowsIfUnset()
     {
         var field = new BooleanDbField();

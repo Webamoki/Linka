@@ -49,7 +49,7 @@ public abstract class DbField(
     }
 
     public abstract string StringValue();
-    public abstract object? ObjectValue();
+    public abstract object ObjectValue();
 
     public bool IsValid(object? value, out string? message)
     {
@@ -131,6 +131,8 @@ public abstract class RefDbField<T>(
     public virtual T? Value() => _value;
     protected virtual T OldValue() => _oldValue ?? throw new InvalidOperationException();
 
+    public override object? ObjectValue() => _value;
+
     public static bool operator ==(RefDbField<T> left, T? right)
     {
         if (left.IsEmpty() && right == null) return true;
@@ -199,6 +201,8 @@ public abstract class StructDbField<T>(
     public bool IsEmpty() => _value == null;
     public virtual T? Value() => _value;
     protected virtual T OldValue() => _oldValue ?? throw new InvalidOperationException();
+
+    public override object? ObjectValue() => _value;
 
     public static bool operator ==(StructDbField<T> left, T? right)
     {

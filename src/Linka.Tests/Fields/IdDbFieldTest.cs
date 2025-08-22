@@ -76,6 +76,22 @@ public class IdDbFieldTest
         Ensure.Equal(value, field.StringValue());
     }
 
+    [Test]
+    public void IdDbField_ObjectValue_ReturnsEmptyIfUnset()
+    {
+        var field = new IdDbField();
+        Ensure.Equal(null, field.ObjectValue());
+    }
+
+    [TestCase("ABCDEF1234")]
+    [TestCase("XYZ9998888")]
+    public void IdDbField_ObjectValue_ReturnsSetValue(string value)
+    {
+        var field = new IdDbField();
+        field.Value(value);
+        Ensure.Equal(value, field.ObjectValue());
+    }
+
     [TestCase("ABCDE")]
     public void ShortIdDbField_HasCorrectLength(string value)
     {

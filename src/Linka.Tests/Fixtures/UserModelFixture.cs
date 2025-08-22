@@ -4,7 +4,7 @@ using Webamoki.Linka.TestUtils;
 
 namespace Tests.Fixtures;
 
-public class UserModelFixture : Fixture<UserModel>, IFixture
+public class UserModelFixture : Fixture<UserDbSchema>, IFixture
 {
     public override void Inject()
     {
@@ -14,11 +14,12 @@ public class UserModelFixture : Fixture<UserModel>, IFixture
             "1234567890",
             UserModel.UserRank.User,
             "password",
-            "cartToken",
+            null,
             true,
             false,
             100
             );
+        model.ID.Value("30120320SU");
         DbService<UserDbSchema> db = new();
         db.Insert(model);
     }

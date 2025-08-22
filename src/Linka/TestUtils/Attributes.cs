@@ -4,50 +4,48 @@ using Testcontainers.PostgreSql;
 
 namespace Webamoki.Linka.TestUtils;
 
-[AttributeUsage(AttributeTargets.Class)]
-public class FixturesAttribute : Attribute, ITestAction
+[AttributeUsage(AttributeTargets.Class, AllowMultiple = true)]
+public class FixturesAttribute<T> : Attribute, ITestAction where T : IFixture, new()
 {
-    private static readonly Dictionary<string,object> DatabaseLocks = [];
-    private readonly List<IFixture> _fixtures;
-    private readonly DbSchema _schema;
-    private readonly object _lock;
-    private PostgreSqlContainer? _container;
-    public FixturesAttribute(List<IFixture> fixtures)
-    {
-        if (fixtures.Count == 0)
-            throw new ArgumentException("Fixtures list cannot be null or empty.", nameof(fixtures));
-        _schema = fixtures[0].Schema();
-        foreach (var fixture in fixtures)
-        {
-            if (fixture.Schema() != _schema)
-                throw new ArgumentException("All fixtures must use the same DbSchema.", nameof(fixtures));
-        }
-        if (!DatabaseLocks.ContainsKey(_schema.DatabaseName))
-        {
-            DatabaseLocks[_schema.DatabaseName] = new object();
-        }
-        _lock = DatabaseLocks[_schema.DatabaseName];
-        _fixtures = fixtures;
-    }
-    
+    // ReSharper disable once StaticMemberInGenericType
+
+    private static readonly Dictionary<string,FixtureManager> FixtureManagers = [];
     public void BeforeTest(ITest test)
     {
-        Monitor.Enter(_lock);
-        _container = _schema.SchemaGeneric!.Mock();
-        foreach(var fixture in _fixtures)
+        // Create a Fixture Manager if it doesn't exist already
+        var testClass = test.ClassName!;
+        if (!FixtureManagers.TryGetValue(testClass, out var fixtureManager))
         {
-            fixture.Inject();
+            fixtureManager = new FixtureManager();
+            FixtureManagers.Add(testClass, fixtureManager);
         }
+
+        if (!fixtureManager.IsComplete())
+        {
+            fixtureManager.Add(new T());
+        }
+        
+        var testClassAttributes = test.Fixture?.GetType().GetCustomAttributes(true) ?? [];
+        var fixtureCount = testClassAttributes.Count(a => a is FixturesAttribute<T>);
+        if (fixtureManager.Count != fixtureCount) return;
+
+        if (!fixtureManager.IsLast<T>()) return;
+        
+        fixtureManager.Load();
     }
 
     public void AfterTest(ITest test)
     {
-        _container!.DisposeAsync().AsTask().Wait();
-        Monitor.Exit(_lock);
+        var fixtureManager = FixtureManagers[test.ClassName!];
+        fixtureManager.Complete();
+        if (!fixtureManager.IsLast<T>()) return;
+        fixtureManager.Dispose();
     }
 
     public ActionTargets Targets => ActionTargets.Test;
 }
+
+
 [AttributeUsage(AttributeTargets.Class)]
 public class RegisterSchemaAttribute<T> : Attribute, ITestAction where T : DbSchema, new()
 {

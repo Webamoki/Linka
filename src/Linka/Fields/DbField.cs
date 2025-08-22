@@ -7,7 +7,7 @@ public abstract class DbField(
     public bool IsPrimary { get; private set; }
     public bool IsUnique { get; set; }
     public int Search { get; private set; }
-    public bool IsRequired { get; private set; } = true;
+    public bool IsRequired { get; internal set; } = true;
     public bool IsSet { get; protected set; }
 
     /// <summary>

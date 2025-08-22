@@ -75,6 +75,14 @@ public abstract class Model
         foreach (var (fieldName, fieldGetter) in info.FieldGetters)
         {
             var field = fieldGetter(this);
+            if (!field.IsSet)
+            {
+                if (info.Fields[fieldName].IsRequired)
+                {
+                    validationErrors.Add($"Field '{fieldName}' is required.");
+                }
+                continue;
+            }
             if (!field.IsValid(out var message))
             {
                 validationErrors.Add($"Field '{fieldName}': {message}");

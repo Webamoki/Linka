@@ -44,6 +44,10 @@ public class DbSchema
     
 }
 
+/// <summary>
+/// Schema to Generic Translator without using Reflection.
+/// Allows a Schema to store itself as a generic.
+/// </summary>
 internal interface IDbSchemaGeneric
 {
     public PostgreSqlContainer Mock();

@@ -6,11 +6,17 @@ using Webamoki.Linka.TestUtils;
 
 namespace Tests;
 
-[Fixtures([new UserModelFixture()])]
+[Fixtures<UserModelFixture>]
 public class TestingArea
 {
     [Test]
     public void TestMethod()
+    {
+        Linka.AddConnection("localhost", "u62560199300users", "u62560199300users", "Thb9jbCcgpxRBvBMtfQb");
+    }
+    
+    [Test]
+    public void TestMethod2()
     {
         Linka.AddConnection("localhost", "u62560199300users", "u62560199300users", "Thb9jbCcgpxRBvBMtfQb");
         Linka.Configure<UserDbSchema>();

@@ -50,7 +50,7 @@ public class UserModel() : Model
         string phone,
         UserRank rank,
         string password,
-        string cartToken,
+        string? cartToken,
         bool verified,
         bool login,
         int credit

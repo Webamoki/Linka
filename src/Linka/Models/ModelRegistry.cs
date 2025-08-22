@@ -199,6 +199,7 @@ internal interface IModelInfo
     Type ListType { get; }
     string TableName { get; }
     public void SetListNavigation(Action<Model, object> action, Model model, List<Model> models);
+    FieldIterator FieldIterator(Model model);
 }
 
 internal class ModelInfo<T>(Model model) : IModelInfo where T : Model, new()
@@ -220,6 +221,11 @@ internal class ModelInfo<T>(Model model) : IModelInfo where T : Model, new()
     {
         var list = models.Cast<T>().ToList();
         action.Invoke(model, list);
+    }
+
+    public FieldIterator FieldIterator(Model model)
+    {
+        return new FieldIterator(FieldGetters, model);
     }
 }
 

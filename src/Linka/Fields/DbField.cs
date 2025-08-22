@@ -4,9 +4,9 @@ public abstract class DbField(
     Validator validator,
     string sqlType)
 {
-    public bool IsPrimary { get; private set; }
-    public bool IsUnique { get; set; }
-    public int Search { get; private set; }
+    public bool IsPrimary { get; internal set; }
+    public bool IsUnique { get; internal set; }
+    public int Search { get; internal set; }
     public bool IsRequired { get; internal set; } = true;
     public bool IsSet { get; protected set; }
 
@@ -49,6 +49,7 @@ public abstract class DbField(
     }
 
     public abstract string StringValue();
+    public abstract object? ObjectValue();
 
     public bool IsValid(object? value, out string? message)
     {

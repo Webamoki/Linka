@@ -10,11 +10,11 @@ internal interface IEnumAttribute
 
 [AttributeUsage(AttributeTargets.Constructor,AllowMultiple = true)]
 public class EnumAttribute<T> : Attribute, IEnumAttribute
-    where T : Model, new()
+    where T : Enum, new()
 {
-    public ModelAttribute(string tableName) { Setup(tableName); }
+    public EnumAttribute(string tableName) { Setup(tableName); }
 
-    public ModelAttribute()
+    public EnumAttribute()
     {
         var name = typeof(T).Name;
         if (name.EndsWith("Model"))

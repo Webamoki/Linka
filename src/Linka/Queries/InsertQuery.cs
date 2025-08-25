@@ -3,6 +3,7 @@
 internal class InsertQuery(string table) : Query
 {
     private readonly List<string> _columns = [];
+    private readonly List<string> _valueMarkers = [];
     private int _values;
     public void AddColumn(string column) => _columns.Add(column);
 
@@ -12,6 +13,14 @@ internal class InsertQuery(string table) : Query
         base.AddValues(values);
     }
 
+    public void AddValueMarker()
+    {
+        AddValueMarker("?");
+    }
+    public void AddValueMarker(object marker)
+    {
+        _valueMarkers.Add((String) marker);
+    }
     internal override string Render(out List<object> values)
     {
         ResetBody();
@@ -23,7 +32,7 @@ internal class InsertQuery(string table) : Query
 
         var formattedColumns = $"\"{string.Join("\",\"", _columns)}\"";
 
-        var singleRowPlaceholder = $"({string.Join(",", Enumerable.Repeat("?", _columns.Count))})";
+        var singleRowPlaceholder = $"({string.Join(",", _valueMarkers)})";
 
         // e.g., (?,?),(?,?) for two rows with two columns each.
         var allValuePlaceholders = string.Join(",", Enumerable.Repeat(singleRowPlaceholder, _values));

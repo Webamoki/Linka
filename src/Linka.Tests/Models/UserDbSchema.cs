@@ -5,4 +5,5 @@ namespace Tests.Models;
 
 [method: Model<UserModel>]
 [method: Model<IpAddressModel>]
+[method: Enum<IpAddressModel>]
 public class UserDbSchema() : DbSchema("users", "User");

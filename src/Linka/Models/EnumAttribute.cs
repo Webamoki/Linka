@@ -1,7 +1,7 @@
 ﻿namespace Webamoki.Linka.Models;
 
 
-internal interface IModelAttribute
+internal interface IEnumAttribute
 {
     void RegisterWithSchema<TDbSchema>()
         where TDbSchema : DbSchema, new();
@@ -9,7 +9,7 @@ internal interface IModelAttribute
 }
 
 [AttributeUsage(AttributeTargets.Constructor,AllowMultiple = true)]
-public class ModelAttribute<T> : Attribute, IModelAttribute
+public class EnumAttribute<T> : Attribute, IEnumAttribute
     where T : Model, new()
 {
     public ModelAttribute(string tableName) { Setup(tableName); }

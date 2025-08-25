@@ -20,7 +20,7 @@ public static class Linka
             foreach (var attribute in modelAttributes.Cast<IModelAttribute>())
             {
                 attributes.Add(attribute);
-                attribute.RegisterModelWithSchema<T>();
+                attribute.RegisterWithSchema<T>();
             }
         }
 

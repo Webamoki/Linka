@@ -1,6 +1,6 @@
-﻿using Webamoki.Linka.SchemaSystem;
+﻿using Webamoki.Linka.ModelSystem;
 
-namespace Webamoki.Linka.ModelSystem;
+namespace Webamoki.Linka.SchemaSystem;
 
 [AttributeUsage(AttributeTargets.Constructor,AllowMultiple = true)]
 public class ModelAttribute<T> : Attribute, ISchemaCompileAttribute

@@ -1,6 +1,4 @@
-﻿using Webamoki.Linka.SchemaSystem;
-
-namespace Webamoki.Linka.ModelSystem;
+﻿namespace Webamoki.Linka.SchemaSystem;
 
 
 

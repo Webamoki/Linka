@@ -12,7 +12,7 @@ public class UserModelFixture : Fixture<UserDbSchema>, IFixture
             "Fred",
             "fred@example.com",
             "1234567890",
-            UserModel.UserRank.User,
+            UserModel.RankEnum.User,
             "password",
             null,
             true,
@@ -20,7 +20,7 @@ public class UserModelFixture : Fixture<UserDbSchema>, IFixture
             100
             );
         model.ID.Value("30120320SU");
-        DbService<UserDbSchema> db = new();
+        using var db = new DbService<UserDbSchema>();
         db.Insert(model);
     }
 }

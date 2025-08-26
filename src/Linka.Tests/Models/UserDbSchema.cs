@@ -3,7 +3,7 @@ using Webamoki.Linka.Models;
 
 namespace Tests.Models;
 
+[method: Enum<UserModel.RankEnum>]
 [method: Model<UserModel>]
 [method: Model<IpAddressModel>]
-[method: Enum<IpAddressModel>]
 public class UserDbSchema() : DbSchema("users", "User");

@@ -20,13 +20,14 @@ public static class DbMocker
         Linka.MockConnection(schema.DatabaseName, container.GetMappedPublicPort(5432));
 
         using var db = new DbService<T>();
-        var script = CreateSchemaQuery(schema);
+        var script = CreateSchemaQuery<T>(schema);
         db.ExecuteScript(script);
         return container;
     }
 
-    private static string CreateSchemaQuery(DbSchema schema)
+    private static string CreateSchemaQuery<T>(DbSchema schema) where T : DbSchema, new()
     {
+        var enumQueries = "";
         var tableQueries = "";
         var constraintQueries = "";
 
@@ -34,16 +35,22 @@ public static class DbMocker
         foreach (var modelType in schema.Models)
         {
             var info = ModelRegistry.Get(modelType);
-            tableQueries += CreateTableQuery(info) + "\n";
+            tableQueries += CreateTableQuery<T>(info) + "\n";
             constraintQueries += CreateConstraintQuery(info) + "\n";
         }
 
+        foreach (var (_, (name, enumString)) in schema.Enums)
+        {
+            enumQueries += $"CREATE TYPE \"{name}\" AS {enumString};";
+        }
+        
         return $"""
                 BEGIN;
                 CREATE SCHEMA IF NOT EXISTS "{schema.Name}";
                 
                 SET search_path TO "{schema.Name}";
                 
+                {enumQueries}
                 {tableQueries}
                 {constraintQueries}
                 COMMIT;
@@ -51,9 +58,8 @@ public static class DbMocker
     }
 
 
-    private static string CreateTableQuery(IModelInfo info)
+    private static string CreateTableQuery<T>(IModelInfo info) where T : DbSchema, new()
     {
-        var enumTypes = "";
         var columns = "";
         var keys = "";
         List<string> fullTextColumns = [];
@@ -63,8 +69,8 @@ public static class DbMocker
             var sqlType = field.SQLType;
             if (sqlType.StartsWith("ENUM"))
             {
-                var enumType = $"\"{info.TableName}_{fieldName}\"";
-                enumTypes += $"CREATE TYPE {enumType} AS {sqlType};";
+                var enumField = (IEnumDbField)field;
+                var enumType = $"\"{enumField.GetSchemaEnumName<T>()}\"";
                 sqlType = enumType;
             }
 
@@ -94,8 +100,6 @@ public static class DbMocker
         }
 
         var query = $"""
-                      {enumTypes}
-                      
                       CREATE TABLE "{info.TableName}" (
                         {columns}
                         PRIMARY KEY ({string.Join(", ", info.PrimaryFields.Select(c => $"\"{c.Key}\""))})

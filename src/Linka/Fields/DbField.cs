@@ -129,7 +129,6 @@ public abstract class RefDbField<T>(
 
     public bool IsEmpty() => _value == null;
     public virtual T? Value() => _value;
-    protected virtual T OldValue() => _oldValue ?? throw new InvalidOperationException();
 
     public override object? ObjectValue() => _value;
 
@@ -200,7 +199,6 @@ public abstract class StructDbField<T>(
 
     public bool IsEmpty() => _value == null;
     public virtual T? Value() => _value;
-    protected virtual T OldValue() => _oldValue ?? throw new InvalidOperationException();
 
     public override object? ObjectValue() => _value;
 

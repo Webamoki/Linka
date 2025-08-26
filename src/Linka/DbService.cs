@@ -2,6 +2,7 @@ using System.Data;
 using System.Linq.Expressions;
 using System.Text;
 using Npgsql;
+using Webamoki.Linka.Fields;
 using Webamoki.Linka.Models;
 using Webamoki.Linka.Queries;
 using Webamoki.Utils;
@@ -181,16 +182,68 @@ public sealed class DbService<TDbSchema> : IDbService, IDisposable where TDbSche
 
     public IncludeQuery<T> Include<T>(Expression<Func<T, object>> expression) where T : Model, new() =>
         new(this, expression);
-
-    /// <summary>
-    /// Inserts a model instance into the database.
-    /// </summary>
-    /// <typeparam name="T">The type of the model to insert.</typeparam>
-    /// <param name="model">The model instance to insert.</param>
-    /// <returns>DatabaseCode indicating the result of the operation.</returns>
+    
     public DatabaseCode Insert<T>(T model) where T : Model
     {
-        return model.Insert(this);
+        var info = ModelRegistry.Get<T>();
+        var fieldIterator = model.GetFieldIterator();
+        // Validate all fields before inserting
+        var validationErrors = new List<string>();
+        foreach (var (fieldName, field) in fieldIterator.All())
+        {
+            if (!field.IsSet)
+            {
+                if (info.Fields[fieldName].IsRequired)
+                {
+                    validationErrors.Add($"Field '{fieldName}' is required.");
+                }
+                continue;
+            }
+            if (!field.IsValid(out var message))
+            {
+                validationErrors.Add($"Field '{fieldName}': {message}");
+            }
+        }
+
+        if (validationErrors.Count > 0)
+        {
+            throw new InvalidOperationException($"Model validation failed: {string.Join(", ", validationErrors)}");
+        }
+
+        // Create insert query
+        var insertQuery = new InsertQuery(info.TableName);
+        var values = new List<object>();
+
+        // Add columns and values for all set fields
+        foreach (var (fieldName, field) in fieldIterator.All())
+        {
+            // Only include fields that have been set and are not auto-generated primary keys
+            if (field.IsSet)
+            {
+                var value = field.ObjectValue();
+                if (value is null) continue;
+                insertQuery.AddColumn(fieldName);
+
+                if (value is Enum)
+                {
+                    var enumField = (IEnumDbField)field;
+                    insertQuery.AddValueMarker($"'{value}'::\"{enumField.GetSchemaEnumName<TDbSchema>()}\"");
+                }
+                else
+                {
+                    insertQuery.AddValueMarker();
+                    values.Add(value);
+                }
+            }
+        }
+
+        if (values.Count == 0)
+        {
+            throw new InvalidOperationException("No fields have been set for insertion.");
+        }
+
+        insertQuery.AddValues(values);
+        return insertQuery.ExecuteTransaction(this);
     }
 }
 

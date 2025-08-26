@@ -13,23 +13,23 @@ public static class Linka
         if (!RegisteredSchemas.Add(typeof(T)))
             return false;
         var constructors = typeof(T).GetConstructors();
-        List<IModelAttribute> attributes = [];
+        List<ISchemaRegisterAttribute> schemaAttributes = [];
         foreach (var ctor in constructors)
         {
-            var modelAttributes = ctor.GetCustomAttributes(typeof(ModelAttribute<>), true);
-            foreach (var attribute in modelAttributes.Cast<IModelAttribute>())
+            var attributes = ctor.GetCustomAttributes(typeof(ISchemaRegisterAttribute), true);
+            foreach (var attribute in attributes.Cast<ISchemaRegisterAttribute>())
             {
-                attributes.Add(attribute);
-                attribute.RegisterWithSchema<T>();
+                schemaAttributes.Add(attribute);
+                attribute.Register<T>();
             }
         }
 
-        if (attributes.Count == 0)
+        if (schemaAttributes.Count == 0)
             throw new Exception($"No ModelAttribute found for DbSchema {typeof(T).Name}. " +
                                 "Please add a ModelAttribute to the constructor of the DbSchema class.");
-        foreach (var attribute in attributes)
+        foreach (var attribute in schemaAttributes)
         {
-            attribute.Register<T>();
+            attribute.RegisterConnections<T>();
         }
 
         return true;

@@ -52,68 +52,58 @@ public class DateTimeValidator : Validator
             || (!_isDateOnly && DateTime.TryParseExact(str, fallbackFormat, CultureInfo.InvariantCulture,
                 DateTimeStyles.None, out parsed)))
         {
-            message = null;
-            return parsed >= _minDate && parsed <= _maxDate;
         }
 
         message = null;
         return parsed >= _minDate && parsed <= _maxDate;
     }
 
-    public static bool LessThanOrEqual(string left, string right)
+    public static bool LessThanOrEqual(DateTime left, string right)
     {
-        var leftDt = DateTime.Parse(left);
         var rightDt = DateTime.Parse(right);
-        return leftDt <= rightDt;
+        return left <= rightDt;
     }
 
-    public static bool GreaterThanOrEqual(string left, string right)
+    public static bool GreaterThanOrEqual(DateTime left, string right)
     {
-        var leftDt = DateTime.Parse(left);
         var rightDt = DateTime.Parse(right);
-        return leftDt >= rightDt;
+        return left >= rightDt;
     }
 
-    public static bool LessThan(string left, string right)
+    public static bool LessThan(DateTime left, string right)
     {
-        var leftDt = DateTime.Parse(left);
         var rightDt = DateTime.Parse(right);
-        return leftDt < rightDt;
+        return left < rightDt;
     }
 
-    public static bool GreaterThan(string left, string right)
+    public static bool GreaterThan(DateTime left, string right)
     {
-        var leftDt = DateTime.Parse(left);
         var rightDt = DateTime.Parse(right);
-        return leftDt > rightDt;
+        return left > rightDt;
     }
 }
 
-public class DateTimeDbField : RefDbField<string>
+public class DateTimeDbField : RefDbField<DateTime>
 {
     protected DateTimeDbField(DateTime? minDate, DateTime? maxDate, bool isDateOnly)
         : base(
             DateTimeValidator.Create(minDate, maxDate, isDateOnly), isDateOnly ? "DATE" : "TIMESTAMP(0)") { }
 
     public DateTimeDbField(DateTime? minDate = null, DateTime? maxDate = null) : this(minDate, maxDate, false) { }
-    public override string StringValue() => Value() ?? throw new InvalidOperationException("Value is null");
+    public override string StringValue() => Value().ToString("yyyy-MM-dd HH:mm:ss");
 
-    public override object ObjectValue()
-    {
-        var value = Value() ?? throw new InvalidOperationException("Value is null");
-        return value;
-    }
+    public override object ObjectValue() => Value();
     
     public override void LoadValue(object? value)
     {
         switch (value)
         {
             case DateTime dateTime:
-                Value(dateTime.ToString("yyyy-MM-dd HH:mm:ss"));
+                Value(dateTime);
                 return;
             case string str:
                 Validator.IsValid(str, out _);
-                Value(str);
+                Value(DateTime.Parse(str));
                 return;
             default:
                 throw new Exception("Value is not a valid datetime string");
@@ -122,19 +112,19 @@ public class DateTimeDbField : RefDbField<string>
 
     public void SetNow()
     {
-        Value(DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss"));
+        Value(DateTime.Now);
     }
     public static bool operator <=(DateTimeDbField left, string right) =>
-        DateTimeValidator.LessThanOrEqual(left.Value() ?? throw new InvalidOperationException("Value is null"), right);
+        DateTimeValidator.LessThanOrEqual(left.Value(), right);
     
     public static bool operator >=(DateTimeDbField left, string right) =>
-        DateTimeValidator.GreaterThanOrEqual(left.Value() ?? throw new InvalidOperationException("Value is null"), right);
+        DateTimeValidator.GreaterThanOrEqual(left.Value(), right);
     
     public static bool operator <(DateTimeDbField left, string right) =>
-        DateTimeValidator.LessThan(left.Value() ?? throw new InvalidOperationException("Value is null"), right);
+        DateTimeValidator.LessThan(left.Value(), right);
     
     public static bool operator >(DateTimeDbField left, string right) =>
-        DateTimeValidator.GreaterThan(left.Value() ?? throw new InvalidOperationException("Value is null"), right);
+        DateTimeValidator.GreaterThan(left.Value(), right);
     
 }
 
@@ -144,15 +134,11 @@ public class DateDbField(DateTime? minDate = null, DateTime? maxDate = null) : D
     {
         if (value is DateTime dateTime)
         {
-            Value(dateTime.ToString("yyyy-MM-dd"));
+            Value(dateTime);
             return;
         }
 
         throw new Exception("Value is not a valid datetime string");
     }
-
-    public new void SetNow()
-    {
-        Value(DateTime.Now.ToString("yyyy-MM-dd"));
-    }
+    public override string StringValue() => Value().ToString("yyyy-MM-dd");
 }

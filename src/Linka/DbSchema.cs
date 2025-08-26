@@ -2,10 +2,16 @@
 using Webamoki.Linka.Models;
 
 namespace Webamoki.Linka;
-
+internal interface ISchemaRegisterAttribute
+{
+    void Register<TDbSchema>()
+        where TDbSchema : DbSchema, new();
+    void RegisterConnections<TDbSchema>() where TDbSchema : DbSchema, new();
+}
 public class DbSchema
 {
     internal readonly HashSet<Type> Models = [];
+    internal readonly Dictionary<Type, (string Name,string SqlType)> Enums = [];
     internal static readonly Dictionary<Type, DbSchema> ModelSchemas = [];
     private static readonly Dictionary<Type, DbSchema> Instances = [];
     internal IDbSchemaGeneric? SchemaGeneric = null;
@@ -16,6 +22,10 @@ public class DbSchema
     public bool HasModel<T>() where T : Model => HasModel(typeof(T));
 
     public bool HasModel(Type modelType) => Models.Contains(modelType);
+    
+    public bool HasEnum<T>() where T : Enum => HasEnum(typeof(T));
+    public bool HasEnum(Type enumType) => Enums.ContainsKey(enumType);
+    public string GetEnumName<T>() where T : Enum => Enums[typeof(T)].Name;
 
     // ReSharper disable once MemberCanBeProtected.Global
     public DbSchema(string database, string name)

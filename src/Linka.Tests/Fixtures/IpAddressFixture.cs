@@ -12,7 +12,7 @@ public class IpAddressFixture : Fixture<UserDbSchema>, IFixture
             "30120320SU",
             "127.0.0.1"
             );
-        DbService<UserDbSchema> db = new();
+        using var db = new DbService<UserDbSchema>();
         db.Insert(model);
     }
 }

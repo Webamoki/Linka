@@ -45,7 +45,11 @@ public class EnumValidator<TEnum> : Validator where TEnum : struct, Enum
     }
 }
 
-public class EnumDbField<T>() : StructDbField<T>(EnumValidator<T>.Create(), GetSqlType())
+interface IEnumDbField
+{
+    string GetSchemaEnumName<TDbSchema>() where TDbSchema : DbSchema, new();
+}
+public class EnumDbField<T>() : StructDbField<T>(EnumValidator<T>.Create(), GetSqlType()), IEnumDbField
     where T : struct, Enum
 {
     public override string StringValue()
@@ -79,5 +83,12 @@ public class EnumDbField<T>() : StructDbField<T>(EnumValidator<T>.Create(), GetS
 
         base.LoadValue(value);
     }
-    
+
+    public string GetSchemaEnumName<TDbSchema>() where TDbSchema : DbSchema, new()
+    {
+        DbSchema schema = DbSchema.Get<TDbSchema>();
+        if (!schema.HasEnum<T>())
+            throw new Exception($"Enum {typeof(T).Name} is not registered for schema {schema.Name}.");
+        return schema.GetEnumName<T>();
+    }
 }

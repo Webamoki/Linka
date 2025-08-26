@@ -19,13 +19,13 @@ public class UserModel() : Model
     [FullText]
     public PhoneDbField Phone { get; } = new();
 
-    public enum UserRank
+    public enum RankEnum
     {
         User,
         Admin
     }
 
-    public EnumDbField<UserRank> Rank { get; } = new();
+    public EnumDbField<RankEnum> Rank { get; } = new();
 
     [Unique] [NotRequired]
     public HashDbField Session { get; } = new();
@@ -48,7 +48,7 @@ public class UserModel() : Model
         string name,
         string email,
         string phone,
-        UserRank rank,
+        RankEnum rankEnum,
         string password,
         string? cartToken,
         bool verified,
@@ -59,7 +59,7 @@ public class UserModel() : Model
         Name.Value(name);
         Email.Value(email);
         Phone.Value(phone);
-        Rank.Value(rank);
+        Rank.Value(rankEnum);
         Password.Value(password);
         CartToken.Value(cartToken);
         Created.SetNow();

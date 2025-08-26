@@ -178,7 +178,7 @@ public class DateTimeDbFieldTest
         field.SetNow();
         var newValue = field.Value();
 
-        Ensure.NotEqual(originalValue, newValue);
+        Ensure.NotEqual(originalValue!, newValue!);
         Ensure.True(field.IsSet);
     }
 
@@ -239,7 +239,7 @@ public class DateTimeDbFieldTest
         var secondValue = field.Value();
 
         // Values should be different 
-        Ensure.NotEqual(firstValue, secondValue);
+        Ensure.NotEqual(firstValue!, secondValue!);
     }
 
     [Test]
@@ -320,7 +320,7 @@ public class DateTimeDbFieldTest
         field.SetNow();
         var newValue = field.Value();
 
-        Ensure.NotEqual(originalValue, newValue);
+        Ensure.NotEqual(originalValue!, newValue!);
         Ensure.True(field.IsSet);
 
         // New value should be today's date

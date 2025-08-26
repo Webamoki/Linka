@@ -37,7 +37,7 @@ public class ModelQueryBuilderTest
             (a => a.ID != "AAAAAAAAAA", "`User`.`ID` != 'AAAAAAAAAA'", null),
             (a => a.Session == null, "`User`.`Session` IS NULL", null),
             (a => a.Session != null, "`User`.`Session` IS NOT NULL", null),
-            (a => a.Rank == UserModel.UserRank.User, "`User`.`Rank` = 'User'", null),
+            (a => a.Rank == UserModel.RankEnum.User, "`User`.`Rank` = 'User'", null),
             (a => a.Verified == true, "`User`.`Verified` = true", null),
             (a => a.Login == false, "`User`.`Login` = false", null),
             (a => a.Created <= "2022-10-12", "`User`.`Created` <= '2022-10-12'", null),
@@ -75,7 +75,7 @@ public class ModelQueryBuilderTest
         const string dateTime = "2022-10-12";
         const int vInt = 1023;
         const string vString = "Fred";
-        const UserModel.UserRank rank = UserModel.UserRank.Admin;
+        const UserModel.RankEnum rank = UserModel.RankEnum.Admin;
         
         var valuesToCheck = new List<(Expression<Func<UserModel, bool>> expression, string sql, string? value)>
         {

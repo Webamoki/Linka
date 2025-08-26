@@ -34,7 +34,7 @@ internal class FixtureManager
         HashSet<string> loaded = [];
         foreach (var fixture in _fixtures)
         {
-            fixture.TryRegister();
+            fixture.TryCompile();
             var schemaName = fixture.Schema().Name;
             if (loaded.Add(schemaName))
             {

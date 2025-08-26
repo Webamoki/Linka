@@ -1,7 +1,7 @@
 ﻿namespace Webamoki.Linka.Models;
 
 [AttributeUsage(AttributeTargets.Constructor,AllowMultiple = true)]
-public class ModelAttribute<T> : Attribute, ISchemaRegisterAttribute
+public class ModelAttribute<T> : Attribute, ISchemaCompileAttribute
     where T : Model, new()
 {
     public ModelAttribute(string tableName) { Setup(tableName); }
@@ -17,11 +17,11 @@ public class ModelAttribute<T> : Attribute, ISchemaRegisterAttribute
     private static void Setup(string tableName)
     {
         Model.SetTableName<T>(tableName);
-        ModelRegistry.InitialRegister<T>();
+        ModelRegistry.InitialCompile<T>();
     }
 
 
-    public void Register<TDbSchema>()
+    public void Compile<TDbSchema>()
         where TDbSchema : DbSchema, new()
     {
         var schema = DbSchema.Get<TDbSchema>();
@@ -31,7 +31,7 @@ public class ModelAttribute<T> : Attribute, ISchemaRegisterAttribute
             throw new Exception($"Model {typeof(T).Name} is already registered with a different DbSchema.");
     }
     
-    public void RegisterConnections<TDbSchema>()
+    public void CompileConnections<TDbSchema>()
         where TDbSchema : DbSchema, new()
     {
         var schema = DbSchema.Get<TDbSchema>();

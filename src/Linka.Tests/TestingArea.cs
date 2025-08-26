@@ -19,7 +19,7 @@ public class TestingArea
     public void TestMethod2()
     {
         Linka.AddConnection("localhost", "u62560199300users", "u62560199300users", "Thb9jbCcgpxRBvBMtfQb");
-        Linka.Configure<UserDbSchema>();
+        // Linka.Configure<UserDbSchema>();
         
         
         

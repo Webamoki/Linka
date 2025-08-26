@@ -10,14 +10,21 @@ public static class DbMocker
     {
         var schema = DbSchema.Get<T>();
         // create docker container
+        var databaseName = $"mock_{schema.Name}";
         var container = new PostgreSqlBuilder()
-            .WithDatabase(schema.DatabaseName)
+            .WithDatabase(databaseName)
             .WithUsername("mocking")
             .WithPassword("mocking")
             .WithPortBinding(5432,true)
             .Build();
         container.StartAsync().Wait();
-        Linka.MockConnection(schema.DatabaseName, container.GetMappedPublicPort(5432));
+        Linka.ForceConnection(
+            "localhost",
+            databaseName,
+            "mocking",
+            "mocking",
+            container.GetMappedPublicPort(5432));
+        Linka.Register<T>(databaseName);
 
         using var db = new DbService<T>();
         var script = CreateSchemaQuery<T>(schema);

@@ -6,4 +6,4 @@ namespace Tests.Models;
 [method: Enum<UserModel.RankEnum>]
 [method: Model<UserModel>]
 [method: Model<IpAddressModel>]
-public class UserDbSchema() : DbSchema("users", "User");
+public class UserDbSchema() : DbSchema("User");

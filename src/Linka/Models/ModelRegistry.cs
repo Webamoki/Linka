@@ -132,7 +132,7 @@ internal static class ModelRegistry
     ///     model information.
     /// </summary>
     /// <typeparam name="T">The type of the model to be injected, which must inherit from AbstractModel.</typeparam>
-    public static void InitialRegister<T>() where T : Model, new()
+    public static void InitialCompile<T>() where T : Model, new()
     {
         var type = typeof(T);
         var model = new T();

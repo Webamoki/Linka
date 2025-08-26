@@ -8,7 +8,7 @@ using Webamoki.Utils;
 
 namespace Tests.Queries;
 
-[RegisterSchema<UserDbSchema>]
+[CompileSchema<UserDbSchema>]
 public class ModelQueryBuilderTest
 {
 

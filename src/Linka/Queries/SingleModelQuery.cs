@@ -14,7 +14,7 @@ internal class SingleModelQuery<T> where T : Model, new()
     private readonly Dictionary<string,NavigationListInfo> _navigationLists = [];
     public SingleModelQuery(IDbService db,Expression<Func<T, bool>> expression)
     {
-        if (!db.Schema.HasModel<T>()) throw new Exception($"Model {typeof(T).Name} not loaded for database {db.Schema.DatabaseName}.");
+        if (!db.Schema.HasModel<T>()) throw new Exception($"Model {typeof(T).Name} not loaded for schema {db.Schema.Name}.");
         var condition = ModelQueryBuilder.Condition(expression, out var values, out var error);
         if (error != null)
             throw new Exception(error);

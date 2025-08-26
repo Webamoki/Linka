@@ -29,7 +29,7 @@ public sealed class DbService<TDbSchema> : IDbService, IDisposable where TDbSche
     public DbService(bool debug = false)
     {
         var schema = DbSchema.Get<TDbSchema>();
-        _connection = new NpgsqlConnection(schema.ConnectionString);
+        _connection = new NpgsqlConnection(Linka.ConnectionString<TDbSchema>());
         _debug = debug || Linka.Debug;
     }
 

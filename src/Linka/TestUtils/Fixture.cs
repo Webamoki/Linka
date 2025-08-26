@@ -5,7 +5,7 @@ public interface IFixture
 {
     void Inject();
     DbSchema Schema();
-    void TryRegister();
+    void TryCompile();
 }
 
 public abstract class Fixture<T> : IFixture where T : DbSchema, new()
@@ -14,8 +14,8 @@ public abstract class Fixture<T> : IFixture where T : DbSchema, new()
 
     public DbSchema Schema() => DbSchema.Get<T>();
     
-    public void TryRegister()
+    public void TryCompile()
     {
-        Linka.TryRegister<T>();
+        Linka.TryCompile<T>();
     }
 }

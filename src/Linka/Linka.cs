@@ -1,26 +1,36 @@
 ﻿using Testcontainers.PostgreSql;
-using Webamoki.Linka.Models;
 
 namespace Webamoki.Linka;
 
 public static class Linka
 {
     public static bool Debug { internal get; set; }
-    private static readonly HashSet<Type> RegisteredSchemas = [];
-    private static readonly Dictionary<string, string> ConnectionStrings = [];
-    public static bool TryRegister<T>() where T : DbSchema, new()
+    private static readonly HashSet<Type> CompiledSchemas = [];
+    private static readonly Dictionary<string, string> DatabaseConnections = [];
+    private static readonly Dictionary<string, string> SchemaDatabases = [];
+    
+    internal static string ConnectionString<T>() where T : DbSchema, new()
     {
-        if (!RegisteredSchemas.Add(typeof(T)))
+        var schema = DbSchema.Get<T>();
+        if (!SchemaDatabases.TryGetValue(schema.Name, out var database))
+            throw new Exception($"No database configured for schema {schema.Name}.");
+        if (!DatabaseConnections.TryGetValue(database, out var connectionString))
+            throw new Exception($"No connection string configured for database {database}.");
+        return connectionString;
+    }
+    public static bool TryCompile<T>() where T : DbSchema, new()
+    {
+        if (!CompiledSchemas.Add(typeof(T)))
             return false;
         var constructors = typeof(T).GetConstructors();
-        List<ISchemaRegisterAttribute> schemaAttributes = [];
+        List<ISchemaCompileAttribute> schemaAttributes = [];
         foreach (var ctor in constructors)
         {
-            var attributes = ctor.GetCustomAttributes(typeof(ISchemaRegisterAttribute), true);
-            foreach (var attribute in attributes.Cast<ISchemaRegisterAttribute>())
+            var attributes = ctor.GetCustomAttributes(typeof(ISchemaCompileAttribute), true);
+            foreach (var attribute in attributes.Cast<ISchemaCompileAttribute>())
             {
                 schemaAttributes.Add(attribute);
-                attribute.Register<T>();
+                attribute.Compile<T>();
             }
         }
 
@@ -29,27 +39,25 @@ public static class Linka
                                 "Please add a ModelAttribute to the constructor of the DbSchema class.");
         foreach (var attribute in schemaAttributes)
         {
-            attribute.RegisterConnections<T>();
+            attribute.CompileConnections<T>();
         }
 
         return true;
     }
-
-    public static void Configure<T>() where T : DbSchema, new()
+    
+    public static void Configure<T>(string database) where T : DbSchema, new()
     {
-        if (!TryRegister<T>())
+        if (!TryCompile<T>())
             throw new Exception($"DbSchema {typeof(T).Name} is already registered.");
+        Register<T>(database);
         DbSchema.Verify<T>();
     }
-
-    public static PostgreSqlContainer Mock<T>() where T : DbSchema, new()
+    
+    public static void Register<T>(string database) where T : DbSchema, new()
     {
-        TryRegister<T>();
-        var container = DbMocker.Mock<T>();
-        DbSchema.Verify<T>();
-        return container;
+        var schema = DbSchema.Get<T>();
+        SchemaDatabases[schema.Name] = database;
     }
-
 
     //
     // public static void Reset()
@@ -57,25 +65,16 @@ public static class Linka
     //     ModelCache.Reset();
     // }
 
-    public static void AddConnection(string server, string database, string user, string password)
+    public static void AddConnection(string server, string database, string user, string password, ushort port = 5432)
     {
-        var connectionString = $"Server={server};Database={database};User Id={user};Password={password}";
-        if (!ConnectionStrings.TryAdd(database, connectionString))
+        var connectionString = $"Server={server};Port={port};Database={database};User Id={user};Password={password}";
+        if (!DatabaseConnections.TryAdd(database, connectionString))
             throw new Exception($"Connection string for database {database} already exists.");
     }
     
-    public static void MockConnection(string database,ushort port)
+    public static void ForceConnection(string server, string database, string user, string password, ushort port = 5432)
     {
-        var connectionString = $"Server=localhost;Port={port};Database={database};User Id=mocking;Password=mocking";
-        ConnectionStrings[database] = connectionString;
-    }
-
-
-    internal static string GetConnectionString(string database)
-    {
-        if (ConnectionStrings.TryGetValue(database, out var connectionString))
-            return connectionString;
-        throw new Exception($"Connection string for database {database} not found. " +
-                            "Please add a connection string using AddConnection method.");
+        var connectionString = $"Server={server};Port={port};Database={database};User Id={user};Password={password}";
+        DatabaseConnections[database] = connectionString;
     }
 }

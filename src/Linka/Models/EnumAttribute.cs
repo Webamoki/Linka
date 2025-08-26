@@ -4,10 +4,10 @@
 
 
 [AttributeUsage(AttributeTargets.Constructor,AllowMultiple = true)]
-public class EnumAttribute<T> : Attribute, ISchemaRegisterAttribute
+public class EnumAttribute<T> : Attribute, ISchemaCompileAttribute
     where T : Enum, new()
 {
-    public void Register<TDbSchema>()
+    public void Compile<TDbSchema>()
         where TDbSchema : DbSchema, new()
     {
         var schema = DbSchema.Get<TDbSchema>();
@@ -22,7 +22,7 @@ public class EnumAttribute<T> : Attribute, ISchemaRegisterAttribute
     {
         return $"ENUM ({string.Join(",", Enum.GetNames(typeof(T)).Select(name => $"'{name}'"))})";
     }
-    public void RegisterConnections<TDbSchema>() where TDbSchema : DbSchema, new()
+    public void CompileConnections<TDbSchema>() where TDbSchema : DbSchema, new()
     {
     }
 }

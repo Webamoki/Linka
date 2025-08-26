@@ -47,11 +47,11 @@ public class FixturesAttribute<T> : Attribute, ITestAction where T : IFixture, n
 
 
 [AttributeUsage(AttributeTargets.Class)]
-public class RegisterSchemaAttribute<T> : Attribute, ITestAction where T : DbSchema, new()
+public class CompileSchemaAttribute<T> : Attribute, ITestAction where T : DbSchema, new()
 {
     public void BeforeTest(ITest test)
     {
-        Linka.TryRegister<T>();
+        Linka.TryCompile<T>();
     }
 
     public void AfterTest(ITest test)

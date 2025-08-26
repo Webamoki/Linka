@@ -2,11 +2,11 @@
 using Webamoki.Linka.Models;
 
 namespace Webamoki.Linka;
-internal interface ISchemaRegisterAttribute
+internal interface ISchemaCompileAttribute
 {
-    void Register<TDbSchema>()
+    void Compile<TDbSchema>()
         where TDbSchema : DbSchema, new();
-    void RegisterConnections<TDbSchema>() where TDbSchema : DbSchema, new();
+    void CompileConnections<TDbSchema>() where TDbSchema : DbSchema, new();
 }
 public class DbSchema
 {
@@ -15,7 +15,6 @@ public class DbSchema
     internal static readonly Dictionary<Type, DbSchema> ModelSchemas = [];
     private static readonly Dictionary<Type, DbSchema> Instances = [];
     internal IDbSchemaGeneric? SchemaGeneric = null;
-    internal string ConnectionString => Linka.GetConnectionString(DatabaseName);
     internal readonly string DatabaseName;
     internal readonly string Name;
 
@@ -28,12 +27,11 @@ public class DbSchema
     public string GetEnumName<T>() where T : Enum => Enums[typeof(T)].Name;
 
     // ReSharper disable once MemberCanBeProtected.Global
-    public DbSchema(string database, string name)
+    public DbSchema(string name)
     {
         if (Instances.TryGetValue(GetType(), out _))
             throw new Exception("DbSchema constructor should not be used. Use DbSchema.Get<T>() instead.");
         Instances[GetType()] = this;
-        DatabaseName = database;
         Name = name;
     }
 
@@ -65,6 +63,9 @@ internal interface IDbSchemaGeneric
 
 internal class DbSchemaGeneric<T> : IDbSchemaGeneric where T : DbSchema, new()
 {
-    public PostgreSqlContainer Mock() =>
-        DbMocker.Mock<T>();
+    public PostgreSqlContainer Mock() {
+        var container = DbMocker.Mock<T>();
+        DbSchema.Verify<T>();
+        return container;
+    }
 }

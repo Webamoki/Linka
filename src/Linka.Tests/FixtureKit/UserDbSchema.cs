@@ -1,7 +1,7 @@
 ﻿using Webamoki.Linka;
 using Webamoki.Linka.Models;
 
-namespace Tests.Models;
+namespace Tests.FixtureKit;
 
 [method: Enum<UserModel.RankEnum>]
 [method: Model<UserModel>]

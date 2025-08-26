@@ -1,8 +1,7 @@
 ﻿using NUnit.Framework;
 using NUnit.Framework.Interfaces;
-using Testcontainers.PostgreSql;
 
-namespace Webamoki.Linka.TestUtils;
+namespace Webamoki.Linka.Testing;
 
 [AttributeUsage(AttributeTargets.Class, AllowMultiple = true)]
 public class FixturesAttribute<T> : Attribute, ITestAction where T : IFixture, new()

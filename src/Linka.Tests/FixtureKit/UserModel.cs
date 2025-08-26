@@ -3,7 +3,7 @@ using Webamoki.Linka.Fields.NumericFields;
 using Webamoki.Linka.Fields.TextFields;
 using Webamoki.Linka.Models;
 
-namespace Tests.Models;
+namespace Tests.FixtureKit;
 
 public class UserModel() : Model
 {

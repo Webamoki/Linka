@@ -1,8 +1,8 @@
 ﻿using System.Linq.Expressions;
-using Tests.Models;
 using NUnit.Framework;
+using Tests.FixtureKit;
 using Webamoki.Linka.Queries;
-using Webamoki.Linka.TestUtils;
+using Webamoki.Linka.Testing;
 using Webamoki.Utils.Testing;
 using Webamoki.Utils;
 

@@ -1,5 +1,5 @@
 ﻿
-namespace Webamoki.Linka.TestUtils;
+namespace Webamoki.Linka.Testing;
 
 public interface IFixture
 {

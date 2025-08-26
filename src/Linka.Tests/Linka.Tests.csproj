@@ -18,4 +18,8 @@
       <ProjectReference Include="..\Linka\Linka.csproj" />
     </ItemGroup>
 
+    <ItemGroup>
+      <Folder Include="Models\" />
+    </ItemGroup>
+
 </Project>

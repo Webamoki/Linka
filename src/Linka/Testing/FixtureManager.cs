@@ -1,6 +1,6 @@
 ﻿using Testcontainers.PostgreSql;
 
-namespace Webamoki.Linka.TestUtils;
+namespace Webamoki.Linka.Testing;
 
 internal class FixtureManager
 {

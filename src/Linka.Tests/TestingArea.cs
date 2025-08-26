@@ -1,8 +1,7 @@
-using Tests.Models;
 using NUnit.Framework;
-using Tests.Fixtures;
+using Tests.FixtureKit.Fixtures;
 using Webamoki.Linka;
-using Webamoki.Linka.TestUtils;
+using Webamoki.Linka.Testing;
 
 namespace Tests;
 

@@ -2,7 +2,7 @@
 using Webamoki.Linka.Fields.TextFields;
 using Webamoki.Linka.Models;
 
-namespace Tests.Models;
+namespace Tests.FixtureKit;
 
 public class IpAddressModel(): Model
 {

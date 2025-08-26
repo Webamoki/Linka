@@ -1,8 +1,7 @@
-﻿using Tests.Models;
-using Webamoki.Linka;
-using Webamoki.Linka.TestUtils;
+﻿using Webamoki.Linka;
+using Webamoki.Linka.Testing;
 
-namespace Tests.Fixtures;
+namespace Tests.FixtureKit.Fixtures;
 
 public class UserModelFixture : Fixture<UserDbSchema>, IFixture
 {

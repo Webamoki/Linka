@@ -1,6 +1,6 @@
 ﻿using Webamoki.Linka.Fields;
 
-namespace Webamoki.Linka.Models;
+namespace Webamoki.Linka.ModelSystem;
 
 /// <summary>
 /// Custom iterator for model field getters that provides efficient iteration

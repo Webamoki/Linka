@@ -1,20 +1,20 @@
 ﻿using Testcontainers.PostgreSql;
-using Webamoki.Linka.Checks;
-using Webamoki.Linka.Models;
+using Webamoki.Linka.ModelSystem;
+using Webamoki.Linka.Testing;
 
-namespace Webamoki.Linka;
+namespace Webamoki.Linka.SchemaSystem;
 internal interface ISchemaCompileAttribute
 {
     void Compile<TDbSchema>()
-        where TDbSchema : DbSchema, new();
-    void CompileConnections<TDbSchema>() where TDbSchema : DbSchema, new();
+        where TDbSchema : Schema, new();
+    void CompileConnections<TDbSchema>() where TDbSchema : Schema, new();
 }
-public class DbSchema
+public class Schema
 {
     internal readonly HashSet<Type> Models = [];
     internal readonly Dictionary<Type, (string Name,string SqlType)> Enums = [];
-    internal static readonly Dictionary<Type, DbSchema> ModelSchemas = [];
-    private static readonly Dictionary<Type, DbSchema> Instances = [];
+    internal static readonly Dictionary<Type, Schema> ModelSchemas = [];
+    private static readonly Dictionary<Type, Schema> Instances = [];
     internal IDbSchemaGeneric? SchemaGeneric = null;
     internal readonly string Name;
 
@@ -27,7 +27,7 @@ public class DbSchema
     public string GetEnumName<T>() where T : Enum => Enums[typeof(T)].Name;
 
     // ReSharper disable once MemberCanBeProtected.Global
-    public DbSchema(string name)
+    public Schema(string name)
     {
         if (Instances.TryGetValue(GetType(), out _))
             throw new Exception("DbSchema constructor should not be used. Use DbSchema.Get<T>() instead.");
@@ -35,12 +35,12 @@ public class DbSchema
         Name = name;
     }
 
-    internal static void Verify<T>() where T : DbSchema, new()
+    internal static void Verify<T>() where T : Schema, new()
     {
         var schema = Get<T>();
 
         // Verify the schema itself (enums, etc.)
-        DbSchemaCheck.Check<T>();
+        SchemaCheck.Check<T>();
 
         // Verify each model in the schema
         foreach (var modelType in schema.Models)
@@ -49,10 +49,10 @@ public class DbSchema
         }
     }
 
-    internal static DbSchema Get<T>() where T : DbSchema, new() =>
+    internal static Schema Get<T>() where T : Schema, new() =>
         Instances.TryGetValue(typeof(T), out var instance) ? instance : new T();
     
-    internal static DbSchema GetWithModel<T>() where T : Model=>
+    internal static Schema GetWithModel<T>() where T : Model=>
         ModelSchemas.TryGetValue(typeof(T), out var schema) ? schema : throw new Exception($"Model {typeof(T).Name} is not registered with any DbSchema.");
     
 }
@@ -66,11 +66,11 @@ internal interface IDbSchemaGeneric
     public PostgreSqlContainer Mock();
 }
 
-internal class DbSchemaGeneric<T> : IDbSchemaGeneric where T : DbSchema, new()
+internal class DbSchemaGeneric<T> : IDbSchemaGeneric where T : Schema, new()
 {
     public PostgreSqlContainer Mock() {
         var container = DbMocker.Mock<T>();
-        DbSchema.Verify<T>();
+        Schema.Verify<T>();
         return container;
     }
 }

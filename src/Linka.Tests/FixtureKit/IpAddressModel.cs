@@ -1,6 +1,6 @@
 ﻿using Webamoki.Linka.Fields;
 using Webamoki.Linka.Fields.TextFields;
-using Webamoki.Linka.Models;
+using Webamoki.Linka.ModelSystem;
 
 namespace Tests.FixtureKit;
 

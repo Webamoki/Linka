@@ -1,4 +1,4 @@
-﻿using Webamoki.Linka.Models;
+﻿using Webamoki.Linka.ModelSystem;
 
 namespace Webamoki.Linka.Queries;
 

@@ -1,17 +1,17 @@
 ﻿using Webamoki.Linka.Queries;
 using Webamoki.Utils;
 
-namespace Webamoki.Linka.Checks;
+namespace Webamoki.Linka.SchemaSystem;
 
-public static class DbSchemaCheck
+public static class SchemaCheck
 {
     /// <summary>
     /// Verifies that the database schema matches the expected DbSchema definition.
     /// </summary>
     /// <typeparam name="T">The DbSchema type to verify</typeparam>
-    public static void Check<T>() where T : DbSchema, new()
+    public static void Check<T>() where T : Schema, new()
     {
-        var schema = DbSchema.Get<T>();
+        var schema = Schema.Get<T>();
         Logging.WriteLog($"Verifying DbSchema {typeof(T).Name} for schema {schema.Name}");
         CheckEnums<T>(schema);
         Logging.WriteLog($"DbSchema {typeof(T).Name} verification completed successfully");
@@ -22,7 +22,7 @@ public static class DbSchemaCheck
     /// </summary>
     /// <typeparam name="T">The DbSchema type</typeparam>
     /// <param name="schema">The schema instance</param>
-    private static void CheckEnums<T>(DbSchema schema) where T : DbSchema, new()
+    private static void CheckEnums<T>(Schema schema) where T : Schema, new()
     {
         if (schema.Enums.Count == 0)
         {

@@ -1,4 +1,6 @@
-﻿namespace Webamoki.Linka.Fields;
+﻿using Webamoki.Linka.SchemaSystem;
+
+namespace Webamoki.Linka.Fields;
 
 public class EnumValidator<TEnum> : Validator where TEnum : struct, Enum
 {   
@@ -47,7 +49,7 @@ public class EnumValidator<TEnum> : Validator where TEnum : struct, Enum
 
 interface IEnumDbField
 {
-    string GetSchemaEnumName<TDbSchema>() where TDbSchema : DbSchema, new();
+    string GetSchemaEnumName<TDbSchema>() where TDbSchema : Schema, new();
 }
 public class EnumDbField<T>() : StructDbField<T>(EnumValidator<T>.Create(), GetSqlType()), IEnumDbField
     where T : struct, Enum
@@ -84,9 +86,9 @@ public class EnumDbField<T>() : StructDbField<T>(EnumValidator<T>.Create(), GetS
         base.LoadValue(value);
     }
 
-    public string GetSchemaEnumName<TDbSchema>() where TDbSchema : DbSchema, new()
+    public string GetSchemaEnumName<TDbSchema>() where TDbSchema : Schema, new()
     {
-        DbSchema schema = DbSchema.Get<TDbSchema>();
+        Schema schema = Schema.Get<TDbSchema>();
         if (!schema.HasEnum<T>())
             throw new Exception($"Enum {typeof(T).Name} is not registered for schema {schema.Name}.");
         return schema.GetEnumName<T>();

@@ -1,8 +1,9 @@
 ﻿using System.Reflection;
 using Sigil;
 using Webamoki.Linka.Fields;
+using Webamoki.Linka.SchemaSystem;
 
-namespace Webamoki.Linka.Models;
+namespace Webamoki.Linka.ModelSystem;
 
 internal static class ModelRegistry
 {
@@ -41,7 +42,7 @@ internal static class ModelRegistry
     /// Executed after all models are injected.
     /// </summary>
     /// <typeparam name="T"></typeparam>
-    public static bool ApplyNavigations<T>(DbSchema schema) where T : Model, new()
+    public static bool ApplyNavigations<T>(Schema schema) where T : Model, new()
     {
         var info = Get<T>();
         if (info.Navigations.Count > 0 || info.NavigationLists.Count > 0)

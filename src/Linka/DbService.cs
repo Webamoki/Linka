@@ -3,8 +3,9 @@ using System.Linq.Expressions;
 using System.Text;
 using Npgsql;
 using Webamoki.Linka.Fields;
-using Webamoki.Linka.Models;
+using Webamoki.Linka.ModelSystem;
 using Webamoki.Linka.Queries;
+using Webamoki.Linka.SchemaSystem;
 using Webamoki.Utils;
 
 namespace Webamoki.Linka;
@@ -19,21 +20,21 @@ public interface IDbService
     T? SingleOrNull<T>(Expression<Func<T, bool>> expression) where T : Model, new();
     IncludeQuery<T> Include<T>(Expression<Func<T, object>> expression) where T : Model, new();
     DatabaseCode Insert<T>(T model) where T : Model;
-    DbSchema Schema { get; }
+    Schema Schema { get; }
 }
 
-public sealed class DbService<TDbSchema> : IDbService, IDisposable where TDbSchema : DbSchema, new()
+public sealed class DbService<TDbSchema> : IDbService, IDisposable where TDbSchema : Schema, new()
 {
     private readonly NpgsqlConnection _connection;
     private readonly bool _debug;
     public DbService(bool debug = false)
     {
-        var schema = DbSchema.Get<TDbSchema>();
+        var schema = Schema.Get<TDbSchema>();
         _connection = new NpgsqlConnection(Linka.ConnectionString<TDbSchema>());
         _debug = debug || Linka.Debug;
     }
 
-    public DbSchema Schema => DbSchema.Get<TDbSchema>();
+    public Schema Schema => Schema.Get<TDbSchema>();
 
     public DatabaseCode ExecuteTransaction(string query, List<object> values)
     {

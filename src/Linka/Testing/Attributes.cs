@@ -1,5 +1,6 @@
 ﻿using NUnit.Framework;
 using NUnit.Framework.Interfaces;
+using Webamoki.Linka.SchemaSystem;
 
 namespace Webamoki.Linka.Testing;
 
@@ -46,7 +47,7 @@ public class FixturesAttribute<T> : Attribute, ITestAction where T : IFixture, n
 
 
 [AttributeUsage(AttributeTargets.Class)]
-public class CompileSchemaAttribute<T> : Attribute, ITestAction where T : DbSchema, new()
+public class CompileSchemaAttribute<T> : Attribute, ITestAction where T : Schema, new()
 {
     public void BeforeTest(ITest test)
     {

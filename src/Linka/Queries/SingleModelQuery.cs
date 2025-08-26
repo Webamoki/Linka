@@ -2,7 +2,7 @@
 using System.Linq.Expressions;
 using System.Text.Json;
 using Npgsql;
-using Webamoki.Linka.Models;
+using Webamoki.Linka.ModelSystem;
 
 namespace Webamoki.Linka.Queries;
 

@@ -1,4 +1,5 @@
 ﻿using Testcontainers.PostgreSql;
+using Webamoki.Linka.SchemaSystem;
 
 namespace Webamoki.Linka;
 
@@ -9,16 +10,16 @@ public static class Linka
     private static readonly Dictionary<string, string> DatabaseConnections = [];
     private static readonly Dictionary<string, string> SchemaDatabases = [];
     
-    internal static string ConnectionString<T>() where T : DbSchema, new()
+    internal static string ConnectionString<T>() where T : Schema, new()
     {
-        var schema = DbSchema.Get<T>();
+        var schema = Schema.Get<T>();
         if (!SchemaDatabases.TryGetValue(schema.Name, out var database))
             throw new Exception($"No database configured for schema {schema.Name}.");
         if (!DatabaseConnections.TryGetValue(database, out var connectionString))
             throw new Exception($"No connection string configured for database {database}.");
         return connectionString;
     }
-    public static bool TryCompile<T>() where T : DbSchema, new()
+    public static bool TryCompile<T>() where T : Schema, new()
     {
         if (!CompiledSchemas.Add(typeof(T)))
             return false;
@@ -45,17 +46,17 @@ public static class Linka
         return true;
     }
     
-    public static void Configure<T>(string database) where T : DbSchema, new()
+    public static void Configure<T>(string database) where T : Schema, new()
     {
         if (!TryCompile<T>())
             throw new Exception($"DbSchema {typeof(T).Name} is already registered.");
         Register<T>(database);
-        DbSchema.Verify<T>();
+        Schema.Verify<T>();
     }
     
-    public static void Register<T>(string database) where T : DbSchema, new()
+    public static void Register<T>(string database) where T : Schema, new()
     {
-        var schema = DbSchema.Get<T>();
+        var schema = Schema.Get<T>();
         SchemaDatabases[schema.Name] = database;
     }
 

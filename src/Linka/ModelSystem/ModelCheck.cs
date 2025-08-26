@@ -1,13 +1,13 @@
 ﻿using Webamoki.Linka.Fields;
-using Webamoki.Linka.Models;
 using Webamoki.Linka.Queries;
+using Webamoki.Linka.SchemaSystem;
 using Webamoki.Utils;
 
-namespace Webamoki.Linka.Checks;
+namespace Webamoki.Linka.ModelSystem;
 
 public static class ModelCheck
 {
-    public static void Check<T>(Type modelType) where T : DbSchema, new()
+    public static void Check<T>(Type modelType) where T : Schema, new()
     {
         CheckFields<T>(modelType);
         CheckRelations<T>(modelType);
@@ -15,9 +15,9 @@ public static class ModelCheck
     }
 
 
-    private static void CheckFields<T>(Type modelType) where T : DbSchema, new()
+    private static void CheckFields<T>(Type modelType) where T : Schema, new()
     {
-        var schema = DbSchema.Get<T>();
+        var schema = Schema.Get<T>();
         const string sqlQuery = """
                                 SELECT
                                     a.attname AS ColumnName,
@@ -95,9 +95,9 @@ public static class ModelCheck
             throw new Exception($"Fields {string.Join(", ", fieldNames)} do not exist in table: {tableName}.");
     }
     
-    private static void CheckFulltext<T>(Type modelType) where T : DbSchema, new()
+    private static void CheckFulltext<T>(Type modelType) where T : Schema, new()
     {
-        var schema = DbSchema.Get<T>();
+        var schema = Schema.Get<T>();
         const string sqlQuery = """
                                 SELECT
                                     pg_get_indexdef(i.oid) AS Definition
@@ -149,9 +149,9 @@ public static class ModelCheck
         throw new Exception($"FullText index for model {tableName} does not exist in schema {schema.Name}.");
     }
     
-    private static void CheckRelations<T>(Type modelType) where T : DbSchema, new()
+    private static void CheckRelations<T>(Type modelType) where T : Schema, new()
     {
-        var schema = DbSchema.Get<T>();
+        var schema = Schema.Get<T>();
         const string sqlQuery = """
                                 SELECT
                                     tc.constraint_name,

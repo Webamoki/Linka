@@ -1,18 +1,20 @@
 ﻿
+using Webamoki.Linka.SchemaSystem;
+
 namespace Webamoki.Linka.Testing;
 
 public interface IFixture
 {
     void Inject();
-    DbSchema Schema();
+    Schema Schema();
     void TryCompile();
 }
 
-public abstract class Fixture<T> : IFixture where T : DbSchema, new()
+public abstract class Fixture<T> : IFixture where T : Schema, new()
 {
     public abstract void Inject();
 
-    public DbSchema Schema() => DbSchema.Get<T>();
+    public Schema Schema() => SchemaSystem.Schema.Get<T>();
     
     public void TryCompile()
     {

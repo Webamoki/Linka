@@ -1,4 +1,6 @@
-﻿namespace Webamoki.Linka.Models;
+﻿using Webamoki.Linka.SchemaSystem;
+
+namespace Webamoki.Linka.ModelSystem;
 
 [AttributeUsage(AttributeTargets.Constructor,AllowMultiple = true)]
 public class ModelAttribute<T> : Attribute, ISchemaCompileAttribute
@@ -22,19 +24,19 @@ public class ModelAttribute<T> : Attribute, ISchemaCompileAttribute
 
 
     public void Compile<TDbSchema>()
-        where TDbSchema : DbSchema, new()
+        where TDbSchema : Schema, new()
     {
-        var schema = DbSchema.Get<TDbSchema>();
+        var schema = Schema.Get<TDbSchema>();
         schema.SchemaGeneric = new DbSchemaGeneric<TDbSchema>();
         schema.Models.Add(typeof(T));
-        if (!DbSchema.ModelSchemas.TryAdd(typeof(T), schema))
+        if (!Schema.ModelSchemas.TryAdd(typeof(T), schema))
             throw new Exception($"Model {typeof(T).Name} is already registered with a different DbSchema.");
     }
     
     public void CompileConnections<TDbSchema>()
-        where TDbSchema : DbSchema, new()
+        where TDbSchema : Schema, new()
     {
-        var schema = DbSchema.Get<TDbSchema>();
+        var schema = Schema.Get<TDbSchema>();
         ModelRegistry.ApplyNavigations<T>(schema);
     }
 }

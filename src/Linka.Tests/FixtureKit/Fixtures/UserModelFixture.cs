@@ -3,7 +3,7 @@ using Webamoki.Linka.Testing;
 
 namespace Tests.FixtureKit.Fixtures;
 
-public class UserModelFixture : Fixture<UserDbSchema>, IFixture
+public class UserModelFixture : Fixture<UserSchema>, IFixture
 {
     public override void Inject()
     {
@@ -19,7 +19,7 @@ public class UserModelFixture : Fixture<UserDbSchema>, IFixture
             100
             );
         model.ID.Value("30120320SU");
-        using var db = new DbService<UserDbSchema>();
+        using var db = new DbService<UserSchema>();
         db.Insert(model);
     }
 }

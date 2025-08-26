@@ -3,7 +3,7 @@ using Webamoki.Linka.Testing;
 
 namespace Tests.FixtureKit.Fixtures;
 
-public class IpAddressFixture : Fixture<UserDbSchema>, IFixture
+public class IpAddressFixture : Fixture<UserSchema>, IFixture
 {
     public override void Inject()
     {
@@ -11,7 +11,7 @@ public class IpAddressFixture : Fixture<UserDbSchema>, IFixture
             "30120320SU",
             "127.0.0.1"
             );
-        using var db = new DbService<UserDbSchema>();
+        using var db = new DbService<UserSchema>();
         db.Insert(model);
     }
 }

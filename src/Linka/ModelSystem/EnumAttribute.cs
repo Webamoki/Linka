@@ -1,4 +1,6 @@
-﻿namespace Webamoki.Linka.Models;
+﻿using Webamoki.Linka.SchemaSystem;
+
+namespace Webamoki.Linka.ModelSystem;
 
 
 
@@ -8,9 +10,9 @@ public class EnumAttribute<T> : Attribute, ISchemaCompileAttribute
     where T : Enum, new()
 {
     public void Compile<TDbSchema>()
-        where TDbSchema : DbSchema, new()
+        where TDbSchema : Schema, new()
     {
-        var schema = DbSchema.Get<TDbSchema>();
+        var schema = Schema.Get<TDbSchema>();
         if (schema.Enums.ContainsKey(typeof(T)))
             throw new Exception($"Enum {typeof(T).Name} is already registered for schema {schema.Name}.");
         var name = typeof(T).Name;
@@ -22,7 +24,7 @@ public class EnumAttribute<T> : Attribute, ISchemaCompileAttribute
     {
         return $"ENUM ({string.Join(",", Enum.GetNames(typeof(T)).Select(name => $"'{name}'"))})";
     }
-    public void CompileConnections<TDbSchema>() where TDbSchema : DbSchema, new()
+    public void CompileConnections<TDbSchema>() where TDbSchema : Schema, new()
     {
     }
 }

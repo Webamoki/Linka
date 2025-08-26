@@ -1,6 +1,6 @@
 ﻿using System.Linq.Expressions;
 using System.Reflection;
-using Webamoki.Linka.Models;
+using Webamoki.Linka.ModelSystem;
 
 namespace Webamoki.Linka.Queries;
 

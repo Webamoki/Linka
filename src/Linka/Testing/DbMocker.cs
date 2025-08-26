@@ -1,14 +1,15 @@
 ﻿using Testcontainers.PostgreSql;
 using Webamoki.Linka.Fields;
-using Webamoki.Linka.Models;
+using Webamoki.Linka.ModelSystem;
+using Webamoki.Linka.SchemaSystem;
 
-namespace Webamoki.Linka;
+namespace Webamoki.Linka.Testing;
 
 public static class DbMocker
 {
-    public static PostgreSqlContainer Mock<T>() where T : DbSchema, new()
+    public static PostgreSqlContainer Mock<T>() where T : Schema, new()
     {
-        var schema = DbSchema.Get<T>();
+        var schema = Schema.Get<T>();
         // create docker container
         var databaseName = $"mock_{schema.Name}";
         var container = new PostgreSqlBuilder()
@@ -34,7 +35,7 @@ public static class DbMocker
         return container;
     }
 
-    private static string CreateSchemaQuery<T>(DbSchema schema) where T : DbSchema, new()
+    private static string CreateSchemaQuery<T>(Schema schema) where T : Schema, new()
     {
         var enumQueries = "";
         var tableQueries = "";
@@ -67,7 +68,7 @@ public static class DbMocker
     }
 
 
-    private static string CreateTableQuery<T>(IModelInfo info) where T : DbSchema, new()
+    private static string CreateTableQuery<T>(IModelInfo info) where T : Schema, new()
     {
         var columns = "";
         var keys = "";

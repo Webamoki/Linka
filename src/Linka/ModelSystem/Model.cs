@@ -1,10 +1,8 @@
 using System.Data;
 using System.Text.Json;
 using Npgsql;
-using Webamoki.Linka.Fields;
-using Webamoki.Linka.Queries;
 
-namespace Webamoki.Linka.Models;
+namespace Webamoki.Linka.ModelSystem;
 
 public abstract class Model
 {

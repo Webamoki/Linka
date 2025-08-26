@@ -23,18 +23,18 @@ public interface IDbService
     Schema Schema { get; }
 }
 
-public sealed class DbService<TDbSchema> : IDbService, IDisposable where TDbSchema : Schema, new()
+public sealed class DbService<TSchema> : IDbService, IDisposable where TSchema : Schema, new()
 {
     private readonly NpgsqlConnection _connection;
     private readonly bool _debug;
     public DbService(bool debug = false)
     {
-        var schema = Schema.Get<TDbSchema>();
-        _connection = new NpgsqlConnection(Linka.ConnectionString<TDbSchema>());
+        var schema = Schema.Get<TSchema>();
+        _connection = new NpgsqlConnection(Linka.ConnectionString<TSchema>());
         _debug = debug || Linka.Debug;
     }
 
-    public Schema Schema => Schema.Get<TDbSchema>();
+    public Schema Schema => Schema.Get<TSchema>();
 
     public DatabaseCode ExecuteTransaction(string query, List<object> values)
     {
@@ -228,7 +228,7 @@ public sealed class DbService<TDbSchema> : IDbService, IDisposable where TDbSche
                 if (value is Enum)
                 {
                     var enumField = (IEnumDbField)field;
-                    insertQuery.AddValueMarker($"'{value}'::\"{enumField.GetSchemaEnumName<TDbSchema>()}\"");
+                    insertQuery.AddValueMarker($"'{value}'::\"{enumField.GetSchemaEnumName<TSchema>()}\"");
                 }
                 else
                 {

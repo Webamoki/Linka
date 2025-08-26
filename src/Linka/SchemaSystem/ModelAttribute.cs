@@ -23,20 +23,20 @@ public class ModelAttribute<T> : Attribute, ISchemaCompileAttribute
     }
 
 
-    public void Compile<TDbSchema>()
-        where TDbSchema : Schema, new()
+    public void Compile<TSchema>()
+        where TSchema : Schema, new()
     {
-        var schema = Schema.Get<TDbSchema>();
-        schema.SchemaGeneric = new DbSchemaGeneric<TDbSchema>();
+        var schema = Schema.Get<TSchema>();
+        schema.SchemaGeneric = new SchemaGeneric<TSchema>();
         schema.Models.Add(typeof(T));
         if (!Schema.ModelSchemas.TryAdd(typeof(T), schema))
-            throw new Exception($"Model {typeof(T).Name} is already registered with a different DbSchema.");
+            throw new Exception($"Model {typeof(T).Name} is already registered with a different Schema.");
     }
     
-    public void CompileConnections<TDbSchema>()
-        where TDbSchema : Schema, new()
+    public void CompileConnections<TSchema>()
+        where TSchema : Schema, new()
     {
-        var schema = Schema.Get<TDbSchema>();
+        var schema = Schema.Get<TSchema>();
         ModelRegistry.ApplyNavigations<T>(schema);
     }
 }

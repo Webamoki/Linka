@@ -36,8 +36,8 @@ public static class Linka
         }
 
         if (schemaAttributes.Count == 0)
-            throw new Exception($"No ModelAttribute found for DbSchema {typeof(T).Name}. " +
-                                "Please add a ModelAttribute to the constructor of the DbSchema class.");
+            throw new Exception($"No ModelAttribute found for Schema {typeof(T).Name}. " +
+                                "Please add a ModelAttribute to the constructor of the Schema class.");
         foreach (var attribute in schemaAttributes)
         {
             attribute.CompileConnections<T>();
@@ -49,7 +49,7 @@ public static class Linka
     public static void Configure<T>(string database) where T : Schema, new()
     {
         if (!TryCompile<T>())
-            throw new Exception($"DbSchema {typeof(T).Name} is already registered.");
+            throw new Exception($"Schema {typeof(T).Name} is already registered.");
         Register<T>(database);
         Schema.Verify<T>();
     }

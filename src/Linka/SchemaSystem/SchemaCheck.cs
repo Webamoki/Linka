@@ -6,21 +6,21 @@ namespace Webamoki.Linka.SchemaSystem;
 public static class SchemaCheck
 {
     /// <summary>
-    /// Verifies that the database schema matches the expected DbSchema definition.
+    /// Verifies that the database schema matches the expected Schema definition.
     /// </summary>
-    /// <typeparam name="T">The DbSchema type to verify</typeparam>
+    /// <typeparam name="T">The Schema type to verify</typeparam>
     public static void Check<T>() where T : Schema, new()
     {
         var schema = Schema.Get<T>();
-        Logging.WriteLog($"Verifying DbSchema {typeof(T).Name} for schema {schema.Name}");
+        Logging.WriteLog($"Verifying Schema {typeof(T).Name} for schema {schema.Name}");
         CheckEnums<T>(schema);
-        Logging.WriteLog($"DbSchema {typeof(T).Name} verification completed successfully");
+        Logging.WriteLog($"Schema {typeof(T).Name} verification completed successfully");
     }
 
     /// <summary>
     /// Verifies that all enums defined in the schema exist in the database with correct values.
     /// </summary>
-    /// <typeparam name="T">The DbSchema type</typeparam>
+    /// <typeparam name="T">The Schema type</typeparam>
     /// <param name="schema">The schema instance</param>
     private static void CheckEnums<T>(Schema schema) where T : Schema, new()
     {
@@ -69,7 +69,7 @@ public static class SchemaCheck
             if (!expectedEnums.TryGetValue(enumName, out var expectedType))
             {
                 throw new Exception($"Unexpected enum '{enumName}' found in database schema '{schema.Name}'. " +
-                                  "This enum is not defined in the DbSchema class.");
+                                  "This enum is not defined in the Schema class.");
             }
             
             Assert(expectedType, enumValues, $"Enum {enumName} in schema {schema.Name} has unexpected values. Expected: {expectedType}, got: {enumValues}.");

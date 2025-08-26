@@ -49,7 +49,7 @@ public class EnumValidator<TEnum> : Validator where TEnum : struct, Enum
 
 interface IEnumDbField
 {
-    string GetSchemaEnumName<TDbSchema>() where TDbSchema : Schema, new();
+    string GetSchemaEnumName<TSchema>() where TSchema : Schema, new();
 }
 public class EnumDbField<T>() : StructDbField<T>(EnumValidator<T>.Create(), GetSqlType()), IEnumDbField
     where T : struct, Enum
@@ -86,9 +86,9 @@ public class EnumDbField<T>() : StructDbField<T>(EnumValidator<T>.Create(), GetS
         base.LoadValue(value);
     }
 
-    public string GetSchemaEnumName<TDbSchema>() where TDbSchema : Schema, new()
+    public string GetSchemaEnumName<TSchema>() where TSchema : Schema, new()
     {
-        Schema schema = Schema.Get<TDbSchema>();
+        Schema schema = Schema.Get<TSchema>();
         if (!schema.HasEnum<T>())
             throw new Exception($"Enum {typeof(T).Name} is not registered for schema {schema.Name}.");
         return schema.GetEnumName<T>();

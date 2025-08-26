@@ -7,10 +7,10 @@
 public class EnumAttribute<T> : Attribute, ISchemaCompileAttribute
     where T : Enum, new()
 {
-    public void Compile<TDbSchema>()
-        where TDbSchema : Schema, new()
+    public void Compile<TSchema>()
+        where TSchema : Schema, new()
     {
-        var schema = Schema.Get<TDbSchema>();
+        var schema = Schema.Get<TSchema>();
         if (schema.Enums.ContainsKey(typeof(T)))
             throw new Exception($"Enum {typeof(T).Name} is already registered for schema {schema.Name}.");
         var name = typeof(T).Name;
@@ -22,7 +22,7 @@ public class EnumAttribute<T> : Attribute, ISchemaCompileAttribute
     {
         return $"ENUM ({string.Join(",", Enum.GetNames(typeof(T)).Select(name => $"'{name}'"))})";
     }
-    public void CompileConnections<TDbSchema>() where TDbSchema : Schema, new()
+    public void CompileConnections<TSchema>() where TSchema : Schema, new()
     {
     }
 }

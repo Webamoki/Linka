@@ -5,9 +5,9 @@ using Webamoki.Linka.Testing;
 namespace Webamoki.Linka.SchemaSystem;
 internal interface ISchemaCompileAttribute
 {
-    void Compile<TDbSchema>()
-        where TDbSchema : Schema, new();
-    void CompileConnections<TDbSchema>() where TDbSchema : Schema, new();
+    void Compile<TSchema>()
+        where TSchema : Schema, new();
+    void CompileConnections<TSchema>() where TSchema : Schema, new();
 }
 public class Schema
 {
@@ -15,7 +15,7 @@ public class Schema
     internal readonly Dictionary<Type, (string Name,string SqlType)> Enums = [];
     internal static readonly Dictionary<Type, Schema> ModelSchemas = [];
     private static readonly Dictionary<Type, Schema> Instances = [];
-    internal IDbSchemaGeneric? SchemaGeneric = null;
+    internal ISchemaGeneric? SchemaGeneric = null;
     internal readonly string Name;
 
     public bool HasModel<T>() where T : Model => HasModel(typeof(T));
@@ -30,7 +30,7 @@ public class Schema
     public Schema(string name)
     {
         if (Instances.TryGetValue(GetType(), out _))
-            throw new Exception("DbSchema constructor should not be used. Use DbSchema.Get<T>() instead.");
+            throw new Exception("Schema constructor should not be used. Use Schema.Get<T>() instead.");
         Instances[GetType()] = this;
         Name = name;
     }
@@ -53,7 +53,7 @@ public class Schema
         Instances.TryGetValue(typeof(T), out var instance) ? instance : new T();
     
     internal static Schema GetWithModel<T>() where T : Model=>
-        ModelSchemas.TryGetValue(typeof(T), out var schema) ? schema : throw new Exception($"Model {typeof(T).Name} is not registered with any DbSchema.");
+        ModelSchemas.TryGetValue(typeof(T), out var schema) ? schema : throw new Exception($"Model {typeof(T).Name} is not registered with any Schema.");
     
 }
 
@@ -61,12 +61,12 @@ public class Schema
 /// Schema to Generic Translator without using Reflection.
 /// Allows a Schema to store itself as a generic.
 /// </summary>
-internal interface IDbSchemaGeneric
+internal interface ISchemaGeneric
 {
     public PostgreSqlContainer Mock();
 }
 
-internal class DbSchemaGeneric<T> : IDbSchemaGeneric where T : Schema, new()
+internal class SchemaGeneric<T> : ISchemaGeneric where T : Schema, new()
 {
     public PostgreSqlContainer Mock() {
         var container = DbMocker.Mock<T>();

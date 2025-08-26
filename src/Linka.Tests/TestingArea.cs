@@ -26,12 +26,12 @@ public class TestingArea
     public void TestMethod3()
     {
         Linka.AddConnection("localhost", "u62560199300users", "u62560199300users", "Thb9jbCcgpxRBvBMtfQb");
-        // Linka.Configure<UserDbSchema>();
+        // Linka.Configure<UserSchema>();
         
         
         
         //
-        // using var db = new DbService<UserDbSchema>(true);
+        // using var db = new DbService<UserSchema>(true);
         //
         // var ip = db.Include<IpAddressModel>(u => u.User).First(u=> u.UserID == "30120320SU");
         //

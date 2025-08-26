@@ -65,16 +65,16 @@ public static class Linka
     //     ModelCache.Reset();
     // }
 
-    public static void AddConnection(string server, string database, string user, string password, ushort port = 5432)
+    public static void AddConnection(string server, string database, string user, string password, ushort port = 5432,bool includeDetails = false)
     {
-        var connectionString = $"Server={server};Port={port};Database={database};User Id={user};Password={password}";
+        var connectionString = $"Server={server};Port={port};Database={database};User Id={user};Password={password};Include Error Detail={includeDetails}";
         if (!DatabaseConnections.TryAdd(database, connectionString))
             throw new Exception($"Connection string for database {database} already exists.");
     }
     
-    public static void ForceConnection(string server, string database, string user, string password, ushort port = 5432)
+    public static void ForceConnection(string server, string database, string user, string password, ushort port = 5432 ,bool includeDetails = false)
     {
-        var connectionString = $"Server={server};Port={port};Database={database};User Id={user};Password={password}";
+        var connectionString = $"Server={server};Port={port};Database={database};User Id={user};Password={password};Include Error Detail={includeDetails}";
         DatabaseConnections[database] = connectionString;
     }
 }

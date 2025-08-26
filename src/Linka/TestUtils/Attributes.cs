@@ -26,7 +26,7 @@ public class FixturesAttribute<T> : Attribute, ITestAction where T : IFixture, n
         }
         
         var testClassAttributes = test.Fixture?.GetType().GetCustomAttributes(true) ?? [];
-        var fixtureCount = testClassAttributes.Count(a => a is FixturesAttribute<T>);
+        var fixtureCount = testClassAttributes.Length;
         if (fixtureManager.Count != fixtureCount) return;
 
         if (!fixtureManager.IsLast<T>()) return;

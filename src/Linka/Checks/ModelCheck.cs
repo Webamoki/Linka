@@ -1,20 +1,21 @@
 ﻿using Webamoki.Linka.Fields;
+using Webamoki.Linka.Models;
 using Webamoki.Linka.Queries;
 using Webamoki.Utils;
 
-namespace Webamoki.Linka.Models;
+namespace Webamoki.Linka.Checks;
 
-public static class ModelVerifier
+public static class ModelCheck
 {
-    public static void Verify<T>(Type modelType) where T : DbSchema, new()
+    public static void Check<T>(Type modelType) where T : DbSchema, new()
     {
-        VerifyFields<T>(modelType);
-        VerifyRelations<T>(modelType);
-        VerifyFullText<T>(modelType);
+        CheckFields<T>(modelType);
+        CheckRelations<T>(modelType);
+        CheckFulltext<T>(modelType);
     }
 
 
-    private static void VerifyFields<T>(Type modelType) where T : DbSchema, new()
+    private static void CheckFields<T>(Type modelType) where T : DbSchema, new()
     {
         var schema = DbSchema.Get<T>();
         const string sqlQuery = """
@@ -65,7 +66,7 @@ public static class ModelVerifier
 
         var query = new Query(sqlQuery);
         var tableName = ModelRegistry.Get(modelType).TableName;
-        Logging.WriteLog($"Verifying model {tableName} in database {schema.DatabaseName}");
+        Logging.WriteLog($"Verifying model {tableName} in schema {schema.Name}");
         query.AddValue(tableName);
         query.AddValue(schema.Name);
         
@@ -94,7 +95,7 @@ public static class ModelVerifier
             throw new Exception($"Fields {string.Join(", ", fieldNames)} do not exist in table: {tableName}.");
     }
     
-    private static void VerifyFullText<T>(Type modelType) where T : DbSchema, new()
+    private static void CheckFulltext<T>(Type modelType) where T : DbSchema, new()
     {
         var schema = DbSchema.Get<T>();
         const string sqlQuery = """
@@ -121,7 +122,7 @@ public static class ModelVerifier
     
         var query = new Query(sqlQuery);
         var tableName = ModelRegistry.Get(modelType).TableName;
-        Logging.WriteLog($"Verifying model {tableName} full text columns in database {schema.DatabaseName}");
+        Logging.WriteLog($"Verifying model {tableName} full text columns in schema {schema.Name}");
         query.AddValue(tableName);
         query.AddValue(schema.Name);
         query.AddValue($"FT_{tableName}");
@@ -145,10 +146,10 @@ public static class ModelVerifier
             Assert(definition, databaseDefinition, $"FullText index for model {tableName} does index all fields {fields}.");
             return;
         }
-        throw new Exception($"FullText index for model {tableName} does not exist in database {schema.DatabaseName}.");
+        throw new Exception($"FullText index for model {tableName} does not exist in schema {schema.Name}.");
     }
     
-    private static void VerifyRelations<T>(Type modelType) where T : DbSchema, new()
+    private static void CheckRelations<T>(Type modelType) where T : DbSchema, new()
     {
         var schema = DbSchema.Get<T>();
         const string sqlQuery = """

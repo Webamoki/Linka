@@ -23,7 +23,9 @@ public static class DbMocker
             databaseName,
             "mocking",
             "mocking",
-            container.GetMappedPublicPort(5432));
+            container.GetMappedPublicPort(5432),
+            true
+        );
         Linka.Register<T>(databaseName);
 
         using var db = new DbService<T>();

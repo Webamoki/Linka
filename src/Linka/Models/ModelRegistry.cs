@@ -59,7 +59,7 @@ internal static class ModelRegistry
             if (!typeof(Model).IsAssignableFrom(navType)) throw new Exception($"The model {navType} is not a Model.");
             if (!schema.HasModel(navType))
                 throw new Exception(
-                    $"Cannot navigate unrelated model {navType.Name} for database {schema.DatabaseName}.");
+                    $"Cannot navigate unrelated model {navType.Name} for schema {schema.Name}.");
             var targetInfo = Get(navType);
 
 

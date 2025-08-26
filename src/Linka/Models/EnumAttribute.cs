@@ -12,7 +12,7 @@ public class EnumAttribute<T> : Attribute, ISchemaCompileAttribute
     {
         var schema = DbSchema.Get<TDbSchema>();
         if (schema.Enums.ContainsKey(typeof(T)))
-            throw new Exception($"Enum {typeof(T).Name} is already registered for database {schema.DatabaseName}.");
+            throw new Exception($"Enum {typeof(T).Name} is already registered for schema {schema.Name}.");
         var name = typeof(T).Name;
         if (!name.EndsWith("Enum"))
             name += "Enum";

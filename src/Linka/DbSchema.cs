@@ -1,4 +1,5 @@
 ﻿using Testcontainers.PostgreSql;
+using Webamoki.Linka.Checks;
 using Webamoki.Linka.Models;
 
 namespace Webamoki.Linka;
@@ -15,7 +16,6 @@ public class DbSchema
     internal static readonly Dictionary<Type, DbSchema> ModelSchemas = [];
     private static readonly Dictionary<Type, DbSchema> Instances = [];
     internal IDbSchemaGeneric? SchemaGeneric = null;
-    internal readonly string DatabaseName;
     internal readonly string Name;
 
     public bool HasModel<T>() where T : Model => HasModel(typeof(T));
@@ -38,9 +38,14 @@ public class DbSchema
     internal static void Verify<T>() where T : DbSchema, new()
     {
         var schema = Get<T>();
+
+        // Verify the schema itself (enums, etc.)
+        DbSchemaCheck.Check<T>();
+
+        // Verify each model in the schema
         foreach (var modelType in schema.Models)
         {
-            ModelVerifier.Verify<T>(modelType);
+            ModelCheck.Check<T>(modelType);
         }
     }
 

@@ -34,9 +34,9 @@ internal class SingleModelQuery<T> where T : Model, new()
             {
                 var targetInfo = navInfo.TargetModelInfo;
                 _query.LeftJoin<T>(targetInfo.ModelType, navInfo.Field, navInfo.TargetField);
-                foreach (var (fieldName, _) in targetInfo.Fields)
+                foreach (var field in targetInfo.Fields.Values)
                 {
-                    _query.Select(targetInfo.ModelType, fieldName);
+                    _query.Select(targetInfo.ModelType, field);
                 }
                 _navigations.Add(navInfo);
                 continue;
@@ -73,23 +73,6 @@ internal class SingleModelQuery<T> where T : Model, new()
         var reader = _query.Execute(_dbService);
         return ReadModel(reader);
 
-    }
-
-    public T Single()
-    {
-        var model = SingleOrNull();
-        if (model == null)
-            throw new Exception($"Model {typeof(T).Name} not found.");
-        return model;
-    }
-
-    public T? SingleOrNull()
-    {
-        var reader = _query.Execute(_dbService);
-        // check if the reader has more than 1 row
-        if (reader.FieldCount > 1)
-            throw new Exception($"Query returned more than one row for model {typeof(T).Name}.");
-        return ReadModel(reader);
     }
     
     private T? ReadModel(NpgsqlDataReader reader)

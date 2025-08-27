@@ -77,9 +77,8 @@ public static class DbMocker
         {
             var nullable = field.IsRequired ? " NOT NULL" : "";
             var sqlType = field.SQLType;
-            if (sqlType.StartsWith("ENUM"))
+            if (field is IEnumDbField enumField)
             {
-                var enumField = (IEnumDbField)field;
                 var enumType = $"\"{enumField.GetSchemaEnumName<T>()}\"";
                 sqlType = enumType;
             }

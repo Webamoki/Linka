@@ -9,16 +9,11 @@ public class FixturesAttribute<T> : Attribute, ITestAction where T : IFixture, n
 {
     // ReSharper disable once StaticMemberInGenericType
 
-    private static readonly Dictionary<string,FixtureManager> FixtureManagers = [];
     public void BeforeTest(ITest test)
     {
         // Create a Fixture Manager if it doesn't exist already
         var testClass = test.ClassName!;
-        if (!FixtureManagers.TryGetValue(testClass, out var fixtureManager))
-        {
-            fixtureManager = new FixtureManager();
-            FixtureManagers.Add(testClass, fixtureManager);
-        }
+        var fixtureManager = FixtureManager.Get(testClass);
 
         if (!fixtureManager.IsComplete())
         {
@@ -36,7 +31,7 @@ public class FixturesAttribute<T> : Attribute, ITestAction where T : IFixture, n
 
     public void AfterTest(ITest test)
     {
-        var fixtureManager = FixtureManagers[test.ClassName!];
+        var fixtureManager = FixtureManager.Get(test.ClassName!);
         fixtureManager.Complete();
         if (!fixtureManager.IsLast<T>()) return;
         fixtureManager.Dispose();

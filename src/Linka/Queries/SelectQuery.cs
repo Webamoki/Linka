@@ -1,4 +1,5 @@
-﻿using Webamoki.Linka.ModelSystem;
+﻿using Webamoki.Linka.Fields;
+using Webamoki.Linka.ModelSystem;
 
 namespace Webamoki.Linka.Queries;
 
@@ -44,16 +45,23 @@ internal class SelectQuery : ConditionQuery
         _groupBy.AddBody($"\"{table}\".\"{column}\"");
     }
 
-    public void Select<T>(string column) where T : Model
+    public void Select<T>(DbField field) where T : Model
     {
         var table = Model.TableName<T>();
-        AddSelect($"\"{table}\".\"{column}\" as \"{table}.{column}\"");
+        FieldSelect(table,field);
     }
-
-    public void Select(Type modelType, string column)
+    public void Select(Type modelType, DbField field)
     {
         var table = ModelRegistry.Get(modelType).TableName;
-        AddSelect($"\"{table}\".\"{column}\" as \"{table}.{column}\"");
+        FieldSelect(table,field);
+    }
+
+    private void FieldSelect(string table, DbField field)
+    {
+        var column = field.Name;
+        var cast = field is IEnumDbField ? "::text" : "";
+        
+        AddSelect($"\"{table}\".\"{column}\"{cast} as \"{table}.{column}\"");
     }
 
     public void JsonSelect<T>(Type modelType, string alias) where T : Model

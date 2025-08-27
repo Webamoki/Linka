@@ -8,8 +8,8 @@ public class UserModelFixture : Fixture<UserSchema>, IFixture
     public override void Inject()
     {
         var model = new UserModel(
-            "Fred",
-            "fred@example.com",
+            "John",
+            "johndoe@example.com",
             "1234567890",
             UserModel.RankEnum.User,
             "password",
@@ -18,7 +18,7 @@ public class UserModelFixture : Fixture<UserSchema>, IFixture
             false,
             100
             );
-        model.ID.Value("30120320SU");
+        model.ID.Value("AAAAAAAAAA");
         using var db = new DbService<UserSchema>();
         db.Insert(model);
     }

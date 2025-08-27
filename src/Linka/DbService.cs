@@ -14,28 +14,16 @@ internal interface IDbService
 {
     NpgsqlDataReader Execute(string query, List<object> values);
     DatabaseCode ExecuteTransaction(string query, List<object> values);
-    T First<T>(Expression<Func<T, bool>> expression) where T : Model, new();
-    T? FirstOrNull<T>(Expression<Func<T, bool>> expression) where T : Model, new();
-    T Single<T>(Expression<Func<T, bool>> expression) where T : Model, new();
-    T? SingleOrNull<T>(Expression<Func<T, bool>> expression) where T : Model, new();
-    IncludeQuery<T> Include<T>(Expression<Func<T, object>> expression) where T : Model, new();
-    DatabaseCode Insert<T>(T model) where T : Model;
     Schema Schema { get; }
-    
     public void AddModelToCache<T>(T model) where T : Model;
 }
 
-public sealed class DbService<TSchema> : IDbService, IDisposable where TSchema : Schema, new()
+public sealed class DbService<TSchema>(bool debug = false) : IDbService, IDisposable
+    where TSchema : Schema, new()
 {
-    private readonly NpgsqlConnection _connection;
-    private readonly bool _debug;
+    private readonly NpgsqlConnection _connection = new(Linka.ConnectionString<TSchema>());
+    private readonly bool _debug = debug || Linka.Debug;
     private Dictionary<Type, IModelCache> _caches = [];
-    public DbService(bool debug = false)
-    {
-        var schema = Schema.Get<TSchema>();
-        _connection = new NpgsqlConnection(Linka.ConnectionString<TSchema>());
-        _debug = debug || Linka.Debug;
-    }
 
     public Schema Schema => Schema.Get<TSchema>();
 
@@ -177,13 +165,7 @@ public sealed class DbService<TSchema> : IDbService, IDisposable where TSchema :
 
     public T? FirstOrNull<T>(Expression<Func<T, bool>> expression) where T : Model, new() =>
         new SingleModelQuery<T>(this, expression).FirstOrNull();
-
-    public T Single<T>(Expression<Func<T, bool>> expression) where T : Model, new() =>
-        new SingleModelQuery<T>(this, expression).Single();
-
-    public T? SingleOrNull<T>(Expression<Func<T, bool>> expression) where T : Model, new() =>
-        new SingleModelQuery<T>(this, expression).SingleOrNull();
-
+    
     public IncludeQuery<T> Include<T>(Expression<Func<T, object>> expression) where T : Model, new() =>
         new(this, expression);
     

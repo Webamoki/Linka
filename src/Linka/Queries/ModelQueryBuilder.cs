@@ -15,9 +15,9 @@ internal static class ModelQueryBuilder
         var query = new SelectQuery();
         query.AddTable<T>();
         var modelInfo = ModelRegistry.Get<T>();
-        foreach (var (fieldName, _) in modelInfo.Fields)
+        foreach (var field in modelInfo.Fields.Values)
         {
-            query.Select<T>(fieldName);
+            query.Select<T>(field);
         }
 
         return query;

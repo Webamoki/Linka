@@ -22,8 +22,9 @@ public class ModelCache<T> : IModelCache where T : Model
             primaryKeys[fieldKey] = fieldValue;
         }
         _primaryCache[primaryKeys] = model;
-        foreach (var fieldKey in info.UniqueFields.Keys)
+        foreach (var (fieldKey,field) in info.UniqueFields)
         {
+            if (!field.IsSet) continue;
             var fieldValue = info.FieldGetters[fieldKey](model).StringValue();
             
             _uniqueCache[(fieldKey,fieldValue)] = model;

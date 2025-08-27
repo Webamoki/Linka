@@ -30,10 +30,4 @@ public class IncludeQuery<T>
 
     public T? FirstOrNull(Expression<Func<T, bool>> expression) =>
         new SingleModelQuery<T>(_dbService, expression, _included).FirstOrNull();
-
-    public T Single(Expression<Func<T, bool>> expression) =>
-        new SingleModelQuery<T>(_dbService, expression, _included).Single();
-
-    public T? SingleOrNull(Expression<Func<T, bool>> expression) =>
-        new SingleModelQuery<T>(_dbService, expression, _included).SingleOrNull();
 }

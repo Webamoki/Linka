@@ -38,13 +38,16 @@ public abstract class Model
 
     internal void Load<T>(NpgsqlDataReader reader) where T : Model { Load(typeof(T), reader); }
     
-    internal void Load(Type type, IDataReader reader)
+    internal void Load(Type type, NpgsqlDataReader reader)
     {
         var info = ModelRegistry.Get(type);
         var fieldIterator = GetFieldIterator();
         foreach (var (fieldName, field) in fieldIterator.All())
         {
-            var value = reader[$"{info.TableName}.{fieldName}"];
+            var readerFieldName = $"{info.TableName}.{fieldName}";
+            object? value;
+            if (field.SQLType.StartsWith("ENUM")) value = reader.GetValue(reader.GetOrdinal(readerFieldName)).ToString();
+            else value = reader[readerFieldName];
             if (value is DBNull) value = null;
             field.LoadValue(value);
         }

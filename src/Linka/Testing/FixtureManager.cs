@@ -4,10 +4,21 @@ namespace Webamoki.Linka.Testing;
 
 internal class FixtureManager
 {
+    private static Dictionary<string,FixtureManager> Instances = [];
     private readonly List<IFixture> _fixtures = [];
     private readonly HashSet<String> _fixtureNames = [];
     private bool _isComplete;
     
+    private FixtureManager(){}
+    public static FixtureManager Get(string testClass)
+    {
+        if (!Instances.TryGetValue(testClass, out var instance))
+        {
+            instance = new FixtureManager();
+            Instances.Add(testClass, instance);
+        }
+        return instance;
+    }
     private static readonly Dictionary<string,object> DatabaseLocks = [];
     private List<PostgreSqlContainer> _containers = [];
     public int Count => _fixtures.Count;

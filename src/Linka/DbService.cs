@@ -10,7 +10,7 @@ using Webamoki.Utils;
 
 namespace Webamoki.Linka;
 
-public interface IDbService
+internal interface IDbService
 {
     NpgsqlDataReader Execute(string query, List<object> values);
     DatabaseCode ExecuteTransaction(string query, List<object> values);
@@ -21,12 +21,15 @@ public interface IDbService
     IncludeQuery<T> Include<T>(Expression<Func<T, object>> expression) where T : Model, new();
     DatabaseCode Insert<T>(T model) where T : Model;
     Schema Schema { get; }
+    
+    public void AddModelToCache<T>(T model) where T : Model;
 }
 
 public sealed class DbService<TSchema> : IDbService, IDisposable where TSchema : Schema, new()
 {
     private readonly NpgsqlConnection _connection;
     private readonly bool _debug;
+    private Dictionary<Type, IModelCache> _caches = [];
     public DbService(bool debug = false)
     {
         var schema = Schema.Get<TSchema>();
@@ -244,7 +247,25 @@ public sealed class DbService<TSchema> : IDbService, IDisposable where TSchema :
         }
 
         insertQuery.AddValues(values);
-        return insertQuery.ExecuteTransaction(this);
+        var code = insertQuery.ExecuteTransaction(this);
+        if (code != DatabaseCode.Success)
+        {
+            throw new InvalidOperationException($"Insert failed with code {code}.");
+        }
+        
+        AddModelToCache(model);
+        return code;
+    }
+    
+    // TODO: Remove public modifier
+    public void AddModelToCache<T>(T model) where T : Model
+    {
+        if (!_caches.TryGetValue(typeof(T), out var cache))
+        {
+            cache = new ModelCache<T>();
+            _caches[typeof(T)] = cache;
+        }
+        cache.Add(model);
     }
 }
 

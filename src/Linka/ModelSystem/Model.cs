@@ -6,8 +6,14 @@ namespace Webamoki.Linka.ModelSystem;
 
 public abstract class Model
 {
+    internal bool _toDelete = false;
     private static readonly Dictionary<Type, string> TableNames = [];
-
+    
+    public void Delete()
+    {
+        _toDelete = true;
+    }
+    
     public static string TableName<T>() where T : Model => TableName(typeof(T));
     private static string TableName(Type type)
     {

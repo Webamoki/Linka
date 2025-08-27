@@ -9,7 +9,7 @@ public class IncludeQuery<T>
     private readonly IDbService _dbService;
     private readonly HashSet<string> _included = [];
 
-    public IncludeQuery(IDbService dbService, Expression<Func<T, object>> includeExpression)
+    internal IncludeQuery(IDbService dbService, Expression<Func<T, object>> includeExpression)
     {
         _dbService = dbService;
         Include(includeExpression);

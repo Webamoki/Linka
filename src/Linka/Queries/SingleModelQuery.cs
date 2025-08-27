@@ -124,6 +124,7 @@ internal class SingleModelQuery<T> where T : Model, new()
             
         }
         reader.Close();
+        _dbService.AddModelToCache(model);
         return model;
     }
 }

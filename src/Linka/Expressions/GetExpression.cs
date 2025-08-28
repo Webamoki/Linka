@@ -7,13 +7,13 @@ using Webamoki.Linka.Queries;
 
 namespace Webamoki.Linka.Expressions;
 
-internal class GetExpression<T> where T : Model, new()
+public class GetExpression<T> where T : Model, new()
 {
-    private readonly IDbService _dbService;
-    private readonly SelectQuery _query;
+    internal readonly IDbService _dbService;
+    internal readonly SelectQuery _query;
     private readonly List<NavigationInfo> _navigations = [];
     private readonly Dictionary<string,NavigationListInfo> _navigationLists = [];
-    public GetExpression(IDbService db,Expression<Func<T, bool>> expression)
+    internal GetExpression(IDbService db,Expression<Func<T, bool>> expression)
     {
         if (!db.Schema.HasModel<T>()) throw new Exception($"Model {typeof(T).Name} not loaded for schema {db.Schema.Name}.");
         var condition = ExpressionBuilder.Condition(expression, out var values, out var error);
@@ -25,7 +25,7 @@ internal class GetExpression<T> where T : Model, new()
         _dbService = db;
     }
 
-    public GetExpression(IDbService db, Expression<Func<T, bool>> expression, HashSet<string> navigations) : this(db, expression)
+    internal GetExpression(IDbService db, Expression<Func<T, bool>> expression, HashSet<string> navigations) : this(db, expression)
     {
         var info = ModelRegistry.Get<T>();
         var group = false;
@@ -60,7 +60,7 @@ internal class GetExpression<T> where T : Model, new()
             _query.GroupBy<T>(field);
         }
     }
-    public T Get()
+    internal T Get()
     {
         var model = GetOrNull();
         if (model == null)
@@ -68,7 +68,7 @@ internal class GetExpression<T> where T : Model, new()
         return model;
     }
 
-    public T? GetOrNull()
+    internal T? GetOrNull()
     {
         _query.Limit = 1;
         var reader = _query.Execute(_dbService);
@@ -78,20 +78,9 @@ internal class GetExpression<T> where T : Model, new()
         return model;
     }
 
-    public List<T> GetMany()
-    {
-        var reader = _query.Execute(_dbService);
-        List<T> models = [];
-        while (reader.Read())
-        {
-            models.Add(ReadModel(reader));
-        }
-        reader.Close();
-
-        return models;
-    }
+    public GetManyExpression<T> GetMany() => new(this);
     
-    private T ReadModel(NpgsqlDataReader reader)
+    internal T ReadModel(NpgsqlDataReader reader)
     {
         var model = new T();
         model.Load<T>(reader);

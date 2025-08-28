@@ -62,7 +62,7 @@ public class FetchTest
     public void GetMany_UserModel_ReturnsExpected()
     {
         using var db = new DbService<UserSchema>();
-        var models = db.GetMany<UserModel>(u=> u.Rank == UserModel.RankEnum.Admin);
+        var models = db.GetMany<UserModel>(u=> u.Rank == UserModel.RankEnum.Admin).Load();
         Ensure.Count(models, 2);
         Ensure.Equal("Alice", models[0].Name.Value());
         Ensure.Equal("Bob", models[1].Name.Value());

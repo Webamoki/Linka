@@ -3,28 +3,29 @@ using System.Linq.Expressions;
 using System.Text.Json;
 using Npgsql;
 using Webamoki.Linka.ModelSystem;
+using Webamoki.Linka.Queries;
 
-namespace Webamoki.Linka.Queries;
+namespace Webamoki.Linka.Expressions;
 
-internal class SingleModelQuery<T> where T : Model, new()
+internal class GetExpression<T> where T : Model, new()
 {
     private readonly IDbService _dbService;
     private readonly SelectQuery _query;
     private readonly List<NavigationInfo> _navigations = [];
     private readonly Dictionary<string,NavigationListInfo> _navigationLists = [];
-    public SingleModelQuery(IDbService db,Expression<Func<T, bool>> expression)
+    public GetExpression(IDbService db,Expression<Func<T, bool>> expression)
     {
         if (!db.Schema.HasModel<T>()) throw new Exception($"Model {typeof(T).Name} not loaded for schema {db.Schema.Name}.");
-        var condition = ModelQueryBuilder.Condition(expression, out var values, out var error);
+        var condition = ExpressionBuilder.Condition(expression, out var values, out var error);
         if (error != null)
             throw new Exception(error);
         
-        _query = ModelQueryBuilder.GetQuery<T>();
+        _query = ExpressionBuilder.GetQuery<T>();
         _query.SetCondition(condition, values);
         _dbService = db;
     }
 
-    public SingleModelQuery(IDbService db, Expression<Func<T, bool>> expression, HashSet<string> navigations) : this(db, expression)
+    public GetExpression(IDbService db, Expression<Func<T, bool>> expression, HashSet<string> navigations) : this(db, expression)
     {
         var info = ModelRegistry.Get<T>();
         var group = false;
@@ -59,15 +60,15 @@ internal class SingleModelQuery<T> where T : Model, new()
             _query.GroupBy<T>(field);
         }
     }
-    public T First()
+    public T Get()
     {
-        var model = FirstOrNull();
+        var model = GetOrNull();
         if (model == null)
             throw new Exception($"Model {typeof(T).Name} not found.");
         return model;
     }
 
-    public T? FirstOrNull()
+    public T? GetOrNull()
     {
         _query.Limit = 1;
         var reader = _query.Execute(_dbService);

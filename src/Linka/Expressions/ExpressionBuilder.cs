@@ -1,14 +1,15 @@
 ﻿using System.Linq.Expressions;
 using System.Reflection;
 using Webamoki.Linka.ModelSystem;
+using Webamoki.Linka.Queries;
 
-namespace Webamoki.Linka.Queries;
+namespace Webamoki.Linka.Expressions;
 
 /// <summary>
 /// This class is used to build SQL queries for given Model Classes.
 /// Contains methods to create Select queries and to parse conditions.
 /// </summary>
-internal static class ModelQueryBuilder
+internal static class ExpressionBuilder
 {
     public static SelectQuery GetQuery<T>() where T : Model
     {

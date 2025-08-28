@@ -2,6 +2,7 @@ using System.Data;
 using System.Linq.Expressions;
 using System.Text;
 using Npgsql;
+using Webamoki.Linka.Expressions;
 using Webamoki.Linka.Fields;
 using Webamoki.Linka.ModelSystem;
 using Webamoki.Linka.Queries;
@@ -160,13 +161,16 @@ public sealed class DbService<TSchema>(bool debug = false) : IDbService, IDispos
 
     public void Dispose() { _connection.Dispose(); }
 
-    public T First<T>(Expression<Func<T, bool>> expression) where T : Model, new() =>
-        new SingleModelQuery<T>(this, expression).First();
+    public T Get<T>(Expression<Func<T, bool>> expression) where T : Model, new() =>
+        new GetExpression<T>(this, expression).Get();
 
-    public T? FirstOrNull<T>(Expression<Func<T, bool>> expression) where T : Model, new() =>
-        new SingleModelQuery<T>(this, expression).FirstOrNull();
+    public T? GetOrNull<T>(Expression<Func<T, bool>> expression) where T : Model, new() =>
+        new GetExpression<T>(this, expression).GetOrNull();
     
-    public IncludeQuery<T> Include<T>(Expression<Func<T, object>> expression) where T : Model, new() =>
+    public T? GetMany<T>(Expression<Func<T, bool>> expression) where T : Model, new() =>
+        new GetExpression<T>(this, expression).GetOrNull();
+    
+    public IncludeExpression<T> Include<T>(Expression<Func<T, object>> expression) where T : Model, new() =>
         new(this, expression);
     
     public DatabaseCode Insert<T>(T model) where T : Model
@@ -249,6 +253,7 @@ public sealed class DbService<TSchema>(bool debug = false) : IDbService, IDispos
         }
         cache.Add(model);
     }
+
 }
 
 public enum DatabaseCode

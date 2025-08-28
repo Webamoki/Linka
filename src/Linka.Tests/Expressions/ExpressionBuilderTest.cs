@@ -1,15 +1,15 @@
 ﻿using System.Linq.Expressions;
 using NUnit.Framework;
 using Tests.FixtureKit;
-using Webamoki.Linka.Queries;
+using Webamoki.Linka.Expressions;
 using Webamoki.Linka.Testing;
-using Webamoki.Utils.Testing;
 using Webamoki.Utils;
+using Webamoki.Utils.Testing;
 
-namespace Tests.Queries;
+namespace Tests.Expressions;
 
 [CompileSchema<UserSchema>]
-public class ModelQueryBuilderTest
+public class ExpressionBuilderTest
 {
 
     private static string QuoteQuery(string query) =>
@@ -18,7 +18,7 @@ public class ModelQueryBuilderTest
     [Test]
     public void GetQuery_RendersExpected()
     {
-        var query = ModelQueryBuilder.GetQuery<UserModel>();
+        var query = ExpressionBuilder.GetQuery<UserModel>();
         const string text = "SELECT `User`.`ID` as `User.ID` , `User`.`Name` as `User.Name` , `User`.`Email` as `User.Email` , `User`.`Phone` as `User.Phone` , `User`.`Rank` as `User.Rank` , `User`.`Session` as `User.Session` , `User`.`Password` as `User.Password` , `User`.`CartToken` as `User.CartToken` , `User`.`Created` as `User.Created` , `User`.`Verified` as `User.Verified` , `User`.`Login` as `User.Login` , `User`.`Credit` as `User.Credit` FROM `User`";
         
         Ensure.Equal(QuoteQuery(text),
@@ -46,7 +46,7 @@ public class ModelQueryBuilderTest
         };
         foreach (var (expression, expected, expectedValue) in valuesToCheck)
         {
-            var query = ModelQueryBuilder.Condition(
+            var query = ExpressionBuilder.Condition(
                 expression,
                 out var values,
                 out var error
@@ -90,7 +90,7 @@ public class ModelQueryBuilderTest
         };
         foreach (var (expression, expected, expectedValue) in valuesToCheck)
         {
-            var query = ModelQueryBuilder.Condition(
+            var query = ExpressionBuilder.Condition(
                 expression,
                 out var values,
                 out var error
@@ -120,7 +120,7 @@ public class ModelQueryBuilderTest
         };
         foreach (var (expression, expectedError) in valuesToCheck)
         {
-            var query = ModelQueryBuilder.Condition(
+            var query = ExpressionBuilder.Condition(
                 expression,
                 out var values,
                 out var error
@@ -153,7 +153,7 @@ public class ModelQueryBuilderTest
         };
         foreach (var (expression, expected, expectedValues) in valuesToCheck)
         {
-            var query = ModelQueryBuilder.Condition(
+            var query = ExpressionBuilder.Condition(
                 expression,
                 out var values,
                 out var error

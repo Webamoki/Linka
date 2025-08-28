@@ -1,15 +1,15 @@
 ﻿using System.Linq.Expressions;
 using Webamoki.Linka.ModelSystem;
 
-namespace Webamoki.Linka.Queries;
+namespace Webamoki.Linka.Expressions;
 
-public class IncludeQuery<T>
+public class IncludeExpression<T>
     where T : Model, new()
 {
     private readonly IDbService _dbService;
     private readonly HashSet<string> _included = [];
 
-    internal IncludeQuery(IDbService dbService, Expression<Func<T, object>> includeExpression)
+    internal IncludeExpression(IDbService dbService, Expression<Func<T, object>> includeExpression)
     {
         _dbService = dbService;
         Include(includeExpression);
@@ -25,9 +25,9 @@ public class IncludeQuery<T>
         else throw new Exception($"Invalid include expression: {includeExpression}");
     }
 
-    public T First(Expression<Func<T, bool>> expression) =>
-        new SingleModelQuery<T>(_dbService, expression, _included).First();
+    public T Get(Expression<Func<T, bool>> expression) =>
+        new GetExpression<T>(_dbService, expression, _included).Get();
 
-    public T? FirstOrNull(Expression<Func<T, bool>> expression) =>
-        new SingleModelQuery<T>(_dbService, expression, _included).FirstOrNull();
+    public T? GetOrNull(Expression<Func<T, bool>> expression) =>
+        new GetExpression<T>(_dbService, expression, _included).GetOrNull();
 }

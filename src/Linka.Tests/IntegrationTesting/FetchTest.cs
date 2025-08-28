@@ -41,7 +41,7 @@ public class FetchTest
         {
             Ensure.Equal("John", model.Name.Value());
         }
-        model = db.GetOrNull<UserModel>(u=> u.ID == "BBBBBBBBBB");
+        model = db.GetOrNull<UserModel>(u=> u.ID == "ZZZZZZZZZZ");
         Ensure.Null(model);
     }
 
@@ -58,6 +58,15 @@ public class FetchTest
         Ensure.Equal("johndoe@example.com", user.Email.Value());
     }
     
+    [Test]
+    public void GetMany_UserModel_ReturnsExpected()
+    {
+        using var db = new DbService<UserSchema>();
+        var models = db.GetMany<UserModel>(u=> u.Rank == UserModel.RankEnum.Admin);
+        Ensure.Count(models, 2);
+        Ensure.Equal("Alice", models[0].Name.Value());
+        Ensure.Equal("Bob", models[1].Name.Value());
+    }
     //
     // [Test]
     // public void Delete_UserModel_ReturnsExpected()

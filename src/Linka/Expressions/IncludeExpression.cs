@@ -30,4 +30,7 @@ public class IncludeExpression<T>
 
     public T? GetOrNull(Expression<Func<T, bool>> expression) =>
         new GetExpression<T>(_dbService, expression, _included).GetOrNull();
+    
+    public List<T> GetMany(Expression<Func<T, bool>> expression) =>
+        new GetExpression<T>(_dbService, expression, _included).GetMany();
 }

@@ -72,13 +72,27 @@ internal class GetExpression<T> where T : Model, new()
     {
         _query.Limit = 1;
         var reader = _query.Execute(_dbService);
-        return ReadModel(reader);
+        if (!reader.Read()) return null;
+        var model =  ReadModel(reader);
+        reader.Close();
+        return model;
+    }
 
+    public List<T> GetMany()
+    {
+        var reader = _query.Execute(_dbService);
+        List<T> models = [];
+        while (reader.Read())
+        {
+            models.Add(ReadModel(reader));
+        }
+        reader.Close();
+
+        return models;
     }
     
-    private T? ReadModel(NpgsqlDataReader reader)
+    private T ReadModel(NpgsqlDataReader reader)
     {
-        if (!reader.Read()) return null;
         var model = new T();
         model.Load<T>(reader);
         foreach (var navInfo in _navigations)
@@ -107,7 +121,6 @@ internal class GetExpression<T> where T : Model, new()
             targetInfo.SetListNavigation(navListInfo.Setter, model, models);
             
         }
-        reader.Close();
         _dbService.AddModelToCache(model);
         return model;
     }

@@ -167,8 +167,8 @@ public sealed class DbService<TSchema>(bool debug = false) : IDbService, IDispos
     public T? GetOrNull<T>(Expression<Func<T, bool>> expression) where T : Model, new() =>
         new GetExpression<T>(this, expression).GetOrNull();
     
-    public T? GetMany<T>(Expression<Func<T, bool>> expression) where T : Model, new() =>
-        new GetExpression<T>(this, expression).GetOrNull();
+    public List<T> GetMany<T>(Expression<Func<T, bool>> expression) where T : Model, new() =>
+        new GetExpression<T>(this, expression).GetMany();
     
     public IncludeExpression<T> Include<T>(Expression<Func<T, object>> expression) where T : Model, new() =>
         new(this, expression);

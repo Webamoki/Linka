@@ -9,8 +9,8 @@ namespace Webamoki.Linka.Expressions;
 
 public class GetExpression<T> where T : Model, new()
 {
-    internal readonly IDbService _dbService;
-    internal readonly SelectQuery _query;
+    internal readonly IDbService DbService;
+    internal readonly SelectQuery Query;
     private readonly List<NavigationInfo> _navigations = [];
     private readonly Dictionary<string,NavigationListInfo> _navigationLists = [];
     internal GetExpression(IDbService db,Expression<Func<T, bool>> expression)
@@ -20,9 +20,9 @@ public class GetExpression<T> where T : Model, new()
         if (error != null)
             throw new Exception(error);
         
-        _query = ExpressionBuilder.GetQuery<T>();
-        _query.SetCondition(condition, values);
-        _dbService = db;
+        Query = ExpressionBuilder.GetQuery<T>();
+        Query.SetCondition(condition, values);
+        DbService = db;
     }
 
     internal GetExpression(IDbService db, Expression<Func<T, bool>> expression, HashSet<string> navigations) : this(db, expression)
@@ -34,10 +34,10 @@ public class GetExpression<T> where T : Model, new()
             if (info.Navigations.TryGetValue(navigation, out var navInfo))
             {
                 var targetInfo = navInfo.TargetModelInfo;
-                _query.LeftJoin<T>(targetInfo.ModelType, navInfo.Field, navInfo.TargetField);
+                Query.LeftJoin<T>(targetInfo.ModelType, navInfo.Field, navInfo.TargetField);
                 foreach (var field in targetInfo.Fields.Values)
                 {
-                    _query.Select(targetInfo.ModelType, field);
+                    Query.Select(targetInfo.ModelType, field);
                 }
                 _navigations.Add(navInfo);
                 continue;
@@ -46,8 +46,8 @@ public class GetExpression<T> where T : Model, new()
             {
                 group = true;
                 var targetInfo = navList.TargetModelInfo;
-                _query.LeftJoin<T>(targetInfo.ModelType, navList.Field, navList.TargetField);
-                 _query.JsonSelect<T>(targetInfo.ModelType, navigation);
+                Query.LeftJoin<T>(targetInfo.ModelType, navList.Field, navList.TargetField);
+                 Query.JsonSelect<T>(targetInfo.ModelType, navigation);
                 _navigationLists.Add(navigation,navList);
                 continue;
             }
@@ -57,7 +57,7 @@ public class GetExpression<T> where T : Model, new()
         if (!group) return;
         foreach(var (field,_) in info.PrimaryFields)
         {
-            _query.GroupBy<T>(field);
+            Query.GroupBy<T>(field);
         }
     }
     internal T Get()
@@ -70,8 +70,8 @@ public class GetExpression<T> where T : Model, new()
 
     internal T? GetOrNull()
     {
-        _query.Limit = 1;
-        var reader = _query.Execute(_dbService);
+        Query.Limit = 1;
+        var reader = Query.Execute(DbService);
         if (!reader.Read())
         {
             reader.Close();   
@@ -114,7 +114,7 @@ public class GetExpression<T> where T : Model, new()
             targetInfo.SetListNavigation(navListInfo.Setter, model, models);
             
         }
-        _dbService.AddModelToCache(model);
+        DbService.AddModelToCache(model);
         return model;
     }
 }

@@ -28,6 +28,6 @@ internal class DeleteExpression<T> where T : Model, new()
         {
             throw new InvalidOperationException($"Delete failed with code {code}.");
         }
-        
+        d
     }
 }

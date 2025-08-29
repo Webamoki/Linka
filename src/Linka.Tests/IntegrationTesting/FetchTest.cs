@@ -66,16 +66,20 @@ public class FetchTest
         Ensure.Count(models, 2);
         Ensure.Equal("Alice", models[0].Name.Value());
         Ensure.Equal("Bob", models[1].Name.Value());
+        Ensure.Equal(3, db.GetMany<UserModel>(u=> u.Rank == UserModel.RankEnum.User).Count());
     }
-    //
-    // [Test]
-    // public void Delete_UserModel_ReturnsExpected()
-    // {
-    //     using var db = new DbService<UserSchema>();
-    //     var model = db.Get<UserModel>(u=> u.ID == "AAAAAAAAAA");
-    //     var code = db.Delete<
-    //     Ensure.Equal(DatabaseCode.Success, code);
-    //     model = db.GetOrNull<UserModel>(u=> u.ID == "AAAAAAAAAA");
-    //     Ensure.Null(model);
-    // }
+
+    [Test]
+    public void Delete_UserModel_ReturnsExpected()
+    {
+        using var db = new DbService<UserSchema>();
+        var model = db.Get<UserModel>(u=> u.ID == "AAAAAAAAAA");
+        Ensure.Equal("John", model.Name.Value());
+        db.Delete<UserModel>(u=> u.ID == "AAAAAAAAAA");
+        model = db.GetOrNull<UserModel>(u=> u.ID == "AAAAAAAAAA");
+        Ensure.Null(model);
+        var ip = db.GetOrNull<IpAddressModel>(i=> i.IP == "127.0.0.1");
+        Ensure.Null(ip);
+    }
+
 }

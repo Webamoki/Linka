@@ -72,7 +72,11 @@ public class GetExpression<T> where T : Model, new()
     {
         _query.Limit = 1;
         var reader = _query.Execute(_dbService);
-        if (!reader.Read()) return null;
+        if (!reader.Read())
+        {
+            reader.Close();   
+            return null;
+        }
         var model =  ReadModel(reader);
         reader.Close();
         return model;

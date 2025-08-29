@@ -20,6 +20,7 @@ public class GetManyExpression<T> where T : Model, new()
     
     public List<T> Load()
     {
+        _getExpression._query.IsCount = false;
         var reader =  _getExpression._query.Execute( _getExpression._dbService);
         List<T> models = [];
         while (reader.Read())

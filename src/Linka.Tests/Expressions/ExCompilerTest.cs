@@ -9,7 +9,7 @@ using Webamoki.Utils.Testing;
 namespace Tests.Expressions;
 
 [CompileSchema<UserSchema>]
-public class ExpressionBuilderTest
+public class ExCompilerTest
 {
 
     private static string QuoteQuery(string query) =>
@@ -18,7 +18,7 @@ public class ExpressionBuilderTest
     [Test]
     public void GetQuery_RendersExpected()
     {
-        var query = ExpressionBuilder.GetQuery<UserModel>();
+        var query = ExCompiler.GetQuery<UserModel>();
         const string text = "SELECT `User`.`ID` as `User.ID` , `User`.`Name` as `User.Name` , `User`.`Email` as `User.Email` , `User`.`Phone` as `User.Phone` , `User`.`Rank` as `User.Rank` , `User`.`Session` as `User.Session` , `User`.`Password` as `User.Password` , `User`.`CartToken` as `User.CartToken` , `User`.`Created` as `User.Created` , `User`.`Verified` as `User.Verified` , `User`.`Login` as `User.Login` , `User`.`Credit` as `User.Credit` FROM `User`";
         
         Ensure.Equal(QuoteQuery(text),
@@ -46,7 +46,7 @@ public class ExpressionBuilderTest
         };
         foreach (var (expression, expected, expectedValue) in valuesToCheck)
         {
-            var query = ExpressionBuilder.Condition(
+            var query = ExCompiler.Condition(
                 expression,
                 out var values,
                 out var error
@@ -90,7 +90,7 @@ public class ExpressionBuilderTest
         };
         foreach (var (expression, expected, expectedValue) in valuesToCheck)
         {
-            var query = ExpressionBuilder.Condition(
+            var query = ExCompiler.Condition(
                 expression,
                 out var values,
                 out var error
@@ -120,7 +120,7 @@ public class ExpressionBuilderTest
         };
         foreach (var (expression, expectedError) in valuesToCheck)
         {
-            var query = ExpressionBuilder.Condition(
+            var query = ExCompiler.Condition(
                 expression,
                 out var values,
                 out var error
@@ -153,7 +153,7 @@ public class ExpressionBuilderTest
         };
         foreach (var (expression, expected, expectedValues) in valuesToCheck)
         {
-            var query = ExpressionBuilder.Condition(
+            var query = ExCompiler.Condition(
                 expression,
                 out var values,
                 out var error

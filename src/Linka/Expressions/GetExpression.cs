@@ -16,11 +16,11 @@ public class GetExpression<T> where T : Model, new()
     internal GetExpression(IDbService db,Expression<Func<T, bool>> expression)
     {
         if (!db.Schema.HasModel<T>()) throw new Exception($"Model {typeof(T).Name} not loaded for schema {db.Schema.Name}.");
-        var condition = ExpressionBuilder.Condition(expression, out var values, out var error);
+        var condition = ExCompiler.Condition(expression, out var values, out var error);
         if (error != null)
             throw new Exception(error);
         
-        Query = ExpressionBuilder.GetQuery<T>();
+        Query = ExCompiler.GetQuery<T>();
         Query.SetCondition(condition, values);
         DbService = db;
     }

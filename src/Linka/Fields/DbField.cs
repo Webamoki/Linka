@@ -1,4 +1,7 @@
-﻿namespace Webamoki.Linka.Fields;
+﻿using Webamoki.Linka.Expressions.Ex;
+using Webamoki.Linka.ModelSystem;
+
+namespace Webamoki.Linka.Fields;
 
 public abstract class DbField(
     Validator validator,
@@ -72,6 +75,8 @@ public abstract class DbField(
     public abstract bool IsChanged();
     public abstract void ResetChange();
     public abstract bool IsValid(out string? message);
+    
+    internal abstract Ex<T> ParseEx<T>(string op, object value) where T : Model;
 }
 
 public abstract class RefDbField<T>(
@@ -140,6 +145,28 @@ public abstract class RefDbField<T>(
     }
 
     public static bool operator !=(RefDbField<T> left, T? right) => !(left == right);
+    
+    internal override Ex<TU> ParseEx<TU>(string op, object value)
+    {
+        if (value is not T t)
+            throw new InvalidCastException($"Value is not of type {typeof(T).Name}");
+        
+        if (Validator.IsInjectable)
+        {
+            return op switch
+            {
+                "=" => new EqEx<TU>(Name, new ObjectValueEx<TU>(t)),
+                "!=" => new NeqEx<TU>(Name, new ObjectValueEx<TU>(t)),
+                _ => throw new NotSupportedException($"Operator {op} is not supported for field {Name}")
+            };
+        }
+        return op switch
+        {
+            "=" => new EqEx<U>(Name, t),
+            "!=" => new NeqEx<U>(Name, t),
+            _ => throw new NotSupportedException($"Operator {op} is not supported for field {Name}")
+        };
+    }
 }
 
 /// <summary>

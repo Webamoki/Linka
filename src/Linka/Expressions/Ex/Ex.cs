@@ -1,13 +1,22 @@
-﻿namespace Webamoki.Linka.Expressions.Ex;
+﻿using Webamoki.Linka.ModelSystem;
 
-internal interface IEx;
+namespace Webamoki.Linka.Expressions.Ex;
 
-internal record AssignEx(string name, string op, IValueEx value) : IEx;
+internal interface IEx<T> where T : Model;
 
-internal record Ex(IEx left, string op, IEx right) : IEx;
+internal interface IConditionEx<T>: IEx<T> where T : Model;
 
-internal interface IValueEx;
-internal record NullValueEx : IValueEx;
+internal record EqualEx<T>(string name, bool isEqual) : IConditionEx<T> where T : Model;
+internal record NullEx<T>(string name, bool isNull) : IConditionEx<T> where T : Model;
+internal record EnumEx<T>(string name, bool isEqual, string value) : IConditionEx<T> where T : Model;
+internal record IntEx<T>(string name, string op, int value) : IConditionEx<T> where T : Model;
+internal record DateTimeEx<T>(string name, string op, string value) : IConditionEx<T> where T : Model;
+internal record Ex<T>(IEx<T> left, string op, IEx<T> right) :  IEx<T> where T : Model;
 
-internal record ObjectValueEx(object Value) : IValueEx;
+internal interface IValueEx<T> where T : Model;
 
+internal record ObjectValueEx<T>(object Value) : IValueEx<T> where T : Model;
+
+internal record EmbeddedValue<T>(object Value) : IValueEx<T> where T : Model;
+
+internal record CompareValu

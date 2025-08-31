@@ -133,7 +133,7 @@ public abstract class RefDbField<T>(
     }
 
     public bool IsEmpty() => _value == null;
-    public virtual T? Value() => _value;
+    public T? Value() => _value;
 
     public override object? ObjectValue() => _value;
 
@@ -168,7 +168,7 @@ public abstract class StructDbField<T>(
     private T? _value;
     private T? _oldValue;
 
-    public virtual void Value(T? value)
+    public void Value(T? value)
     {
         if (!IsSet)
         {

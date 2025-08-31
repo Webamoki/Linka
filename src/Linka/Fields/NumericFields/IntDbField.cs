@@ -83,4 +83,19 @@ internal record IntEx<T>(string Name, string Op, int Value) : ConditionEx<T>(Nam
         values = [];
         return $"{GetName()} {Op} {Value}";
     }
+
+    public override bool Verify(T model)
+    {
+        var value = (int)GetValue(model);
+        return Op switch
+        {
+            "=" => value == Value,
+            "!=" => value != Value,
+            ">" => value > Value,
+            "<" => value < Value,
+            ">=" => value >= Value,
+            "<=" => value <= Value,
+            _ => throw new NotSupportedException($"Operator {Op} is not supported for int fields.")
+        };
+    }
 }

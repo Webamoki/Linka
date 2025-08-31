@@ -136,8 +136,16 @@ public class DateTimeDbField : RefDbField<string>
     public static bool operator >(DateTimeDbField left, string right) =>
         DateTimeValidator.GreaterThan(left.Value() ?? throw new InvalidOperationException("Value is null"), right);
 
-    internal override ConditionEx<TU> ParseEx<TU>(string op, object value) =>
-        new DateTimeEx<TU>(Name, op, (string)value);
+    internal override ConditionEx<TU> ParseEx<TU>(string op, object value)
+    {
+        return value switch
+        {
+            DateTime dateTime => new DateTimeEx<TU>(Name, op, dateTime),
+            string str => new DateTimeEx<TU>(Name, op, DateTime.Parse(str)),
+            _ => throw new NotSupportedException($"Operator {op} is not supported for datetime fields.")
+        };
+    }
+       
 }
 
 public class DateDbField(DateTime? minDate = null, DateTime? maxDate = null) : DateTimeDbField(minDate, maxDate, true)
@@ -165,11 +173,26 @@ public class DateDbField(DateTime? minDate = null, DateTime? maxDate = null) : D
     }
 }
 
-internal record DateTimeEx<T>(string Name, string op, string value) : ConditionEx<T>(Name) where T : Model
+internal record DateTimeEx<T>(string Name, string Op, DateTime Value) : ConditionEx<T>(Name) where T : Model
 {
     public override string ToQuery(out List<object> values)
     {
         values = [];
-        return $"{GetName()} {op} '{value}'";
+        return $"{GetName()} {Op} '{Value}'";
+    }
+    
+    public override bool Verify(T model)
+    {
+        var value = (DateTime)GetValue(model);
+        return Op switch
+        {
+            "=" => value == Value,
+            "!=" => value != Value,
+            ">" => value > Value,
+            "<" => value < Value,
+            ">=" => value >= Value,
+            "<=" => value <= Value,
+            _ => throw new NotSupportedException($"Operator {Op} is not supported for datetime fields.")
+        };
     }
 }

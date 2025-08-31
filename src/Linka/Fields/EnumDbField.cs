@@ -49,7 +49,7 @@ public class EnumValidator<TEnum> : Validator where TEnum : struct, Enum
     }
 }
 
-interface IEnumDbField
+internal interface IEnumDbField
 {
     string GetSchemaEnumName<TSchema>() where TSchema : Schema, new();
 }
@@ -62,7 +62,7 @@ public class EnumDbField<T>() : StructDbField<T>(EnumValidator<T>.Create(), GetS
         return value.ToString();
     }
 
-    public override object? ObjectValue()
+    public override object ObjectValue()
     {
         var value = Value() ?? throw new InvalidOperationException("Value is null");
         return value;
@@ -111,5 +111,11 @@ internal record EnumEx<T>(string Name, bool IsEqual, string Value) : ConditionEx
         var op = IsEqual ? "=" : "!=";
         values = [];
         return $"{GetName()} {op} '{Value}'";
+    }
+    
+    public override bool Verify(T model)
+    {
+        var value = (string)GetValue(model);
+        return IsEqual ? value == Value : value != Value;
     }
 }

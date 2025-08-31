@@ -63,4 +63,10 @@ internal record BoolEx<T>(string Name, bool IsEqual, bool Value) : ConditionEx<T
         var value = Value ? "true" : "false";
         return $"{GetName()} {op} {value}";
     }
+    
+    public override bool Verify(T model)
+    {
+        var value = (bool)GetValue(model);
+        return IsEqual ? value == Value : value != Value;
+    }
 }

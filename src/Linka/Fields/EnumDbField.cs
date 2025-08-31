@@ -96,15 +96,19 @@ public class EnumDbField<T>() : StructDbField<T>(EnumValidator<T>.Create(), GetS
         return schema.GetEnumName<T>();
     }
 
-    internal override ConditionEx<TU> ParseEx<TU>(string op, object value) =>
-        op switch
+    internal override ConditionEx<TU> ParseEx<TU>(string op, object value)
+    { 
+        var enumValue = value is string strValue ? Enum.Parse<T>(strValue) : (T)value;
+        return op switch
         {
-            "=" => new EnumEx<TU>(Name, true, value.ToString()!),
-            "!=" => new EnumEx<TU>(Name, false, value.ToString()!),
+            "=" => new EnumEx<TU,T>(Name, true, enumValue),
+            "!=" => new EnumEx<TU,T>(Name, false, enumValue),
             _ => throw new NotSupportedException($"Operator {op} is not supported for enum fields.")
         };
+    }
+        
 }
-internal record EnumEx<T>(string Name, bool IsEqual, string Value) : ConditionEx<T>(Name) where T : Model
+internal record EnumEx<T,TEnum>(string Name, bool IsEqual, TEnum Value) : ConditionEx<T>(Name) where T : Model where TEnum : struct, Enum
 {
     public override string ToQuery(out List<object> values)
     {
@@ -115,7 +119,7 @@ internal record EnumEx<T>(string Name, bool IsEqual, string Value) : ConditionEx
     
     public override bool Verify(T model)
     {
-        var value = (string)GetValue(model);
-        return IsEqual ? value == Value : value != Value;
+        var value = (TEnum)GetValue(model);
+        return IsEqual ? value.Equals(Value) : !value.Equals(Value);
     }
 }

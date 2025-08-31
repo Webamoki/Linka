@@ -9,7 +9,7 @@ using Webamoki.Utils.Testing;
 namespace Tests.Expressions;
 
 [CompileSchema<UserSchema>]
-public class ExCompilerTest
+public class ExParserTest
 {
 
     private static string QuoteQuery(string query) =>
@@ -18,8 +18,8 @@ public class ExCompilerTest
     [Test]
     public void GetQuery_RendersExpected()
     {
-        var query = ExCompiler.GetQuery<UserModel>();
-        const string text = "SELECT `User`.`ID` as `User.ID` , `User`.`Name` as `User.Name` , `User`.`Email` as `User.Email` , `User`.`Phone` as `User.Phone` , `User`.`Rank` as `User.Rank` , `User`.`Session` as `User.Session` , `User`.`Password` as `User.Password` , `User`.`CartToken` as `User.CartToken` , `User`.`Created` as `User.Created` , `User`.`Verified` as `User.Verified` , `User`.`Login` as `User.Login` , `User`.`Credit` as `User.Credit` FROM `User`";
+        var query = GetExpression<UserModel>.GetQuery();
+        const string text = "SELECT `User`.`ID` as `User.ID` , `User`.`Name` as `User.Name` , `User`.`Email` as `User.Email` , `User`.`Phone` as `User.Phone` , `User`.`Rank`::text as `User.Rank` , `User`.`Session` as `User.Session` , `User`.`Password` as `User.Password` , `User`.`CartToken` as `User.CartToken` , `User`.`Created` as `User.Created` , `User`.`Verified` as `User.Verified` , `User`.`Login` as `User.Login` , `User`.`Credit` as `User.Credit` FROM `User`";
         
         Ensure.Equal(QuoteQuery(text),
             query.Render(out var values));
@@ -46,11 +46,8 @@ public class ExCompilerTest
         };
         foreach (var (expression, expected, expectedValue) in valuesToCheck)
         {
-            var query = ExCompiler.Condition(
-                expression,
-                out var values,
-                out var error
-            );
+            var ex = ExParser.Parse(expression, out var error)!;
+            var query = ex.ToQuery(out var values);
             Ensure.Equal(QuoteQuery(expected), query);
             if (expectedValue != null)
             {
@@ -90,11 +87,8 @@ public class ExCompilerTest
         };
         foreach (var (expression, expected, expectedValue) in valuesToCheck)
         {
-            var query = ExCompiler.Condition(
-                expression,
-                out var values,
-                out var error
-            );
+            var ex = ExParser.Parse(expression, out var error)!;
+            var query = ex.ToQuery(out var values);
             Ensure.Equal(QuoteQuery(expected), query);
             if (expectedValue != null)
             {
@@ -120,13 +114,8 @@ public class ExCompilerTest
         };
         foreach (var (expression, expectedError) in valuesToCheck)
         {
-            var query = ExCompiler.Condition(
-                expression,
-                out var values,
-                out var error
-            );
-            Ensure.Empty(query);
-            Ensure.Empty(values);
+            var ex = ExParser.Parse(expression, out var error);
+            Ensure.Null(ex);
             Ensure.Equal(expectedError, error);
         }
     }
@@ -138,33 +127,30 @@ public class ExCompilerTest
         var valuesToCheck = new List<(Expression<Func<UserModel, bool>> expression, string sql, List<string>? value)>
         {
             // 2 statements, 1 layer
-            (a => a.ID == "AAAAAAAAAA" || a.ID == "BBBBBBBBBB", "`User`.`ID` = 'AAAAAAAAAA' OR `User`.`ID` = 'BBBBBBBBBB'", null),
-            (a => a.ID == "AAAAAAAAAA" || a.ID == "BBBBBBBBBB", "`User`.`ID` = 'AAAAAAAAAA' OR `User`.`ID` = 'BBBBBBBBBB'", null),
-            (a => a.ID != "AAAAAAAAAA" && a.ID != "BBBBBBBBBB", "`User`.`ID` != 'AAAAAAAAAA' AND `User`.`ID` != 'BBBBBBBBBB'", null),
-            (a => a.Session == null || a.Session != "sfffaaaaa", "`User`.`Session` IS NULL OR `User`.`Session` != 'sfffaaaaa'", null),
-            (a => a.Name == "Fred" || a.Name == "George", "`User`.`Name` = ? OR `User`.`Name` = ?",
+            (a => a.ID == "AAAAAAAAAA" || a.ID == "BBBBBBBBBB", "(`User`.`ID` = 'AAAAAAAAAA' OR `User`.`ID` = 'BBBBBBBBBB')", null),
+            (a => a.ID == "AAAAAAAAAA" || a.ID == "BBBBBBBBBB", "(`User`.`ID` = 'AAAAAAAAAA' OR `User`.`ID` = 'BBBBBBBBBB')", null),
+            (a => a.ID != "AAAAAAAAAA" && a.ID != "BBBBBBBBBB", "(`User`.`ID` != 'AAAAAAAAAA' AND `User`.`ID` != 'BBBBBBBBBB')", null),
+            (a => a.Session == null || a.Session != "sfffaaaaa", "(`User`.`Session` IS NULL OR `User`.`Session` != 'sfffaaaaa')", null),
+            (a => a.Name == "Fred" || a.Name == "George", "(`User`.`Name` = ? OR `User`.`Name` = ?)",
                 ["Fred", "George"]),
             // 3-4 statements, 2 layers
-            (a => a.ID == "AAAAAAAAAA" || a.ID == "BBBBBBBBBB" && a.ID != "CCCCCCCCCC", "`User`.`ID` = 'AAAAAAAAAA' OR (`User`.`ID` = 'BBBBBBBBBB' AND `User`.`ID` != 'CCCCCCCCCC')", null),
-            (a => a.ID != "AAAAAAAAAA" && a.ID != "BBBBBBBBBB" || a.ID == "CCCCCCCCCC", "(`User`.`ID` != 'AAAAAAAAAA' AND `User`.`ID` != 'BBBBBBBBBB') OR `User`.`ID` = 'CCCCCCCCCC'", null),
-            (a => a.ID != "AAAAAAAAAA" && (a.ID != "BBBBBBBBBB" || a.ID == "CCCCCCCCCC"), "`User`.`ID` != 'AAAAAAAAAA' AND (`User`.`ID` != 'BBBBBBBBBB' OR `User`.`ID` = 'CCCCCCCCCC')", null),
-            (a => a.Session == null || (a.Session != "sfffaaaaa" && a.Session == "sfffaaaaa"), "`User`.`Session` IS NULL OR (`User`.`Session` != 'sfffaaaaa' AND `User`.`Session` = 'sfffaaaaa')", null),
-            (a => a.Name == "Fred" || (a.Name == "George" && a.Name == "John"), "`User`.`Name` = ? OR (`User`.`Name` = ? AND `User`.`Name` = ?)", ["Fred", "George", "John"])
+            (a => a.ID == "AAAAAAAAAA" || a.ID == "BBBBBBBBBB" && a.ID != "CCCCCCCCCC", "(`User`.`ID` = 'AAAAAAAAAA' OR (`User`.`ID` = 'BBBBBBBBBB' AND `User`.`ID` != 'CCCCCCCCCC'))", null),
+            (a => a.ID != "AAAAAAAAAA" && a.ID != "BBBBBBBBBB" || a.ID == "CCCCCCCCCC", "((`User`.`ID` != 'AAAAAAAAAA' AND `User`.`ID` != 'BBBBBBBBBB') OR `User`.`ID` = 'CCCCCCCCCC')", null),
+            (a => a.ID != "AAAAAAAAAA" && (a.ID != "BBBBBBBBBB" || a.ID == "CCCCCCCCCC"), "(`User`.`ID` != 'AAAAAAAAAA' AND (`User`.`ID` != 'BBBBBBBBBB' OR `User`.`ID` = 'CCCCCCCCCC'))", null),
+            (a => a.Session == null || (a.Session != "sfffaaaaa" && a.Session == "sfffaaaaa"), "(`User`.`Session` IS NULL OR (`User`.`Session` != 'sfffaaaaa' AND `User`.`Session` = 'sfffaaaaa'))", null),
+            (a => a.Name == "Fred" || (a.Name == "George" && a.Name == "John"), "(`User`.`Name` = ? OR (`User`.`Name` = ? AND `User`.`Name` = ?))", ["Fred", "George", "John"])
         };
         foreach (var (expression, expected, expectedValues) in valuesToCheck)
         {
-            var query = ExCompiler.Condition(
-                expression,
-                out var values,
-                out var error
-            );
+            var ex = ExParser.Parse(expression, out var error)!;
+            var query = ex.ToQuery(out var values);
             Ensure.Equal(QuoteQuery(expected), query);
             if (expectedValues != null)
             {
                 Ensure.Count(values, expectedValues.Count);
                 for (var i = 0; i < expectedValues.Count; i++)
                 {
-                    Ensure.Equal(expectedValues[i], values[i]);
+                    Ensure.Equal( values[i],expectedValues[i]);
                 }
             }
             else

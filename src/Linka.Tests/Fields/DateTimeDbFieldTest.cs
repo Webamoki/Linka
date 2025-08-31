@@ -342,7 +342,7 @@ public class DateTimeDbFieldTest
     {
         var field = new DateTimeDbField();
         field.Value(value);
-        Ensure.Equal(value, field.ObjectValue());
+        Ensure.Equal(field.ObjectValue(), DateTime.Parse(value));
     }
 
     [Test]
@@ -359,6 +359,6 @@ public class DateTimeDbFieldTest
     {
         var field = new DateDbField();
         field.Value(value);
-        Ensure.Equal(value, field.ObjectValue());
+        Ensure.Equal(field.ObjectValue(), DateTime.Parse(value).Date);
     }
 }

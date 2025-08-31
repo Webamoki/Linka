@@ -1,4 +1,7 @@
-﻿namespace Webamoki.Linka.Fields;
+﻿using Webamoki.Linka.Expressions;
+using Webamoki.Linka.ModelSystem;
+
+namespace Webamoki.Linka.Fields;
 
 public sealed class BooleanValueValidator : Validator
 {
@@ -39,5 +42,25 @@ public class BooleanDbField() : StructDbField<bool>(BooleanValueValidator.Create
     {
         var value = Value() ?? throw new InvalidOperationException("Value is null");
         return value;
+    }
+
+    internal override ConditionEx<T> ParseEx<T>(string op, object value) {
+        return op switch
+        {
+            "=" => new BoolEx<T>(Name, true, (bool)value),
+            "!=" => new BoolEx<T>(Name, false, (bool)value),
+            _ => throw new NotSupportedException($"Operator {op} is not supported for boolean fields.")
+        };
+    }
+        
+}
+internal record BoolEx<T>(string Name, bool IsEqual, bool Value) : ConditionEx<T>(Name) where T : Model
+{
+    public override string ToQuery(out List<object> values)
+    {
+        var op = IsEqual ? "=" : "!=";
+        values = [];
+        var value = Value ? "true" : "false";
+        return $"{GetName()} {op} {value}";
     }
 }

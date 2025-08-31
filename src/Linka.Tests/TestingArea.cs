@@ -9,20 +9,6 @@ namespace Tests;
 [Fixtures<IpAddressFixture>]
 public class TestingArea
 {
-    [Test]
-    public void TestMethod()
-    {
-        var test = 1;
-        var asd = 1;
-    }
-    
-    [Test]
-    public void TestMethod2()
-    {
-        var test = 1;
-        var fe = 2;
-    }
-
     public void TestMethod3()
     {
         Linka.AddConnection("localhost", "u62560199300users", "u62560199300users", "Thb9jbCcgpxRBvBMtfQb");

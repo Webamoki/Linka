@@ -1,4 +1,4 @@
-﻿using Webamoki.Linka.Expressions.Ex;
+﻿using Webamoki.Linka.Expressions;
 using Webamoki.Linka.ModelSystem;
 
 namespace Webamoki.Linka.Fields;
@@ -76,7 +76,7 @@ public abstract class DbField(
     public abstract void ResetChange();
     public abstract bool IsValid(out string? message);
     
-    internal abstract IConditionEx<T> ParseEx<T>(string op, object value) where T : Model;
+    internal abstract ConditionEx<T> ParseEx<T>(string op, object value) where T : Model;
 }
 
 public abstract class RefDbField<T>(
@@ -145,12 +145,12 @@ public abstract class RefDbField<T>(
     }
 
     public static bool operator !=(RefDbField<T> left, T? right) => !(left == right);
-    internal override IConditionEx<TU> ParseEx<TU>(string op, object value)
+    internal override ConditionEx<TU> ParseEx<TU>(string op, object value)
     {
         return op switch
         {
-            "=" => new StringEx<TU>(Name, true, value, Validator.IsInjectable),
-            "!=" => new StringEx<TU>(Name,false,value,Validator.IsInjectable),
+            "=" => new StringEx<TU>(Name, true, (string)value, Validator.IsInjectable),
+            "!=" => new StringEx<TU>(Name,false,(string)value,Validator.IsInjectable),
             _ => throw new NotSupportedException($"Operator {op} is not supported for field {Name}")
         };
     }
@@ -224,14 +224,4 @@ public abstract class StructDbField<T>(
     }
 
     public static bool operator !=(StructDbField<T> left, T? right) => !(left == right);
-    
-    internal override IConditionEx<TU> ParseEx<TU>(string op, object value)
-    {        
-        return op switch
-        {
-            "=" => new StringEx<TU>(Name, true, value, Validator.IsInjectable),
-            "!=" => new StringEx<TU>(Name,false,value,Validator.IsInjectable),
-            _ => throw new NotSupportedException($"Operator {op} is not supported for field {Name}")
-        };
-    }
 }

@@ -1,4 +1,5 @@
-﻿using Webamoki.Linka.Expressions.Ex;
+﻿using Webamoki.Linka.Expressions;
+using Webamoki.Linka.ModelSystem;
 using Webamoki.Linka.SchemaSystem;
 
 namespace Webamoki.Linka.Fields;
@@ -95,11 +96,20 @@ public class EnumDbField<T>() : StructDbField<T>(EnumValidator<T>.Create(), GetS
         return schema.GetEnumName<T>();
     }
 
-    internal override IConditionEx<TU> ParseEx<TU>(string op, object value) =>
+    internal override ConditionEx<TU> ParseEx<TU>(string op, object value) =>
         op switch
         {
-            "=" => new EnumEx<TU>(Name, true, (string)value),
-            "!=" => new EnumEx<TU>(Name, false, (string)value),
+            "=" => new EnumEx<TU>(Name, true, value.ToString()!),
+            "!=" => new EnumEx<TU>(Name, false, value.ToString()!),
             _ => throw new NotSupportedException($"Operator {op} is not supported for enum fields.")
         };
+}
+internal record EnumEx<T>(string Name, bool IsEqual, string Value) : ConditionEx<T>(Name) where T : Model
+{
+    public override string ToQuery(out List<object> values)
+    {
+        var op = IsEqual ? "=" : "!=";
+        values = [];
+        return $"{GetName()} {op} '{Value}'";
+    }
 }

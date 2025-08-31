@@ -1,4 +1,5 @@
-﻿using Webamoki.Linka.Expressions.Ex;
+﻿using Webamoki.Linka.Expressions;
+using Webamoki.Linka.ModelSystem;
 
 namespace Webamoki.Linka.Fields.NumericFields;
 
@@ -71,6 +72,15 @@ public class IntDbField(int min, int max) : StructDbField<int>(IntValidator.Crea
     public static bool operator >(IntDbField left, int right) => (left.Value() ?? throw new InvalidOperationException()) > right;
     public static bool operator <(IntDbField left, int right) => (left.Value() ?? throw new InvalidOperationException()) < right;
 
-    internal override IConditionEx<TU> ParseEx<TU>(string op, object value) =>
+    internal override ConditionEx<TU> ParseEx<TU>(string op, object value) =>
         new IntEx<TU>(Name, op, (int)value);
+}
+
+internal record IntEx<T>(string Name, string Op, int Value) : ConditionEx<T>(Name) where T : Model
+{
+    public override string ToQuery(out List<object> values)
+    {
+        values = [];
+        return $"{GetName()} {Op} {Value}";
+    }
 }

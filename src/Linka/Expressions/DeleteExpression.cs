@@ -11,10 +11,10 @@ internal class DeleteExpression<T> where T : Model, new()
     public DeleteExpression(IDbService db,Expression<Func<T, bool>> expression)
     {
         if (!db.Schema.HasModel<T>()) throw new Exception($"Model {typeof(T).Name} not loaded for schema {db.Schema.Name}.");
-        var condition = ExCompiler.Condition(expression, out var values, out var error);
+        var ex = ExParser.Parse(expression, out var error);
         if (error != null)
             throw new Exception(error);
-
+        var condition = ex!.ToQuery(out var values);
         _query = new DeleteQuery(Model.TableName<T>());
         _query.SetCondition(condition, values);
         _dbService = db;

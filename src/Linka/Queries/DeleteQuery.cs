@@ -1,11 +1,8 @@
-﻿using Webamoki.Linka.Fields;
-using Webamoki.Linka.ModelSystem;
-
+﻿
 namespace Webamoki.Linka.Queries;
 
 internal class DeleteQuery : ConditionQuery
 {
-    private readonly Query _select = new();
     private string _table;
     
     public DeleteQuery(string table, string? alias = null)

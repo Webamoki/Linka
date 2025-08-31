@@ -76,16 +76,8 @@ internal static class ExCompiler
                 _ => throw new NotSupportedException($"Unsupported operator for null value: {op}")
             };
         }
-        
-        
-        if (field.Validator.IsInjectable)
-        {
-            values = [ToStringValue(value)];
-            return $"{fieldName} {op} ?";
-        }
 
-        if (value is string or Enum) return $"{fieldName} {op} '{ToStringValue(value)}'";
-        return $"{fieldName} {op} {ToStringValue(value)}";
+        return field.ParseEx<T>(op, value);
     }
     
     

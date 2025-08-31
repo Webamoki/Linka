@@ -1,4 +1,6 @@
-﻿namespace Webamoki.Linka.Fields.NumericFields;
+﻿using Webamoki.Linka.Expressions.Ex;
+
+namespace Webamoki.Linka.Fields.NumericFields;
 
 public class IntValidator : Validator
 {
@@ -68,4 +70,7 @@ public class IntDbField(int min, int max) : StructDbField<int>(IntValidator.Crea
     public static bool operator >=(IntDbField left, int right) => (left.Value() ?? throw new InvalidOperationException()) >= right;
     public static bool operator >(IntDbField left, int right) => (left.Value() ?? throw new InvalidOperationException()) > right;
     public static bool operator <(IntDbField left, int right) => (left.Value() ?? throw new InvalidOperationException()) < right;
+
+    internal override IConditionEx<TU> ParseEx<TU>(string op, object value) =>
+        new IntEx<TU>(Name, op, (int)value);
 }

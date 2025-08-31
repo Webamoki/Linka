@@ -1,6 +1,4 @@
-﻿using Npgsql;
-
-namespace Webamoki.Linka.SchemaSystem;
+﻿namespace Webamoki.Linka.SchemaSystem;
 
 
 

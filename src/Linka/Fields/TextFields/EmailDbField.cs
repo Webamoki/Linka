@@ -38,8 +38,9 @@ public partial class EmailValidator : TextValidator
         }
         catch
         {
-            
+            // ignored
         }
+
         message = "Value is not a valid email address";
         return false;
     }

@@ -1,4 +1,5 @@
 ﻿using System.Globalization;
+using Webamoki.Linka.Expressions.Ex;
 
 namespace Webamoki.Linka.Fields;
 
@@ -133,7 +134,9 @@ public class DateTimeDbField : RefDbField<string>
     
     public static bool operator >(DateTimeDbField left, string right) =>
         DateTimeValidator.GreaterThan(left.Value() ?? throw new InvalidOperationException("Value is null"), right);
-    
+
+    internal override IConditionEx<TU> ParseEx<TU>(string op, object value) =>
+        new DateTimeEx<TU>(Name, op, (string)value);
 }
 
 public class DateDbField(DateTime? minDate = null, DateTime? maxDate = null) : DateTimeDbField(minDate, maxDate, true)

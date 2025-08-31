@@ -1,4 +1,5 @@
-﻿using Webamoki.Linka.SchemaSystem;
+﻿using Webamoki.Linka.Expressions.Ex;
+using Webamoki.Linka.SchemaSystem;
 
 namespace Webamoki.Linka.Fields;
 
@@ -93,4 +94,12 @@ public class EnumDbField<T>() : StructDbField<T>(EnumValidator<T>.Create(), GetS
             throw new Exception($"Enum {typeof(T).Name} is not registered for schema {schema.Name}.");
         return schema.GetEnumName<T>();
     }
+
+    internal override IConditionEx<TU> ParseEx<TU>(string op, object value) =>
+        op switch
+        {
+            "=" => new EnumEx<TU>(Name, true, (string)value),
+            "!=" => new EnumEx<TU>(Name, false, (string)value),
+            _ => throw new NotSupportedException($"Operator {op} is not supported for enum fields.")
+        };
 }

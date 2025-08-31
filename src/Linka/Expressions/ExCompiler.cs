@@ -50,9 +50,15 @@ internal static class ExCompiler
 
         if (expr.Left is BinaryExpression bExpr)
         {
+            var isAnd = op switch
+            {
+                "AND" => true,
+                "OR" => false,
+                _ => throw new NotSupportedException($"Unsupported operator for binary expression: {op}")
+            };
             var left = ParseBinaryExpression<T>(bExpr);
             var right = ParseBinaryExpression<T>((BinaryExpression)expr.Right);
-            return new Ex<T>(left, op,right);
+            return new Ex<T>(left, isAnd,right);
         }
 
         throw new NotSupportedException($"Unsupported expression: {expr.Left}");

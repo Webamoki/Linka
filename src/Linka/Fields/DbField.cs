@@ -145,13 +145,12 @@ public abstract class RefDbField<T>(
     }
 
     public static bool operator !=(RefDbField<T> left, T? right) => !(left == right);
-    
     internal override IConditionEx<TU> ParseEx<TU>(string op, object value)
     {
         return op switch
         {
-            "=" => new EqualEx<TU>(Name, true, value, Validator.IsInjectable),
-            "!=" => new EqualEx<TU>(Name,false,value,Validator.IsInjectable),
+            "=" => new StringEx<TU>(Name, true, value, Validator.IsInjectable),
+            "!=" => new StringEx<TU>(Name,false,value,Validator.IsInjectable),
             _ => throw new NotSupportedException($"Operator {op} is not supported for field {Name}")
         };
     }
@@ -230,8 +229,8 @@ public abstract class StructDbField<T>(
     {        
         return op switch
         {
-            "=" => new EqualEx<TU>(Name, true, value, Validator.IsInjectable),
-            "!=" => new EqualEx<TU>(Name,false,value,Validator.IsInjectable),
+            "=" => new StringEx<TU>(Name, true, value, Validator.IsInjectable),
+            "!=" => new StringEx<TU>(Name,false,value,Validator.IsInjectable),
             _ => throw new NotSupportedException($"Operator {op} is not supported for field {Name}")
         };
     }

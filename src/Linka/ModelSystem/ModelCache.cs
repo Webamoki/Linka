@@ -9,26 +9,20 @@ interface IModelCache
 
 public class ModelCache<T> : IModelCache where T : Model
 {
-    private readonly Dictionary<Dictionary<string, string>, T> _primaryCache = [];
-    private readonly Dictionary<(string,string), T> _uniqueCache = [];
+    private readonly Dictionary<string, T> _primaryCache = [];
+    private readonly Dictionary<string, T> _uniqueCache = [];
     
     public void Add(Model model)
     {
         var info = ModelRegistry.Get<T>();
-        var primaryKeys = new Dictionary<string, string>();
-        foreach (var fieldKey in info.PrimaryFields.Keys)
-        {
-            
-            var fieldValue = info.FieldGetters[fieldKey](model).StringValue();
-            primaryKeys[fieldKey] = fieldValue;
-        }
-        _primaryCache[primaryKeys] = (T)model;
+        var primaryKey = GetPrimaryKey((T)model);
+        _primaryCache[primaryKey] = (T)model;
+        
         foreach (var (fieldKey,field) in info.UniqueFields)
         {
             if (!field.IsSet) continue;
-            var fieldValue = info.FieldGetters[fieldKey](model).StringValue();
-            
-            _uniqueCache[(fieldKey,fieldValue)] = (T)model;
+            var uniqueKey = GetUniqueKey((T)model, fieldKey);
+            _uniqueCache[uniqueKey] = (T)model;
         }
     }
     internal T? GetModel(IEx<T> ex)
@@ -54,18 +48,33 @@ public class ModelCache<T> : IModelCache where T : Model
     private void Delete(T model)
     {
         var info = ModelRegistry.Get<T>();
+        var primaryKey = GetPrimaryKey(model);
+        _primaryCache.Remove(primaryKey);
+        foreach (var (fieldKey,field) in info.UniqueFields)
+        {
+            if (!field.IsSet) continue;
+            var uniqueKey = GetUniqueKey(model, fieldKey);
+            _uniqueCache.Remove(uniqueKey);
+        }
+    }
+    
+    private string GetPrimaryKey(T model)
+    {
+        var info = ModelRegistry.Get<T>();
         var primaryKeys = new Dictionary<string, string>();
         foreach (var fieldKey in info.PrimaryFields.Keys)
         {
             var fieldValue = info.FieldGetters[fieldKey](model).StringValue();
             primaryKeys[fieldKey] = fieldValue;
         }
-        _primaryCache.Remove(primaryKeys);
-        foreach (var (fieldKey,field) in info.UniqueFields)
-        {
-            if (!field.IsSet) continue;
-            var fieldValue = info.FieldGetters[fieldKey](model).StringValue();
-            _uniqueCache.Remove((fieldKey,fieldValue));
-        }
+        // turn primaryKeys dictionary into string using both keys and values
+        return string.Join(",", primaryKeys.Select(kvp => kvp.Key + "=" + kvp.Value));
+    }
+    
+    private string GetUniqueKey(T model, string fieldKey)
+    {
+        var info = ModelRegistry.Get<T>();
+        var fieldValue = info.FieldGetters[fieldKey](model).StringValue();
+        return fieldKey + "=" + fieldValue;
     }
 }

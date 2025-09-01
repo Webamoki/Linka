@@ -171,6 +171,9 @@ public class DateDbField(DateTime? minDate = null, DateTime? maxDate = null) : D
         var value = Value() ?? throw new InvalidOperationException("Value is null");
         return DateTime.Parse(value).Date;
     }
+    
+    internal override ConditionEx<TU> ParseEx<TU>(string op, object value) =>
+        new DateEx<TU>(Name, op, DateTime.Parse(value.ToString()!));
 }
 
 internal record DateTimeEx<T>(string Name, string Op, DateTime Value) : ConditionEx<T>(Name) where T : Model
@@ -178,7 +181,8 @@ internal record DateTimeEx<T>(string Name, string Op, DateTime Value) : Conditio
     public override string ToQuery(out List<object> values)
     {
         values = [];
-        return $"{GetName()} {Op} '{Value}'";
+        var value = Value.ToString("yyyy-MM-dd HH:mm:ss");
+        return $"{GetName()} {Op} '{value}'";
     }
     
     public override bool Verify(T model)
@@ -194,5 +198,16 @@ internal record DateTimeEx<T>(string Name, string Op, DateTime Value) : Conditio
             "<=" => value <= Value,
             _ => throw new NotSupportedException($"Operator {Op} is not supported for datetime fields.")
         };
+    }
+    
+}
+
+internal record DateEx<T>(string Name, string Op, DateTime Value) : DateTimeEx<T>(Name, Op, Value) where T : Model
+{
+    public override string ToQuery(out List<object> values)
+    {
+        values = [];
+        var value = Value.ToString("yyyy-MM-dd");
+        return $"{GetName()} {Op} '{value}'";
     }
 }

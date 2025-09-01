@@ -170,7 +170,7 @@ public sealed class DbService<TSchema>(bool debug = false) : IDbService, IDispos
         new GetExpression<T,TSchema>(this, expression).GetMany();
     
     public void Delete<T>(Expression<Func<T, bool>> expression) where T : Model, new() =>
-        new DeleteExpression<T>(this, expression).Delete();
+        new DeleteExpression<T,TSchema>(this, expression).Delete();
     
     public IncludeExpression<T,TSchema> Include<T>(Expression<Func<T, object>> expression) where T : Model, new() =>
         new(this, expression);

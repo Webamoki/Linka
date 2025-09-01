@@ -12,6 +12,7 @@ public class GetExpression<T,TSchema> where T : Model, new() where TSchema : Sch
 {
     internal readonly DbService<TSchema> DbService;
     internal readonly SelectQuery Query;
+    internal readonly IEx<T> Expression;
     private readonly List<NavigationInfo> _navigations = [];
     private readonly Dictionary<string,NavigationListInfo> _navigationLists = [];
     internal GetExpression(DbService<TSchema> db,Expression<Func<T, bool>> expression)
@@ -20,6 +21,8 @@ public class GetExpression<T,TSchema> where T : Model, new() where TSchema : Sch
         var ex = ExParser.Parse(expression, out var error);
         if (error != null)
             throw new Exception(error);
+        Expression = ex!;
+
         var condition = ex!.ToQuery(out var values);
 
         Query = GetQuery();
@@ -86,9 +89,11 @@ public class GetExpression<T,TSchema> where T : Model, new() where TSchema : Sch
     internal T? GetOrNull()
     {
         Query.Limit = 1;
-        
-        
-        
+        if (_navigationLists.Count == 0 && _navigations.Count == 0)
+        {
+            var cachedModel = GetCachedModel();
+            if (cachedModel != null) return cachedModel;
+        }
         var reader = Query.Execute(DbService);
         if (!reader.Read())
         {
@@ -102,8 +107,8 @@ public class GetExpression<T,TSchema> where T : Model, new() where TSchema : Sch
 
     private T? GetCachedModel()
     {
-        var cache = DbService.GetModelCache<T>();
-        
+        var cache = (ModelCache<T>)DbService.GetModelCache<T>();
+        return cache.GetModel(Expression);
     }
 
     public GetManyExpression<T,TSchema> GetMany() => new(this);

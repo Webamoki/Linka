@@ -6,9 +6,9 @@ internal interface IEx<in T> where T : Model
 {
     public string ToQuery(out List<object> values);
     
-    public bool Verify(Model model);
+    public bool Verify(T model);
 }
-internal record Ex<T>(IEx<T> Left, bool IsAnd, IEx<T> Right) :  IEx<T> where T : Model
+internal record Ex<T>(IEx<T> Left, bool IsAnd, IEx<T> Right) : IEx<T> where T : Model
 {
     public string ToQuery(out List<object> values)
     {

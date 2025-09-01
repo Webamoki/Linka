@@ -4,16 +4,17 @@ using System.Text.Json;
 using Npgsql;
 using Webamoki.Linka.ModelSystem;
 using Webamoki.Linka.Queries;
+using Webamoki.Linka.SchemaSystem;
 
 namespace Webamoki.Linka.Expressions;
 
-public class GetExpression<T> where T : Model, new()
+public class GetExpression<T,TSchema> where T : Model, new() where TSchema : Schema, new()
 {
-    internal readonly IDbService DbService;
+    internal readonly DbService<TSchema> DbService;
     internal readonly SelectQuery Query;
     private readonly List<NavigationInfo> _navigations = [];
     private readonly Dictionary<string,NavigationListInfo> _navigationLists = [];
-    internal GetExpression(IDbService db,Expression<Func<T, bool>> expression)
+    internal GetExpression(DbService<TSchema> db,Expression<Func<T, bool>> expression)
     {
         if (!db.Schema.HasModel<T>()) throw new Exception($"Model {typeof(T).Name} not loaded for schema {db.Schema.Name}.");
         var ex = ExParser.Parse(expression, out var error);
@@ -39,7 +40,7 @@ public class GetExpression<T> where T : Model, new()
         return query;
     }
     
-    internal GetExpression(IDbService db, Expression<Func<T, bool>> expression, HashSet<string> navigations) : this(db, expression)
+    internal GetExpression(DbService<TSchema> db, Expression<Func<T, bool>> expression, HashSet<string> navigations) : this(db, expression)
     {
         var info = ModelRegistry.Get<T>();
         var group = false;
@@ -85,6 +86,9 @@ public class GetExpression<T> where T : Model, new()
     internal T? GetOrNull()
     {
         Query.Limit = 1;
+        
+        
+        
         var reader = Query.Execute(DbService);
         if (!reader.Read())
         {
@@ -96,7 +100,13 @@ public class GetExpression<T> where T : Model, new()
         return model;
     }
 
-    public GetManyExpression<T> GetMany() => new(this);
+    private T? GetCachedModel()
+    {
+        var cache = DbService.GetModelCache<T>();
+        
+    }
+
+    public GetManyExpression<T,TSchema> GetMany() => new(this);
     
     internal T ReadModel(NpgsqlDataReader reader)
     {

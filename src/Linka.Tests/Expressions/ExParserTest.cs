@@ -18,7 +18,7 @@ public class ExParserTest
     [Test]
     public void GetQuery_RendersExpected()
     {
-        var query = GetExpression<UserModel>.GetQuery();
+        var query = GetExpression<UserModel,UserSchema>.GetQuery();
         const string text = "SELECT `User`.`ID` as `User.ID` , `User`.`Name` as `User.Name` , `User`.`Email` as `User.Email` , `User`.`Phone` as `User.Phone` , `User`.`Rank`::text as `User.Rank` , `User`.`Session` as `User.Session` , `User`.`Password` as `User.Password` , `User`.`CartToken` as `User.CartToken` , `User`.`Created` as `User.Created` , `User`.`Verified` as `User.Verified` , `User`.`Login` as `User.Login` , `User`.`Credit` as `User.Credit` FROM `User`";
         
         Ensure.Equal(QuoteQuery(text),

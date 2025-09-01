@@ -16,7 +16,6 @@ internal interface IDbService
     NpgsqlDataReader Execute(string query, List<object> values);
     DatabaseCode ExecuteTransaction(string query, List<object> values);
     Schema Schema { get; }
-    public void AddModelToCache<T>(T model) where T : Model;
 }
 
 public sealed class DbService<TSchema>(bool debug = false) : IDbService, IDisposable
@@ -162,18 +161,18 @@ public sealed class DbService<TSchema>(bool debug = false) : IDbService, IDispos
     public void Dispose() { _connection.Dispose(); }
 
     public T Get<T>(Expression<Func<T, bool>> expression) where T : Model, new() =>
-        new GetExpression<T>(this, expression).Get();
+        new GetExpression<T,TSchema>(this, expression).Get();
 
     public T? GetOrNull<T>(Expression<Func<T, bool>> expression) where T : Model, new() =>
-        new GetExpression<T>(this, expression).GetOrNull();
+        new GetExpression<T,TSchema>(this, expression).GetOrNull();
     
-    public GetManyExpression<T> GetMany<T>(Expression<Func<T, bool>> expression) where T : Model, new() =>
-        new GetExpression<T>(this, expression).GetMany();
+    public GetManyExpression<T,TSchema> GetMany<T>(Expression<Func<T, bool>> expression) where T : Model, new() =>
+        new GetExpression<T,TSchema>(this, expression).GetMany();
     
     public void Delete<T>(Expression<Func<T, bool>> expression) where T : Model, new() =>
         new DeleteExpression<T>(this, expression).Delete();
     
-    public IncludeExpression<T> Include<T>(Expression<Func<T, object>> expression) where T : Model, new() =>
+    public IncludeExpression<T,TSchema> Include<T>(Expression<Func<T, object>> expression) where T : Model, new() =>
         new(this, expression);
     
     public DatabaseCode Insert<T>(T model) where T : Model
@@ -246,8 +245,7 @@ public sealed class DbService<TSchema>(bool debug = false) : IDbService, IDispos
         return code;
     }
     
-    // TODO: Remove public modifier
-    public void AddModelToCache<T>(T model) where T : Model
+    internal void AddModelToCache<T>(T model) where T : Model
     {
         if (!_caches.TryGetValue(typeof(T), out var cache))
         {
@@ -256,7 +254,16 @@ public sealed class DbService<TSchema>(bool debug = false) : IDbService, IDispos
         }
         cache.Add(model);
     }
-
+    
+    internal IModelCache GetModelCache<T>() where T : Model
+    {
+        if (!_caches.TryGetValue(typeof(T), out var cache))
+        {
+            cache = new ModelCache<T>();
+            _caches[typeof(T)] = cache;
+        }
+        return cache;
+    }
 }
 
 public enum DatabaseCode

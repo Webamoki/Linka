@@ -1,9 +1,11 @@
-﻿namespace Webamoki.Linka.ModelSystem;
+﻿using Webamoki.Linka.Expressions;
+
+namespace Webamoki.Linka.ModelSystem;
 
 interface IModelCache
 {
     void Add(Model model);
-    Model? GetUnique(string fieldKey, string fieldValue);
+    Model? Find(IEx)
 }
 
 public class ModelCache<T> : IModelCache where T : Model

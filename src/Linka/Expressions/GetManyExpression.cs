@@ -1,11 +1,12 @@
 ﻿using Webamoki.Linka.ModelSystem;
+using Webamoki.Linka.SchemaSystem;
 
 namespace Webamoki.Linka.Expressions;
 
-public class GetManyExpression<T> where T : Model, new()
+public class GetManyExpression<T,TSchema> where T : Model, new() where TSchema : Schema, new()
 {
-    private readonly GetExpression<T> _getExpression;
-    internal GetManyExpression(GetExpression<T> getExpression)
+    private readonly GetExpression<T,TSchema> _getExpression;
+    internal GetManyExpression(GetExpression<T,TSchema> getExpression)
     {
         _getExpression = getExpression;
     }

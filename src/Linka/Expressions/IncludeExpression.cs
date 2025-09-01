@@ -1,15 +1,17 @@
 ﻿using System.Linq.Expressions;
 using Webamoki.Linka.ModelSystem;
+using Webamoki.Linka.SchemaSystem;
 
 namespace Webamoki.Linka.Expressions;
 
-public class IncludeExpression<T>
-    where T : Model, new()
+public class IncludeExpression<T,TSchema>
+    where T : Model, new() 
+    where TSchema : Schema, new()
 {
-    private readonly IDbService _dbService;
+    private readonly DbService<TSchema> _dbService;
     private readonly HashSet<string> _included = [];
 
-    internal IncludeExpression(IDbService dbService, Expression<Func<T, object>> includeExpression)
+    internal IncludeExpression(DbService<TSchema> dbService, Expression<Func<T, object>> includeExpression)
     {
         _dbService = dbService;
         Include(includeExpression);
@@ -26,11 +28,11 @@ public class IncludeExpression<T>
     }
 
     public T Get(Expression<Func<T, bool>> expression) =>
-        new GetExpression<T>(_dbService, expression, _included).Get();
+        new GetExpression<T,TSchema>(_dbService, expression, _included).Get();
 
     public T? GetOrNull(Expression<Func<T, bool>> expression) =>
-        new GetExpression<T>(_dbService, expression, _included).GetOrNull();
+        new GetExpression<T,TSchema>(_dbService, expression, _included).GetOrNull();
     
-    public GetManyExpression<T> GetMany(Expression<Func<T, bool>> expression) =>
-        new GetExpression<T>(_dbService, expression, _included).GetMany();
+    public GetManyExpression<T,TSchema> GetMany(Expression<Func<T, bool>> expression) =>
+        new GetExpression<T,TSchema>(_dbService, expression, _included).GetMany();
 }

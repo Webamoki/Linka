@@ -48,4 +48,5 @@ public partial class EmailValidator : TextValidator
     [GeneratedRegex(@"^[^@\s]+\.[^@\s]+$")]
     private static partial Regex MyRegex();
 }
-public class EmailDbField(int maxLength = 50) : TextDbField(EmailValidator.Create(), maxLength) { }
+
+public class EmailDbField(int maxLength = 50) : TextDbField(EmailValidator.Create(), maxLength);

@@ -19,7 +19,15 @@
     </ItemGroup>
 
     <ItemGroup>
-      <Folder Include="Models\" />
+      <Compile Remove="Models\**" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <EmbeddedResource Remove="Models\**" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <None Remove="Models\**" />
     </ItemGroup>
 
 </Project>

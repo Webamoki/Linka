@@ -7,18 +7,18 @@ interface IModelCache
     void Add(Model model);
 }
 
-public class ModelCache<T> : IModelCache where T : Model
+internal class ModelCache<T> : IModelCache where T : Model
 {
     private readonly Dictionary<string, T> _primaryCache = [];
     private readonly Dictionary<string, T> _uniqueCache = [];
-    
+
     public void Add(Model model)
     {
         var info = ModelRegistry.Get<T>();
         var primaryKey = GetPrimaryKey((T)model);
         _primaryCache[primaryKey] = (T)model;
-        
-        foreach (var (fieldKey,field) in info.UniqueFields)
+
+        foreach (var (fieldKey, field) in info.UniqueFields)
         {
             if (!field.IsSet) continue;
             var uniqueKey = GetUniqueKey((T)model, fieldKey);
@@ -44,20 +44,20 @@ public class ModelCache<T> : IModelCache where T : Model
                 Delete(model);
         }
     }
-    
+
     private void Delete(T model)
     {
         var info = ModelRegistry.Get<T>();
         var primaryKey = GetPrimaryKey(model);
         _primaryCache.Remove(primaryKey);
-        foreach (var (fieldKey,field) in info.UniqueFields)
+        foreach (var (fieldKey, field) in info.UniqueFields)
         {
             if (!field.IsSet) continue;
             var uniqueKey = GetUniqueKey(model, fieldKey);
             _uniqueCache.Remove(uniqueKey);
         }
     }
-    
+
     private string GetPrimaryKey(T model)
     {
         var info = ModelRegistry.Get<T>();
@@ -70,11 +70,31 @@ public class ModelCache<T> : IModelCache where T : Model
         // turn primaryKeys dictionary into string using both keys and values
         return string.Join(",", primaryKeys.Select(kvp => kvp.Key + "=" + kvp.Value));
     }
-    
+
     private string GetUniqueKey(T model, string fieldKey)
     {
         var info = ModelRegistry.Get<T>();
         var fieldValue = info.FieldGetters[fieldKey](model).StringValue();
         return fieldKey + "=" + fieldValue;
+    }
+
+    internal void Update(IEx<T> ex, Dictionary<string, object?> setFields)
+    {
+        foreach (var (_, model) in _primaryCache)
+        {
+            if (ex.Verify(model))
+                Update(model, setFields);
+        }
+    }
+
+    private void Update(T model, Dictionary<string, object?> setFields)
+    {
+        var info = ModelRegistry.Get<T>();
+        foreach (var (fieldKey, fieldValue) in setFields)
+        {
+            var field = info.FieldGetters[fieldKey](model);
+            field.LoadValue(fieldValue);
+            field.ResetChange();
+        }
     }
 }

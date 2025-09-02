@@ -2,7 +2,7 @@
 
 namespace Webamoki.Linka.SchemaSystem;
 
-[AttributeUsage(AttributeTargets.Constructor,AllowMultiple = true)]
+[AttributeUsage(AttributeTargets.Constructor, AllowMultiple = true)]
 public class ModelAttribute<T> : Attribute, ISchemaCompileAttribute
     where T : Model, new()
 {
@@ -32,7 +32,7 @@ public class ModelAttribute<T> : Attribute, ISchemaCompileAttribute
         if (!Schema.ModelSchemas.TryAdd(typeof(T), schema))
             throw new Exception($"Model {typeof(T).Name} is already registered with a different Schema.");
     }
-    
+
     public void CompileConnections<TSchema>()
         where TSchema : Schema, new()
     {

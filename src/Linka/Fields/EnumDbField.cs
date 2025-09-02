@@ -5,7 +5,7 @@ using Webamoki.Linka.SchemaSystem;
 namespace Webamoki.Linka.Fields;
 
 public class EnumValidator<TEnum> : Validator where TEnum : struct, Enum
-{   
+{
     private readonly HashSet<string> _enumNames = [];
 
     private EnumValidator()
@@ -72,7 +72,7 @@ public class EnumDbField<T>() : StructDbField<T>(EnumValidator<T>.Create(), GetS
     {
         return $"ENUM ({string.Join(",", Enum.GetNames(typeof(T)).Select(name => $"'{name}'"))})";
     }
-    
+
     public override void LoadValue(object? value)
     {
         if (value is string strValue)
@@ -97,18 +97,24 @@ public class EnumDbField<T>() : StructDbField<T>(EnumValidator<T>.Create(), GetS
     }
 
     internal override ConditionEx<TU> ParseEx<TU>(string op, object value)
-    { 
+    {
         var enumValue = value is string strValue ? Enum.Parse<T>(strValue) : (T)value;
         return op switch
         {
-            "=" => new EnumEx<TU,T>(Name, true, enumValue),
-            "!=" => new EnumEx<TU,T>(Name, false, enumValue),
+            "=" => new EnumEx<TU, T>(Name, true, enumValue),
+            "!=" => new EnumEx<TU, T>(Name, false, enumValue),
             _ => throw new NotSupportedException($"Operator {op} is not supported for enum fields.")
         };
     }
-        
+
+    internal override string GetUpdateSetQuery<TSchema>(object value, out object? queryValue)
+    {
+        queryValue = null;
+        return $"'{value}'::\"{GetSchemaEnumName<TSchema>()}\"";
+    }
+
 }
-internal record EnumEx<T,TEnum>(string Name, bool IsEqual, TEnum Value) : ConditionEx<T>(Name) where T : Model where TEnum : struct, Enum
+internal record EnumEx<T, TEnum>(string Name, bool IsEqual, TEnum Value) : ConditionEx<T>(Name) where T : Model where TEnum : struct, Enum
 {
     public override string ToQuery(out List<object> values)
     {
@@ -116,7 +122,7 @@ internal record EnumEx<T,TEnum>(string Name, bool IsEqual, TEnum Value) : Condit
         values = [];
         return $"{GetName()} {op} '{Value}'";
     }
-    
+
     public override bool Verify(T model)
     {
         var value = (TEnum)GetValue(model);

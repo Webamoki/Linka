@@ -52,7 +52,7 @@ public static class SchemaCheck
         var reader = query.Execute(dbService);
 
         // Create a set of expected enum names for tracking
-        var expectedEnums = new Dictionary<string,string>();
+        var expectedEnums = new Dictionary<string, string>();
         foreach (var (_, (enumName, enumType)) in schema.Enums)
         {
             expectedEnums[enumName] = enumType[6..^1].Replace("'", "");
@@ -64,19 +64,19 @@ public static class SchemaCheck
         {
             var enumName = reader["EnumName"].ToString()!;
             var enumValues = reader["EnumValues"].ToString()!;
-            
-            
+
+
             if (!expectedEnums.TryGetValue(enumName, out var expectedType))
             {
                 throw new Exception($"Unexpected enum '{enumName}' found in database schema '{schema.Name}'. " +
                                   "This enum is not defined in the Schema class.");
             }
-            
+
             Assert(expectedType, enumValues, $"Enum {enumName} in schema {schema.Name} has unexpected values. Expected: {expectedType}, got: {enumValues}.");
-            
+
             foundEnums.Add(enumName);
             Logging.WriteLog($"--- Verifying enum {enumName} in schema {schema.Name}");
-            
+
         }
         if (expectedEnums.Count != foundEnums.Count)
         {

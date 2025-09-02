@@ -13,9 +13,9 @@ public class TestingArea
     {
         Linka.AddConnection("localhost", "u62560199300users", "u62560199300users", "Thb9jbCcgpxRBvBMtfQb");
         // Linka.Configure<UserSchema>();
-        
-        
-        
+
+
+
         //
         // using var db = new DbService<UserSchema>(true);
         //

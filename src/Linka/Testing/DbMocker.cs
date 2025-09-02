@@ -16,7 +16,7 @@ public static class DbMocker
             .WithDatabase(databaseName)
             .WithUsername("mocking")
             .WithPassword("mocking")
-            .WithPortBinding(5432,true)
+            .WithPortBinding(5432, true)
             .Build();
         container.StartAsync().Wait();
         Linka.ForceConnection(
@@ -53,7 +53,7 @@ public static class DbMocker
         {
             enumQueries += $"CREATE TYPE \"{name}\" AS {enumString};";
         }
-        
+
         return $"""
                 BEGIN;
                 CREATE SCHEMA IF NOT EXISTS "{schema.Name}";

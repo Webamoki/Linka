@@ -8,14 +8,14 @@ using Webamoki.Linka.SchemaSystem;
 
 namespace Webamoki.Linka.Expressions;
 
-public class GetExpression<T,TSchema> where T : Model, new() where TSchema : Schema, new()
+public class GetExpression<T, TSchema> where T : Model, new() where TSchema : Schema, new()
 {
     internal readonly DbService<TSchema> DbService;
     internal readonly SelectQuery Query;
     internal readonly IEx<T> Expression;
     private readonly List<NavigationInfo> _navigations = [];
-    private readonly Dictionary<string,NavigationListInfo> _navigationLists = [];
-    internal GetExpression(DbService<TSchema> db,Expression<Func<T, bool>> expression)
+    private readonly Dictionary<string, NavigationListInfo> _navigationLists = [];
+    internal GetExpression(DbService<TSchema> db, Expression<Func<T, bool>> expression)
     {
         if (!db.Schema.HasModel<T>()) throw new Exception($"Model {typeof(T).Name} not loaded for schema {db.Schema.Name}.");
         var ex = ExParser.Parse(expression, out var error);
@@ -42,7 +42,7 @@ public class GetExpression<T,TSchema> where T : Model, new() where TSchema : Sch
 
         return query;
     }
-    
+
     internal GetExpression(DbService<TSchema> db, Expression<Func<T, bool>> expression, HashSet<string> navigations) : this(db, expression)
     {
         var info = ModelRegistry.Get<T>();
@@ -65,15 +65,15 @@ public class GetExpression<T,TSchema> where T : Model, new() where TSchema : Sch
                 group = true;
                 var targetInfo = navList.TargetModelInfo;
                 Query.LeftJoin<T>(targetInfo.ModelType, navList.Field, navList.TargetField);
-                 Query.JsonSelect<T>(targetInfo.ModelType, navigation);
-                _navigationLists.Add(navigation,navList);
+                Query.JsonSelect<T>(targetInfo.ModelType, navigation);
+                _navigationLists.Add(navigation, navList);
                 continue;
             }
             throw new Exception($"Navigation {navigation} not found in model {typeof(T).Name}.");
         }
 
         if (!group) return;
-        foreach(var (field,_) in info.PrimaryFields)
+        foreach (var (field, _) in info.PrimaryFields)
         {
             Query.GroupBy<T>(field);
         }
@@ -97,10 +97,10 @@ public class GetExpression<T,TSchema> where T : Model, new() where TSchema : Sch
         var reader = Query.Execute(DbService);
         if (!reader.Read())
         {
-            reader.Close();   
+            reader.Close();
             return null;
         }
-        var model =  ReadModel(reader);
+        var model = ReadModel(reader);
         reader.Close();
         return model;
     }
@@ -111,8 +111,8 @@ public class GetExpression<T,TSchema> where T : Model, new() where TSchema : Sch
         return cache.GetModel(Expression);
     }
 
-    public GetManyExpression<T,TSchema> GetMany() => new(this);
-    
+    public GetManyExpression<T, TSchema> GetMany() => new(this);
+
     internal T ReadModel(NpgsqlDataReader reader)
     {
         var model = new T();
@@ -126,15 +126,15 @@ public class GetExpression<T,TSchema> where T : Model, new() where TSchema : Sch
             navInfo.Setter.Invoke(model, targetModel);
         }
         var tableName = Model.TableName<T>();
-        foreach(var (column,navListInfo) in _navigationLists)
+        foreach (var (column, navListInfo) in _navigationLists)
         {
             var json = reader.GetString($"{tableName}.{column}");
             if (string.IsNullOrEmpty(json)) continue;
             var list = JsonSerializer.Deserialize<List<Dictionary<string, JsonElement>>>(json) ?? [];
-            
+
             var targetInfo = navListInfo.TargetModelInfo;
             List<Model> models = [];
-            foreach(var navData in list)
+            foreach (var navData in list)
             {
                 var navModel = targetInfo.Create();
                 navModel.Load(targetInfo.ModelType, navData);
@@ -143,7 +143,7 @@ public class GetExpression<T,TSchema> where T : Model, new() where TSchema : Sch
             }
             if (models.Count == 0) continue;
             targetInfo.SetListNavigation(navListInfo.Setter, model, models);
-            
+
         }
         DbService.AddModelToCache(model);
         return model;

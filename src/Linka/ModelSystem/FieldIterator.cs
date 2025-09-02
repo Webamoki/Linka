@@ -10,13 +10,13 @@ internal class FieldIterator
 {
     private readonly Dictionary<string, Func<Model, DbField>> _fieldGetters;
     private readonly Model _model;
-    
+
     internal FieldIterator(Dictionary<string, Func<Model, DbField>> fieldGetters, Model model)
     {
         _fieldGetters = fieldGetters;
         _model = model;
     }
-    
+
     /// <summary>
     /// Iterates through all fields in the model.
     /// </summary>

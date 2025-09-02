@@ -6,7 +6,7 @@ namespace Webamoki.Linka.ModelSystem;
 public abstract class Model
 {
     private static readonly Dictionary<Type, string> TableNames = [];
-    
+
     public static string TableName<T>() where T : Model => TableName(typeof(T));
     private static string TableName(Type type)
     {
@@ -30,7 +30,7 @@ public abstract class Model
     }
 
     internal void Load<T>(NpgsqlDataReader reader) where T : Model { Load(typeof(T), reader); }
-    
+
     internal void Load(Type type, NpgsqlDataReader reader)
     {
         var info = ModelRegistry.Get(type);
@@ -53,7 +53,7 @@ public abstract class Model
         foreach (var (fieldName, field) in fieldIterator.All())
         {
             var jsonElement = reader[$"{info.TableName}.{fieldName}"];
-            object? value =  jsonElement.ValueKind switch
+            object? value = jsonElement.ValueKind switch
             {
                 JsonValueKind.String => jsonElement.GetString(),
                 JsonValueKind.Number => jsonElement.TryGetInt64(out var l) ? l : jsonElement.GetDouble(),

@@ -18,12 +18,12 @@ public class ExParserTest
     [Test]
     public void GetQuery_RendersExpected()
     {
-        var query = GetExpression<UserModel,UserSchema>.GetQuery();
+        var query = GetExpression<UserModel, UserSchema>.GetQuery();
         const string text = "SELECT `User`.`ID` as `User.ID` , `User`.`Name` as `User.Name` , `User`.`Email` as `User.Email` , `User`.`Phone` as `User.Phone` , `User`.`Rank`::text as `User.Rank` , `User`.`Session` as `User.Session` , `User`.`Password` as `User.Password` , `User`.`CartToken` as `User.CartToken` , `User`.`Created` as `User.Created` , `User`.`Verified` as `User.Verified` , `User`.`Login` as `User.Login` , `User`.`Credit` as `User.Credit` FROM `User`";
-        
+
         Ensure.Equal(QuoteQuery(text),
             query.Render(out var values));
-        Logging.WriteLog(query.Render(out  values));
+        Logging.WriteLog(query.Render(out values));
         Ensure.Empty(values);
     }
 
@@ -73,7 +73,7 @@ public class ExParserTest
         const int vInt = 1023;
         const string vString = "Fred";
         const UserModel.RankEnum rank = UserModel.RankEnum.Admin;
-        
+
         var valuesToCheck = new List<(Expression<Func<UserModel, bool>> expression, string sql, string? value)>
         {
             (a => a.Session == vNull, "`User`.`Session` IS NULL", null),
@@ -119,8 +119,8 @@ public class ExParserTest
             Ensure.Equal(expectedError, error);
         }
     }
-    
-    
+
+
     [Test]
     public void Condition_Layered_RendersExpected()
     {
@@ -150,7 +150,7 @@ public class ExParserTest
                 Ensure.Count(values, expectedValues.Count);
                 for (var i = 0; i < expectedValues.Count; i++)
                 {
-                    Ensure.Equal( values[i],expectedValues[i]);
+                    Ensure.Equal(values[i], expectedValues[i]);
                 }
             }
             else

@@ -9,7 +9,7 @@ public abstract class Validator
 {
     private static readonly Dictionary<string, Validator?> Validators = new();
     public abstract bool IsValid(object? value, out string? message);
-    
+
     /// <summary>
     /// This value determines whether the values that pass can be used to do injection attacks.
     /// True, the value has a strict format and can not be used to inject code.
@@ -24,7 +24,7 @@ public abstract class Validator
             throw new Exception($"Validator {hash} already registered");
     }
 
-    
+
     protected static bool Load<T>(string hash, out T? validator) where T : Validator
     {
         hash = typeof(T).Name + hash;

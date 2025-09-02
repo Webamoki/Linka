@@ -17,7 +17,7 @@ public class TextDbFieldTest
         Ensure.NotEqual(v1, v3);
     }
 
-    
+
     [TestCase("hello", true)]
     [TestCase("", false)]
     [TestCase(null, false)]
@@ -27,8 +27,8 @@ public class TextDbFieldTest
         var validator = TextValidator.Create();
         Ensure.Equal(expected, validator.IsValid(input, out _));
     }
-    
-    
+
+
     [TestCase("hi", true)]         // within 2-5
     [TestCase("hello", true)]      // boundary max
     [TestCase("h", false)]         // below min
@@ -51,7 +51,7 @@ public class TextDbFieldTest
         var ex = Assert.Throws<ArgumentOutOfRangeException>(() => TextValidator.Create(-1));
         Ensure.True(ex!.ParamName == "minLength");
     }
-    
+
     [Test]
     public void ChangesVerifyCorrectly()
     {

@@ -4,12 +4,12 @@ namespace Webamoki.Linka.Testing;
 
 internal class FixtureManager
 {
-    private static Dictionary<string,FixtureManager> Instances = [];
+    private static Dictionary<string, FixtureManager> Instances = [];
     private readonly List<IFixture> _fixtures = [];
     private readonly HashSet<String> _fixtureNames = [];
     private bool _isComplete;
-    
-    private FixtureManager(){}
+
+    private FixtureManager() { }
     public static FixtureManager Get(string testClass)
     {
         if (!Instances.TryGetValue(testClass, out var instance))
@@ -19,12 +19,12 @@ internal class FixtureManager
         }
         return instance;
     }
-    private static readonly Dictionary<string,object> DatabaseLocks = [];
+    private static readonly Dictionary<string, object> DatabaseLocks = [];
     private List<PostgreSqlContainer> _containers = [];
     public int Count => _fixtures.Count;
     public bool IsComplete() => _isComplete;
     public void Complete() => _isComplete = true;
-    
+
     public void Add(IFixture fixture)
     {
         if (!_fixtureNames.Add(fixture.GetType().Name))
@@ -34,7 +34,7 @@ internal class FixtureManager
         _fixtures.Add(fixture);
     }
 
-    
+
     public bool IsLast<T>() where T : IFixture
     {
         return _fixtures.Last() is T;
@@ -56,7 +56,7 @@ internal class FixtureManager
             fixture.Inject();
         }
     }
-    
+
     public void Dispose()
     {
         foreach (var container in _containers)

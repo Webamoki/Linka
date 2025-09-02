@@ -72,7 +72,7 @@ public class BooleanDbFieldTest
         var field = new BooleanDbField();
         Assert.Throws<InvalidOperationException>(() => _ = field.StringValue());
     }
-    
+
     [Test]
     public void ChangesVerifyCorrectly()
     {

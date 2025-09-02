@@ -36,8 +36,8 @@ public class EmailDbFieldTest
         Ensure.False(validator.IsValid("missing-at.com", out _));
         Ensure.False(validator.IsValid("@missing-local.org", out _));
         Ensure.False(validator.IsValid("user@.com", out _));
-        Ensure.False(validator.IsValid("user@com", out _)); 
-        Ensure.False(validator.IsValid(12345, out _)); 
+        Ensure.False(validator.IsValid("user@com", out _));
+        Ensure.False(validator.IsValid(12345, out _));
     }
 
     [Test]

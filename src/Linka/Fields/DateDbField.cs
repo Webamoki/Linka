@@ -93,7 +93,8 @@ public class DateTimeDbField : RefDbField<string>
 {
     protected DateTimeDbField(DateTime? minDate, DateTime? maxDate, bool isDateOnly)
         : base(
-            DateTimeValidator.Create(minDate, maxDate, isDateOnly), isDateOnly ? "DATE" : "TIMESTAMP(0)") { }
+            DateTimeValidator.Create(minDate, maxDate, isDateOnly), isDateOnly ? "DATE" : "TIMESTAMP(0)")
+    { }
 
     public DateTimeDbField(DateTime? minDate = null, DateTime? maxDate = null) : this(minDate, maxDate, false) { }
     public override string StringValue() => Value() ?? throw new InvalidOperationException("Value is null");
@@ -103,7 +104,7 @@ public class DateTimeDbField : RefDbField<string>
         var value = Value() ?? throw new InvalidOperationException("Value is null");
         return DateTime.Parse(value);
     }
-    
+
     public override void LoadValue(object? value)
     {
         switch (value)
@@ -126,13 +127,13 @@ public class DateTimeDbField : RefDbField<string>
     }
     public static bool operator <=(DateTimeDbField left, string right) =>
         DateTimeValidator.LessThanOrEqual(left.Value() ?? throw new InvalidOperationException("Value is null"), right);
-    
+
     public static bool operator >=(DateTimeDbField left, string right) =>
         DateTimeValidator.GreaterThanOrEqual(left.Value() ?? throw new InvalidOperationException("Value is null"), right);
-    
+
     public static bool operator <(DateTimeDbField left, string right) =>
         DateTimeValidator.LessThan(left.Value() ?? throw new InvalidOperationException("Value is null"), right);
-    
+
     public static bool operator >(DateTimeDbField left, string right) =>
         DateTimeValidator.GreaterThan(left.Value() ?? throw new InvalidOperationException("Value is null"), right);
 
@@ -145,7 +146,7 @@ public class DateTimeDbField : RefDbField<string>
             _ => throw new NotSupportedException($"Operator {op} is not supported for datetime fields.")
         };
     }
-       
+
 }
 
 public class DateDbField(DateTime? minDate = null, DateTime? maxDate = null) : DateTimeDbField(minDate, maxDate, true)
@@ -165,15 +166,16 @@ public class DateDbField(DateTime? minDate = null, DateTime? maxDate = null) : D
     {
         Value(DateTime.Now.ToString("yyyy-MM-dd"));
     }
-    
+
     public override object ObjectValue()
     {
         var value = Value() ?? throw new InvalidOperationException("Value is null");
         return DateTime.Parse(value).Date;
     }
-    
+
     internal override ConditionEx<TU> ParseEx<TU>(string op, object value) =>
         new DateEx<TU>(Name, op, DateTime.Parse(value.ToString()!));
+
 }
 
 internal record DateTimeEx<T>(string Name, string Op, DateTime Value) : ConditionEx<T>(Name) where T : Model
@@ -184,7 +186,7 @@ internal record DateTimeEx<T>(string Name, string Op, DateTime Value) : Conditio
         var value = Value.ToString("yyyy-MM-dd HH:mm:ss");
         return $"{GetName()} {Op} '{value}'";
     }
-    
+
     public override bool Verify(T model)
     {
         var value = (DateTime)GetValue(model);
@@ -199,7 +201,7 @@ internal record DateTimeEx<T>(string Name, string Op, DateTime Value) : Conditio
             _ => throw new NotSupportedException($"Operator {Op} is not supported for datetime fields.")
         };
     }
-    
+
 }
 
 internal record DateEx<T>(string Name, string Op, DateTime Value) : DateTimeEx<T>(Name, Op, Value) where T : Model

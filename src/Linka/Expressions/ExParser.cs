@@ -18,14 +18,14 @@ internal static class ExParser
             error = null;
             return ParseBinaryExpression<T>((BinaryExpression)expr.Body);
         }
-        catch(FormatException e)
+        catch (FormatException e)
         {
             error = e.Message;
             return null;
         }
     }
-        
-    
+
+
     private static IEx<T> ParseBinaryExpression<T>(BinaryExpression expr) where T : Model
     {
         var op = GetOperator(expr.NodeType);
@@ -52,7 +52,7 @@ internal static class ExParser
             };
             var left = ParseBinaryExpression<T>(bExpr);
             var right = ParseBinaryExpression<T>((BinaryExpression)expr.Right);
-            return new Ex<T>(left, isAnd,right);
+            return new Ex<T>(left, isAnd, right);
         }
 
         throw new NotSupportedException($"Unsupported expression: {expr.Left}");
@@ -79,9 +79,9 @@ internal static class ExParser
 
         return field.ParseEx<T>(op, value);
     }
-    
-    
-    
+
+
+
 
 
 
@@ -100,7 +100,7 @@ internal static class ExParser
             _ => throw new NotSupportedException($"Unsupported operator: {nodeType}")
         };
     }
-    
+
     private static object ParseValueExpression(Expression expr)
     {
         switch (expr)

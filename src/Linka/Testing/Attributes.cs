@@ -19,13 +19,13 @@ public class FixturesAttribute<T> : Attribute, ITestAction where T : IFixture, n
         {
             fixtureManager.Add(new T());
         }
-        
+
         var testClassAttributes = test.Fixture?.GetType().GetCustomAttributes(true) ?? [];
         var fixtureCount = testClassAttributes.Length;
         if (fixtureManager.Count != fixtureCount) return;
 
         if (!fixtureManager.IsLast<T>()) return;
-        
+
         fixtureManager.Load();
     }
 

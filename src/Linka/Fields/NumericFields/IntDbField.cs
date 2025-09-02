@@ -21,7 +21,7 @@ public class IntValidator : Validator
         var hash = $"{min}:{max}";
         if (Load<IntValidator>(hash, out var validator))
             return validator!;
-        
+
         validator = new IntValidator(min, max);
         Register(hash, validator);
         return validator;
@@ -55,13 +55,13 @@ public class IntDbField(int min, int max) : StructDbField<int>(IntValidator.Crea
         var value = Value() ?? throw new InvalidOperationException("Value is null");
         return value;
     }
-    
+
     private static string GetSqlType(int min, int max)
     {
         var sqlType = (min, max) switch
         {
             //postgressql
-            (>= -32768, <= 32767) => "SMALLINT",
+            ( >= -32768, <= 32767) => "SMALLINT",
             _ => "INT"
         };
         return sqlType;
@@ -74,6 +74,11 @@ public class IntDbField(int min, int max) : StructDbField<int>(IntValidator.Crea
 
     internal override ConditionEx<TU> ParseEx<TU>(string op, object value) =>
         new IntEx<TU>(Name, op, (int)value);
+    internal override string GetUpdateSetQuery<TSchema>(object value, out object? queryValue)
+    {
+        queryValue = (int)value;
+        return $"{value}";
+    }
 }
 
 internal record IntEx<T>(string Name, string Op, int Value) : ConditionEx<T>(Name) where T : Model

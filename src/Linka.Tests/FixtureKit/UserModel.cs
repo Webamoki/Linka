@@ -7,13 +7,16 @@ namespace Tests.FixtureKit;
 
 public class UserModel() : Model
 {
-    [Key] [Unique] [FullText]
+    [Key]
+    [Unique]
+    [FullText]
     public IdDbField ID { get; } = new();
 
     [FullText]
     public NameDbField Name { get; } = new();
 
-    [FullText] [Unique]
+    [FullText]
+    [Unique]
     public EmailDbField Email { get; } = new();
 
     [FullText]
@@ -27,7 +30,8 @@ public class UserModel() : Model
 
     public EnumDbField<RankEnum> Rank { get; } = new();
 
-    [Unique] [NotRequired]
+    [Unique]
+    [NotRequired]
     public HashDbField Session { get; } = new();
 
     public TextDbField Password { get; } = new();
@@ -54,7 +58,7 @@ public class UserModel() : Model
         bool verified,
         bool login,
         int credit
-    ): this()
+    ) : this()
     {
         Name.Value(name);
         Email.Value(email);

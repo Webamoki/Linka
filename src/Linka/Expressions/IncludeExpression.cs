@@ -4,8 +4,8 @@ using Webamoki.Linka.SchemaSystem;
 
 namespace Webamoki.Linka.Expressions;
 
-public class IncludeExpression<T,TSchema>
-    where T : Model, new() 
+public class IncludeExpression<T, TSchema>
+    where T : Model, new()
     where TSchema : Schema, new()
 {
     private readonly DbService<TSchema> _dbService;
@@ -28,11 +28,11 @@ public class IncludeExpression<T,TSchema>
     }
 
     public T Get(Expression<Func<T, bool>> expression) =>
-        new GetExpression<T,TSchema>(_dbService, expression, _included).Get();
+        new GetExpression<T, TSchema>(_dbService, expression, _included).Get();
 
     public T? GetOrNull(Expression<Func<T, bool>> expression) =>
-        new GetExpression<T,TSchema>(_dbService, expression, _included).GetOrNull();
-    
-    public GetManyExpression<T,TSchema> GetMany(Expression<Func<T, bool>> expression) =>
-        new GetExpression<T,TSchema>(_dbService, expression, _included).GetMany();
+        new GetExpression<T, TSchema>(_dbService, expression, _included).GetOrNull();
+
+    public GetManyExpression<T, TSchema> GetMany(Expression<Func<T, bool>> expression) =>
+        new GetExpression<T, TSchema>(_dbService, expression, _included).GetMany();
 }

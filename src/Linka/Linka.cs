@@ -8,7 +8,7 @@ public static class Linka
     private static readonly HashSet<Type> CompiledSchemas = [];
     private static readonly Dictionary<string, string> DatabaseConnections = [];
     private static readonly Dictionary<string, string> SchemaDatabases = [];
-    
+
     internal static string ConnectionString<T>() where T : Schema, new()
     {
         var schema = Schema.Get<T>();
@@ -44,7 +44,7 @@ public static class Linka
 
         return true;
     }
-    
+
     public static void Configure<T>(string database) where T : Schema, new()
     {
         if (!TryCompile<T>())
@@ -52,7 +52,7 @@ public static class Linka
         Register<T>(database);
         Schema.Verify<T>();
     }
-    
+
     public static void Register<T>(string database) where T : Schema, new()
     {
         var schema = Schema.Get<T>();
@@ -65,14 +65,14 @@ public static class Linka
     //     ModelCache.Reset();
     // }
 
-    public static void AddConnection(string server, string database, string user, string password, ushort port = 5432,bool includeDetails = false)
+    public static void AddConnection(string server, string database, string user, string password, ushort port = 5432, bool includeDetails = false)
     {
         var connectionString = $"Server={server};Port={port};Database={database};User Id={user};Password={password};Include Error Detail={includeDetails}";
         if (!DatabaseConnections.TryAdd(database, connectionString))
             throw new Exception($"Connection string for database {database} already exists.");
     }
-    
-    public static void ForceConnection(string server, string database, string user, string password, ushort port = 5432 ,bool includeDetails = false)
+
+    public static void ForceConnection(string server, string database, string user, string password, ushort port = 5432, bool includeDetails = false)
     {
         var connectionString = $"Server={server};Port={port};Database={database};User Id={user};Password={password};Include Error Detail={includeDetails}";
         DatabaseConnections[database] = connectionString;

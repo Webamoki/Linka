@@ -69,7 +69,7 @@ public static class ModelCheck
         Logging.WriteLog($"Verifying model {tableName} in schema {schema.Name}");
         query.AddValue(tableName);
         query.AddValue(schema.Name);
-        
+
         using var dbService = new DbService<T>();
         var reader = query.Execute(dbService);
         HashSet<string> fieldNames = [];
@@ -77,14 +77,14 @@ public static class ModelCheck
             fieldNames.Add(fieldName);
 
         var fields = ModelRegistry.Get(modelType).Fields;
-        while(reader.Read())
+        while (reader.Read())
         {
             if (fieldNames.Count == 0) throw new Exception("Table has more fields than expected.");
             var fieldName = reader.GetString(0);
             Logging.WriteLog($"--- Verifying field {fieldName} in model {tableName}");
             fieldNames.Remove(fieldName);
-            if(!fields.TryGetValue(fieldName, out var field)) throw new Exception($"Field {fieldName} does not exist in model: {tableName}.");
-            Assert(field.IsPrimary, reader["IsPrimary"], $"Column {fieldName} in table {tableName} needs to be a primary key."); 
+            if (!fields.TryGetValue(fieldName, out var field)) throw new Exception($"Field {fieldName} does not exist in model: {tableName}.");
+            Assert(field.IsPrimary, reader["IsPrimary"], $"Column {fieldName} in table {tableName} needs to be a primary key.");
             Assert(field.IsUnique, reader["IsUnique"], $"Column {fieldName} in table {tableName} needs to be unique.");
             Assert(!field.IsRequired, reader["IsNullable"], $"Column {fieldName} in table {tableName} needs to be nullable.");
             var enumValues = reader["EnumValues"];
@@ -94,7 +94,7 @@ public static class ModelCheck
         if (fieldNames.Count > 0)
             throw new Exception($"Fields {string.Join(", ", fieldNames)} do not exist in table: {tableName}.");
     }
-    
+
     private static void CheckFulltext<T>(Type modelType) where T : Schema, new()
     {
         var schema = Schema.Get<T>();
@@ -119,7 +119,7 @@ public static class ModelCheck
                                     AND ix.indisvalid = true
                                 
                                 """;
-    
+
         var query = new Query(sqlQuery);
         var tableName = ModelRegistry.Get(modelType).TableName;
         Logging.WriteLog($"Verifying model {tableName} full text columns in schema {schema.Name}");
@@ -148,7 +148,7 @@ public static class ModelCheck
         }
         throw new Exception($"FullText index for model {tableName} does not exist in schema {schema.Name}.");
     }
-    
+
     private static void CheckRelations<T>(Type modelType) where T : Schema, new()
     {
         var schema = Schema.Get<T>();
@@ -177,20 +177,20 @@ public static class ModelCheck
                                     AND tc.table_name = ?;
                                 
                                 """;
-    
+
         var query = new Query(sqlQuery);
         var tableName = ModelRegistry.Get(modelType).TableName;
         Logging.WriteLog($"Verifying model {tableName} relations in database {schema.Name}");
         query.AddValue(schema.Name);
         query.AddValue(tableName);
-        
+
         using var dbService = new DbService<T>();
         var reader = query.Execute(dbService);
         HashSet<string> navigationNames = [];
-    
+
         foreach (var (navigationName, _) in ModelRegistry.Get(modelType).Navigations)
             navigationNames.Add(navigationName);
-        
+
         var navInfos = ModelRegistry.Get(modelType).Navigations;
         while (reader.Read())
         {

@@ -17,7 +17,7 @@ public class ValidatorTest
         Ensure.Equal(validator2, validator3);
         Ensure.NotEqual(validator1, validator3);
     }
-    
+
     [Test]
     public void TextValidator_CheckValues()
     {

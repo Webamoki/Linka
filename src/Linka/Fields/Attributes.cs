@@ -82,7 +82,7 @@ public static class NavConstraintExtensions
 
 [AttributeUsage(AttributeTargets.Field)]
 public class NavigationAttribute(string field, string targetField, NavConstraint constraint = NavConstraint.Restrict)
-    : BaseNavigationAttribute(field,targetField)
+    : BaseNavigationAttribute(field, targetField)
 {
     public NavConstraint Constraint { get; } = constraint;
 }

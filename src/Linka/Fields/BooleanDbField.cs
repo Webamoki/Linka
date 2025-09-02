@@ -44,7 +44,8 @@ public class BooleanDbField() : StructDbField<bool>(BooleanValueValidator.Create
         return value;
     }
 
-    internal override ConditionEx<T> ParseEx<T>(string op, object value) {
+    internal override ConditionEx<T> ParseEx<T>(string op, object value)
+    {
         return op switch
         {
             "=" => new BoolEx<T>(Name, true, (bool)value),
@@ -52,7 +53,13 @@ public class BooleanDbField() : StructDbField<bool>(BooleanValueValidator.Create
             _ => throw new NotSupportedException($"Operator {op} is not supported for boolean fields.")
         };
     }
-        
+
+    internal override string GetUpdateSetQuery<TSchema>(object value, out object? queryValue)
+    {
+        queryValue = null;
+        return $"{value}";
+    }
+
 }
 internal record BoolEx<T>(string Name, bool IsEqual, bool Value) : ConditionEx<T>(Name) where T : Model
 {
@@ -63,7 +70,7 @@ internal record BoolEx<T>(string Name, bool IsEqual, bool Value) : ConditionEx<T
         var value = Value ? "true" : "false";
         return $"{GetName()} {op} {value}";
     }
-    
+
     public override bool Verify(T model)
     {
         var value = (bool)GetValue(model);

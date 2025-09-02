@@ -3,7 +3,7 @@
 
 
 
-[AttributeUsage(AttributeTargets.Constructor,AllowMultiple = true)]
+[AttributeUsage(AttributeTargets.Constructor, AllowMultiple = true)]
 public class EnumAttribute<T> : Attribute, ISchemaCompileAttribute
     where T : Enum, new()
 {

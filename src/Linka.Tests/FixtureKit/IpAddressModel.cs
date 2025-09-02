@@ -4,21 +4,22 @@ using Webamoki.Linka.ModelSystem;
 
 namespace Tests.FixtureKit;
 
-public class IpAddressModel(): Model
+public class IpAddressModel() : Model
 {
     [Key]
     public IdDbField UserID { get; } = new();
 
-    [Key] [FullText]
+    [Key]
+    [FullText]
     public TextDbField IP { get; } = new();
 
     public DateTimeDbField Accessed { get; } = new();
 
-    [PkNavigation(nameof(UserID),NavConstraint.Cascade)]
+    [PkNavigation(nameof(UserID), NavConstraint.Cascade)]
     public UserModel User = null!;
-    
-    
-    public IpAddressModel(string userID, string ip): this()
+
+
+    public IpAddressModel(string userID, string ip) : this()
     {
         UserID.Value(userID);
         IP.Value(ip);

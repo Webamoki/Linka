@@ -37,9 +37,9 @@ internal class ConditionQuery : Query
     //     AddCondition("AND", condition, value);
     // }
 
-    
 
-    
+
+
     // public void OrIn(AbstractModel|string $model, string $column, SelectQuery $query)
     // {
     //     $table = $model::TableName();

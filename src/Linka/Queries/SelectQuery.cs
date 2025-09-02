@@ -48,19 +48,19 @@ internal class SelectQuery : ConditionQuery
     public void Select<T>(DbField field) where T : Model
     {
         var table = Model.TableName<T>();
-        FieldSelect(table,field);
+        FieldSelect(table, field);
     }
     public void Select(Type modelType, DbField field)
     {
         var table = ModelRegistry.Get(modelType).TableName;
-        FieldSelect(table,field);
+        FieldSelect(table, field);
     }
 
     private void FieldSelect(string table, DbField field)
     {
         var column = field.Name;
         var cast = field is IEnumDbField ? "::text" : "";
-        
+
         AddSelect($"\"{table}\".\"{column}\"{cast} as \"{table}.{column}\"");
     }
 
@@ -88,12 +88,6 @@ internal class SelectQuery : ConditionQuery
         );
     }
 
-    public void Select<T1, T2>(string column, string alias) where T1 : Model where T2 : Model
-    {
-        var table1 = Model.TableName<T1>();
-        var table2 = Model.TableName<T2>();
-        AddSelect($"\"{table1}\".\"{column}\" as \"{table2}.{alias}\"");
-    }
 
     private void Join(string table1, string table2, string field1, string field2, string alias = "",
         string join = "JOIN")

@@ -5,12 +5,12 @@ using Webamoki.Linka.SchemaSystem;
 
 namespace Webamoki.Linka.Expressions;
 
-internal class DeleteExpression<T,TSchema> where T : Model, new() where TSchema : Schema, new()
+internal class DeleteExpression<T, TSchema> where T : Model, new() where TSchema : Schema, new()
 {
     private readonly DbService<TSchema> _dbService;
     private readonly DeleteQuery _query;
     private readonly IEx<T> _expression;
-    public DeleteExpression(DbService<TSchema> db,Expression<Func<T, bool>> expression)
+    public DeleteExpression(DbService<TSchema> db, Expression<Func<T, bool>> expression)
     {
         if (!db.Schema.HasModel<T>()) throw new Exception($"Model {typeof(T).Name} not loaded for schema {db.Schema.Name}.");
         var ex = ExParser.Parse(expression, out var error);
@@ -33,6 +33,6 @@ internal class DeleteExpression<T,TSchema> where T : Model, new() where TSchema 
         }
         var cache = (ModelCache<T>)_dbService.GetModelCache<T>();
         cache.Delete(_expression);
-        
+
     }
 }

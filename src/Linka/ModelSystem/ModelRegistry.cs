@@ -20,7 +20,7 @@ internal static class ModelRegistry
 
     public static Model GetModel<T>() where T : Model => Get<T>().Model;
 
-    
+
     private static BaseNavigationAttribute GetNavigationAttribute(FieldInfo field)
     {
         var attributes = field.GetCustomAttributes(false);
@@ -36,7 +36,7 @@ internal static class ModelRegistry
             throw new KeyNotFoundException($"Invalid field {field.Name} in model {field.DeclaringType?.Name}.");
         return navAttribute;
     }
-    
+
     /// <summary>
     /// Configures the model's navigation properties and their constraints.
     /// Executed after all models are injected.
@@ -50,7 +50,7 @@ internal static class ModelRegistry
         var navigations = typeof(T).GetFields();
         foreach (var navReflectionInfo in navigations)
         {
-            var navAttribute = GetNavigationAttribute(navReflectionInfo); 
+            var navAttribute = GetNavigationAttribute(navReflectionInfo);
             var navType = navReflectionInfo.FieldType;
             if (navType.IsGenericType && navType.GetGenericTypeDefinition() == typeof(List<>))
             {

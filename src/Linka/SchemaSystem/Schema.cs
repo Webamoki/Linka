@@ -12,7 +12,7 @@ internal interface ISchemaCompileAttribute
 public class Schema
 {
     internal readonly HashSet<Type> Models = [];
-    internal readonly Dictionary<Type, (string Name,string SqlType)> Enums = [];
+    internal readonly Dictionary<Type, (string Name, string SqlType)> Enums = [];
     internal static readonly Dictionary<Type, Schema> ModelSchemas = [];
     private static readonly Dictionary<Type, Schema> Instances = [];
     internal ISchemaGeneric? SchemaGeneric = null;
@@ -21,7 +21,7 @@ public class Schema
     public bool HasModel<T>() where T : Model => HasModel(typeof(T));
 
     public bool HasModel(Type modelType) => Models.Contains(modelType);
-    
+
     public bool HasEnum<T>() where T : Enum => HasEnum(typeof(T));
     public bool HasEnum(Type enumType) => Enums.ContainsKey(enumType);
     public string GetEnumName<T>() where T : Enum => Enums[typeof(T)].Name;
@@ -51,10 +51,10 @@ public class Schema
 
     internal static Schema Get<T>() where T : Schema, new() =>
         Instances.TryGetValue(typeof(T), out var instance) ? instance : new T();
-    
-    internal static Schema GetWithModel<T>() where T : Model=>
+
+    internal static Schema GetWithModel<T>() where T : Model =>
         ModelSchemas.TryGetValue(typeof(T), out var schema) ? schema : throw new Exception($"Model {typeof(T).Name} is not registered with any Schema.");
-    
+
 }
 
 /// <summary>
@@ -68,7 +68,8 @@ internal interface ISchemaGeneric
 
 internal class SchemaGeneric<T> : ISchemaGeneric where T : Schema, new()
 {
-    public PostgreSqlContainer Mock() {
+    public PostgreSqlContainer Mock()
+    {
         var container = DbMocker.Mock<T>();
         Schema.Verify<T>();
         return container;

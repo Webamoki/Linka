@@ -19,7 +19,7 @@ internal class InsertQuery(string table) : Query
     }
     public void AddValueMarker(object marker)
     {
-        _valueMarkers.Add((String) marker);
+        _valueMarkers.Add((String)marker);
     }
     internal override string Render(out List<object> values)
     {

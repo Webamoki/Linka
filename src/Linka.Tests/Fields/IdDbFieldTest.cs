@@ -108,7 +108,7 @@ public class IdDbFieldTest
         field.Value(value);
         Ensure.Equal(value, field.StringValue());
     }
-    
+
     [Test]
     public void ChangesVerifyCorrectly()
     {

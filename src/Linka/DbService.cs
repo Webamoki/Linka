@@ -36,12 +36,12 @@ public sealed class DbService<TSchema>(bool debug = false) : IDbService, IDispos
             query = $"""SET search_path TO "{Schema.Name}";{query}""";
             if (_debug)
             {
-                Logging.WriteDebug($"Executing transaction: {query}","PostgreSQL: Transaction");
-                Logging.WriteDebug($"With Params: {string.Join(", ", values.Select(value => value))}","PostgreSQL: Transaction");
+                Logging.WriteDebug($"Executing transaction: {query}", "PostgreSQL: Transaction");
+                Logging.WriteDebug($"With Params: {string.Join(", ", values.Select(value => value))}", "PostgreSQL: Transaction");
             }
             using var transaction = _connection.BeginTransaction();
             using var command = CreateCommand(query, values);
-            
+
             command.ExecuteNonQuery();
             transaction.Commit();
         }
@@ -78,7 +78,7 @@ public sealed class DbService<TSchema>(bool debug = false) : IDbService, IDispos
             _connection.Open();
             if (_debug)
             {
-                Logging.WriteDebug($"Executing full SQL script {script}","PostgreSQL: Script");
+                Logging.WriteDebug($"Executing full SQL script {script}", "PostgreSQL: Script");
             }
 
             using var command = CreateCommand(script, []);
@@ -160,20 +160,21 @@ public sealed class DbService<TSchema>(bool debug = false) : IDbService, IDispos
     public void Dispose() { _connection.Dispose(); }
 
     public T Get<T>(Expression<Func<T, bool>> expression) where T : Model, new() =>
-        new GetExpression<T,TSchema>(this, expression).Get();
+        new GetExpression<T, TSchema>(this, expression).Get();
 
     public T? GetOrNull<T>(Expression<Func<T, bool>> expression) where T : Model, new() =>
-        new GetExpression<T,TSchema>(this, expression).GetOrNull();
-    
-    public GetManyExpression<T,TSchema> GetMany<T>(Expression<Func<T, bool>> expression) where T : Model, new() =>
-        new GetExpression<T,TSchema>(this, expression).GetMany();
-    
+        new GetExpression<T, TSchema>(this, expression).GetOrNull();
+
+    public GetManyExpression<T, TSchema> GetMany<T>(Expression<Func<T, bool>> expression) where T : Model, new() =>
+        new GetExpression<T, TSchema>(this, expression).GetMany();
+
     public void Delete<T>(Expression<Func<T, bool>> expression) where T : Model, new() =>
-        new DeleteExpression<T,TSchema>(this, expression).Delete();
-    
-    public IncludeExpression<T,TSchema> Include<T>(Expression<Func<T, object>> expression) where T : Model, new() =>
+        new DeleteExpression<T, TSchema>(this, expression).Delete();
+
+    public UpdateExpression<T, TSchema> Update<T>(Expression<Func<T, bool>> expression) where T : Model, new() => new(this, expression);
+    public IncludeExpression<T, TSchema> Include<T>(Expression<Func<T, object>> expression) where T : Model, new() =>
         new(this, expression);
-    
+
     public DatabaseCode Insert<T>(T model) where T : Model
     {
         var info = ModelRegistry.Get<T>();
@@ -239,11 +240,11 @@ public sealed class DbService<TSchema>(bool debug = false) : IDbService, IDispos
         {
             throw new InvalidOperationException($"Insert failed with code {code}.");
         }
-        
+
         AddModelToCache(model);
         return code;
     }
-    
+
     internal void AddModelToCache<T>(T model) where T : Model
     {
         var type = model.GetType();
@@ -261,7 +262,7 @@ public sealed class DbService<TSchema>(bool debug = false) : IDbService, IDispos
         }
         cache.Add(model);
     }
-    
+
     internal IModelCache GetModelCache<T>() where T : Model
     {
         if (!_caches.TryGetValue(typeof(T), out var cache))

@@ -15,7 +15,7 @@ public abstract class Fixture<T> : IFixture where T : Schema, new()
     public abstract void Inject();
 
     public Schema Schema() => SchemaSystem.Schema.Get<T>();
-    
+
     public void TryCompile()
     {
         Linka.TryCompile<T>();

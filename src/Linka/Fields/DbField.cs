@@ -1,5 +1,6 @@
 ﻿using Webamoki.Linka.Expressions;
 using Webamoki.Linka.ModelSystem;
+using Webamoki.Linka.SchemaSystem;
 
 namespace Webamoki.Linka.Fields;
 
@@ -75,8 +76,9 @@ public abstract class DbField(
     public abstract bool IsChanged();
     public abstract void ResetChange();
     public abstract bool IsValid(out string? message);
-    
+
     internal abstract ConditionEx<T> ParseEx<T>(string op, object value) where T : Model;
+    internal abstract string GetUpdateSetQuery<TSchema>(object value, out object? queryValue) where TSchema : Schema, new();
 }
 
 public abstract class RefDbField<T>(
@@ -150,9 +152,39 @@ public abstract class RefDbField<T>(
         return op switch
         {
             "=" => new StringEx<TU>(Name, true, (string)value, Validator.IsInjectable),
-            "!=" => new StringEx<TU>(Name,false,(string)value,Validator.IsInjectable),
+            "!=" => new StringEx<TU>(Name, false, (string)value, Validator.IsInjectable),
             _ => throw new NotSupportedException($"Operator {op} is not supported for field {Name}")
         };
+    }
+    internal override string GetUpdateSetQuery<TSchema>(object value, out object? queryValue)
+    {
+        if (Validator.IsInjectable)
+        {
+            queryValue = value;
+            return "?";
+        }
+        queryValue = null;
+        return $"'{value}'";
+    }
+
+    public override bool Equals(object obj)
+    {
+        if (ReferenceEquals(this, obj))
+        {
+            return true;
+        }
+
+        if (ReferenceEquals(obj, null))
+        {
+            return false;
+        }
+
+        throw new NotImplementedException();
+    }
+
+    public override int GetHashCode()
+    {
+        throw new NotImplementedException();
     }
 }
 
@@ -224,4 +256,24 @@ public abstract class StructDbField<T>(
     }
 
     public static bool operator !=(StructDbField<T> left, T? right) => !(left == right);
+
+    public override bool Equals(object obj)
+    {
+        if (ReferenceEquals(this, obj))
+        {
+            return true;
+        }
+
+        if (ReferenceEquals(obj, null))
+        {
+            return false;
+        }
+
+        throw new NotImplementedException();
+    }
+
+    public override int GetHashCode()
+    {
+        throw new NotImplementedException();
+    }
 }

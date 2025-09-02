@@ -40,7 +40,7 @@ public class IdValidator : Validator
             message = $"Value length is not {_length}";
             return false;
         }
-        
+
         foreach (var c in s)
         {
             if (_pool.Contains(c)) continue;
@@ -50,7 +50,7 @@ public class IdValidator : Validator
         message = null;
         return true;
     }
-    
+
     public string GenerateValue()
     {
         var sb = new StringBuilder(_length);
@@ -70,7 +70,7 @@ public class IdValidator : Validator
 public class IdDbField(Validator validator, int charSize)
     : RefDbField<string>(validator, $"VARCHAR({charSize})")
 {
-    protected IdDbField(int length, string pool = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789") : this(IdValidator.Create(length,pool), length) { }
+    protected IdDbField(int length, string pool = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789") : this(IdValidator.Create(length, pool), length) { }
     public IdDbField() : this(10) { }
     public override string StringValue() => Value() ?? string.Empty;
 
@@ -81,5 +81,5 @@ public class IdDbField(Validator validator, int charSize)
 
 
 public class ShortIdDbField() : IdDbField(5);
-public class TokenDbField() : IdDbField(5,"ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789");
-public class CountryCodeDbField() : IdDbField(2,"ABCDEFGHIJKLMNOPQRSTUVWXYZ");
+public class TokenDbField() : IdDbField(5, "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789");
+public class CountryCodeDbField() : IdDbField(2, "ABCDEFGHIJKLMNOPQRSTUVWXYZ");

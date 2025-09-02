@@ -42,12 +42,12 @@ internal class Query : BaseQuery
 
     public void ResetBody() { _body = []; }
 
-    public void AddValue(string value) => _values.Add(value);
+    public void AddValue(object value) => _values.Add(value);
     public virtual void AddValues(List<object> value) => _values.AddRange(value);
     public void PrependValue(string value) => _values.Insert(0, value);
 
 
-    
+
 
 
     public void AddBody(params BaseQuery[] bodies)
@@ -68,7 +68,7 @@ internal class Query : BaseQuery
         var query = Render(out var values);
         return service.Execute(query, values);
     }
-    
+
     internal virtual string Render(out List<object> values)
     {
         var query = "";

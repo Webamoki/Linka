@@ -15,7 +15,7 @@ internal class SelectQuery : ConditionQuery
     private Query? _tables;
     private Query Tables => _tables ??= new Query();
 
-    private void AddSelect(IQuery select)
+    private void AddSelect(BaseQuery select)
     {
         if (!_select.IsEmpty())
         {

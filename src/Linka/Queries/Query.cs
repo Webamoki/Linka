@@ -2,23 +2,23 @@ using Npgsql;
 
 namespace Webamoki.Linka.Queries;
 
-internal abstract class IQuery
+internal abstract class BaseQuery
 {
     public abstract bool IsEmpty();
-    public static implicit operator IQuery(string s) => new RenderedQuery(s);
+    public static implicit operator BaseQuery(string s) => new RenderedQuery(s);
 }
 
-internal class RenderedQuery(string query) : IQuery
+internal class RenderedQuery(string query) : BaseQuery
 {
     public readonly string Query = query;
 
     public override bool IsEmpty() => string.IsNullOrEmpty(Query);
 }
 
-internal class Query : IQuery
+internal class Query : BaseQuery
 {
     private readonly List<object> _values = [];
-    private List<IQuery> _body = [];
+    private List<BaseQuery> _body = [];
 
 
     public Query() { }
@@ -50,7 +50,7 @@ internal class Query : IQuery
     
 
 
-    public void AddBody(params IQuery[] bodies)
+    public void AddBody(params BaseQuery[] bodies)
     {
         foreach (var body in bodies)
             if (!body.IsEmpty())

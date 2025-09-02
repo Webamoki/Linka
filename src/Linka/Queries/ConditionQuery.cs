@@ -6,7 +6,7 @@ internal class ConditionQuery : Query
     private Query? _condition;
     protected Query Condition => _condition ??= new Query();
 
-    public void SetCondition(IQuery condition, List<object> values)
+    public void SetCondition(BaseQuery condition, List<object> values)
     {
         Condition.ResetBody();
         Condition.AddBody(condition);

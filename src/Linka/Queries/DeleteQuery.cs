@@ -1,14 +1,9 @@
 ﻿
 namespace Webamoki.Linka.Queries;
 
-internal class DeleteQuery : ConditionQuery
+internal class DeleteQuery(string table, string? alias = null) : ConditionQuery
 {
-    private string _table;
-    
-    public DeleteQuery(string table, string? alias = null)
-    {
-        _table = alias != null ? $"\"{table}\" AS \"{alias}\"" : $"\"{table}\"";
-    }
+    private readonly string _table = alias != null ? $"\"{table}\" AS \"{alias}\"" : $"\"{table}\"";
 
     internal override string Render(out List<object> values)
     {

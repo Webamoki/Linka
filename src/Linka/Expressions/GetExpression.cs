@@ -122,6 +122,7 @@ public class GetExpression<T,TSchema> where T : Model, new() where TSchema : Sch
             var targetInfo = navInfo.TargetModelInfo;
             var targetModel = targetInfo.Create();
             targetModel.Load(targetInfo.ModelType, reader);
+            DbService.AddModelToCache(targetModel);
             navInfo.Setter.Invoke(model, targetModel);
         }
         var tableName = Model.TableName<T>();
@@ -138,6 +139,7 @@ public class GetExpression<T,TSchema> where T : Model, new() where TSchema : Sch
                 var navModel = targetInfo.Create();
                 navModel.Load(targetInfo.ModelType, ipData);
                 models.Add(navModel);
+                DbService.AddModelToCache(navModel);
             }
             if (models.Count == 0) continue;
             targetInfo.SetListNavigation(navListInfo.Setter, model, models);

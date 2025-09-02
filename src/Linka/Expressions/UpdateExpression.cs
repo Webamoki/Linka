@@ -33,6 +33,5 @@ internal class UpdateExpression<T,TSchema> where T : Model, new() where TSchema 
         }
         var cache = (ModelCache<T>)_dbService.GetModelCache<T>();
         cache.Delete(_expression);
-        
     }
 }

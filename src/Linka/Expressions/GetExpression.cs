@@ -134,10 +134,10 @@ public class GetExpression<T,TSchema> where T : Model, new() where TSchema : Sch
             
             var targetInfo = navListInfo.TargetModelInfo;
             List<Model> models = [];
-            foreach(var ipData in list)
+            foreach(var navData in list)
             {
                 var navModel = targetInfo.Create();
-                navModel.Load(targetInfo.ModelType, ipData);
+                navModel.Load(targetInfo.ModelType, navData);
                 models.Add(navModel);
                 DbService.AddModelToCache(navModel);
             }

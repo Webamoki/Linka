@@ -23,7 +23,7 @@ public sealed class DbService<TSchema>(bool debug = false) : IDbService, IDispos
 {
     private readonly NpgsqlConnection _connection = new(Linka.ConnectionString<TSchema>());
     private readonly bool _debug = debug || Linka.Debug;
-    private Dictionary<Type, IModelCache> _caches = [];
+    private readonly Dictionary<Type, IModelCache> _caches = [];
 
     public Schema Schema => Schema.Get<TSchema>();
 
@@ -31,17 +31,17 @@ public sealed class DbService<TSchema>(bool debug = false) : IDbService, IDispos
     {
         var result = DatabaseCode.Success;
         _connection.Open();
-        if (_debug)
-        {
-            Logging.WriteLog($"Executing transaction: {query}");
-            Logging.WriteLog($"With Params: {string.Join(", ", values.Select(value => value))}");
-        }
-
         try
         {
             query = $"""SET search_path TO "{Schema.Name}";{query}""";
+            if (_debug)
+            {
+                Logging.WriteDebug($"Executing transaction: {query}","PostgreSQL: Transaction");
+                Logging.WriteDebug($"With Params: {string.Join(", ", values.Select(value => value))}","PostgreSQL: Transaction");
+            }
             using var transaction = _connection.BeginTransaction();
             using var command = CreateCommand(query, values);
+            
             command.ExecuteNonQuery();
             transaction.Commit();
         }
@@ -78,7 +78,7 @@ public sealed class DbService<TSchema>(bool debug = false) : IDbService, IDispos
             _connection.Open();
             if (_debug)
             {
-                Logging.WriteLog($"Executing full SQL script {script}");
+                Logging.WriteDebug($"Executing full SQL script {script}","PostgreSQL: Script");
             }
 
             using var command = CreateCommand(script, []);
@@ -103,14 +103,13 @@ public sealed class DbService<TSchema>(bool debug = false) : IDbService, IDispos
 
     public NpgsqlDataReader Execute(string query, List<object> values)
     {
-        if (_debug)
-        {
-            Logging.WriteLog($"Executing query: {query}");
-            Logging.WriteLog($"With Params: {string.Join(", ", values.Select(value => value))}");
-        }
-
         _connection.Open();
         query = $"""SET search_path TO "{Schema.Name}";{query}""";
+        if (_debug)
+        {
+            Logging.WriteDebug($"Executing query: {query}", "PostgreSQL: Query");
+            Logging.WriteDebug($"With Params: {string.Join(", ", values.Select(value => value))}", "PostgreSQL: Query");
+        }
         using var cmd = CreateCommand(query, values);
 
         return cmd.ExecuteReader(CommandBehavior.CloseConnection);
@@ -120,7 +119,7 @@ public sealed class DbService<TSchema>(bool debug = false) : IDbService, IDispos
     {
         if (_debug)
         {
-            Logging.WriteLog($"Transaction Error: {ex.Message}");
+            Logging.WriteDebug($"Transaction Error: {ex.Message}");
         }
 
         if (!int.TryParse(ex.SqlState, out var errorCode))
@@ -247,10 +246,18 @@ public sealed class DbService<TSchema>(bool debug = false) : IDbService, IDispos
     
     internal void AddModelToCache<T>(T model) where T : Model
     {
-        if (!_caches.TryGetValue(typeof(T), out var cache))
+        var type = model.GetType();
+        if (!_caches.TryGetValue(type, out var cache))
         {
-            cache = new ModelCache<T>();
-            _caches[typeof(T)] = cache;
+            if (typeof(T) == type)
+            {
+                cache = new ModelCache<T>();
+            }
+            else
+            {
+                cache = ModelRegistry.Get(type).CreateCache;
+            }
+            _caches[type] = cache;
         }
         cache.Add(model);
     }

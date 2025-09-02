@@ -197,6 +197,7 @@ internal interface IModelInfo
     DbField? PrimaryField { get; }
 
     Model Create();
+    IModelCache CreateCache { get; }
     Type ListType { get; }
     string TableName { get; }
     public void SetListNavigation(Action<Model, object> action, Model model, List<Model> models);
@@ -216,6 +217,7 @@ internal class ModelInfo<T>(Model model) : IModelInfo where T : Model, new()
     public Dictionary<string, NavigationListInfo> NavigationLists { get; } = [];
     public DbField? PrimaryField { get; set; }
     public Model Create() => new T();
+    public IModelCache CreateCache => new ModelCache<T>();
     public Type ListType => typeof(List<T>);
     public string TableName => Model.TableName<T>();
     public void SetListNavigation(Action<Model, object> action, Model model, List<Model> models)

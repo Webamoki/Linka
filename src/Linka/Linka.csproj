@@ -27,6 +27,6 @@
       <PackageReference Include="NUnit" Version="4.4.0" />
       <PackageReference Include="Sigil" Version="5.0.0" />
       <PackageReference Include="Testcontainers.PostgreSql" Version="4.6.0" />
-      <PackageReference Include="Webamoki.Utils" Version="1.0.2" />
+      <PackageReference Include="Webamoki.Utils" Version="1.0.5" />
     </ItemGroup>
 </Project>

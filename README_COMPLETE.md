@@ -1,4 +1,4 @@
-# Linka ORM
+﻿# Linka ORM
 
 A modern, type-safe Object-Relational Mapping (ORM) framework for .NET with PostgreSQL, designed for high performance and developer productivity.
 

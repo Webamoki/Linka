@@ -14,7 +14,8 @@ public class UpdateExpression<T, TSchema> where T : Model, new() where TSchema :
     private readonly Dictionary<string, object?> _setFields = [];
     public UpdateExpression(DbService<TSchema> db, Expression<Func<T, bool>> expression)
     {
-        if (!db.Schema.HasModel<T>()) throw new Exception($"Model {typeof(T).Name} not loaded for schema {db.Schema.Name}.");
+        var schema = Schema.Get<TSchema>();
+        if (!schema.HasModel<T>()) throw new Exception($"Model {typeof(T).Name} not loaded for schema {schema.Name}.");
         var ex = ExParser.Parse(expression, out var error);
         if (error != null)
             throw new Exception(error);

@@ -6,15 +6,24 @@ namespace Webamoki.Linka.ModelSystem;
 public abstract class Model
 {
     private static readonly Dictionary<Type, string> TableNames = [];
-
-    // public Model()
-    // {
-    //     if (!ModelRegistry.HasModel(GetType())) return;
-    //     foreach (var (fieldName, field) in GetFieldIterator().All())
-    //     {
-    //         fieldGetter(this).ResetChange();
-    //     }
-    // }
+    internal IDbService? DbService = null;
+    internal ModelUpdateRequest? UpdateRequest = null;
+    protected Model()
+    {
+        if (!ModelRegistry.HasModel(GetType())) return;
+        foreach (var (fieldName, field) in GetFieldIterator().All())
+        {
+            field.Model = this;
+            field.SetName(fieldName);
+        }
+    }
+    internal void ChangeField(string field, object? value)
+    {
+        if (DbService == null) return;
+        if (UpdateRequest == null) UpdateRequest = new(this);
+        UpdateRequest.AddSet(field, value);
+        DbService.UpdateModel(this);
+    }
     public static string TableName<T>() where T : Model => TableName(typeof(T));
     private static string TableName(Type type)
     {
@@ -29,7 +38,7 @@ public abstract class Model
         var info = ModelRegistry.Get(GetType());
         return info.FieldIterator(this);
     }
-
+    
     public static void SetTableName<T>(string tableName)
     {
         var type = typeof(T);

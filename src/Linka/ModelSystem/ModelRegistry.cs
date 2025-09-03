@@ -17,7 +17,7 @@ internal static class ModelRegistry
 
         throw new KeyNotFoundException($"The model {type.Name} was not loaded.");
     }
-    
+
     public static bool HasModel(Type type) => ModelInfos.ContainsKey(type);
 
     private static BaseNavigationAttribute GetNavigationAttribute(FieldInfo field)

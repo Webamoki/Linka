@@ -12,6 +12,8 @@ internal class ConditionQuery : Query
         Condition.AddBody(condition);
         Condition.AddValues(values);
     }
+    
+    public override bool IsEmpty() => base.IsEmpty() && Condition.IsEmpty();
     // private void AddCondition(string op, IQuery condition, string? value = null)
     // {
     //     var conditionQuery = Condition;

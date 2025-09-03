@@ -15,7 +15,9 @@ internal interface IDbService
 {
     NpgsqlDataReader Execute(string query, List<object> values);
     DatabaseCode ExecuteTransaction(string query, List<object> values);
+    
     Schema Schema { get; }
+    void UpdateModel(Model model);
 }
 
 public sealed class DbService<TSchema>(bool debug = false) : IDbService, IDisposable
@@ -24,7 +26,8 @@ public sealed class DbService<TSchema>(bool debug = false) : IDbService, IDispos
     private readonly NpgsqlConnection _connection = new(Linka.ConnectionString<TSchema>());
     private readonly bool _debug = debug || Linka.Debug;
     private readonly Dictionary<Type, IModelCache> _caches = [];
-
+    private readonly HashSet<Model> _toUpdate = [];
+    private readonly HashSet<Model> _toInsert =[];
     public Schema Schema => Schema.Get<TSchema>();
 
     public DatabaseCode ExecuteTransaction(string query, List<object> values)
@@ -258,7 +261,12 @@ public sealed class DbService<TSchema>(bool debug = false) : IDbService, IDispos
             }
             _caches[type] = cache;
         }
+        model.DbService = this;
         cache.Add(model);
+    }
+    public void UpdateModel(Model model) 
+    {
+        _toUpdate.Add(model);
     }
 
     internal IModelCache GetModelCache<T>() where T : Model
@@ -270,6 +278,30 @@ public sealed class DbService<TSchema>(bool debug = false) : IDbService, IDispos
         }
         return cache;
     }
+    
+    public void SaveChanges()
+    {
+        var updateTransaction = new Query();
+        foreach (var model in _toUpdate)
+        {
+            if (model.DbService != this) throw new Exception("Model not managed by this database.");
+            if (model.UpdateRequest == null) throw new Exception("Model has no update request.");
+            if (model.UpdateRequest.ChangedFields.Count == 0) throw new Exception("No changes to save.");
+            var info = ModelRegistry.Get(model.GetType());
+            var updateQuery = new UpdateQuery(info.TableName);
+            foreach (var (field, value) in model.UpdateRequest.ChangedFields)
+            {
+                updateQuery.AddSet<TSchema>(info.Fields[field], value);
+            }
+            updateQuery.SetCondition(model.UpdateRequest.PrimaryKey, []);
+            if (!updateTransaction.IsEmpty()) updateTransaction.AddBody(";");
+            updateTransaction.AddBody(updateQuery);
+            model.UpdateRequest = null;
+        }
+        updateTransaction.ExecuteTransaction(this);
+        _toUpdate.Clear();
+    }
+    
 }
 
 public enum DatabaseCode

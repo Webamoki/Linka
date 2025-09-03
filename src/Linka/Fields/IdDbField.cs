@@ -73,7 +73,7 @@ public class IdDbField(Validator validator, int charSize)
     protected IdDbField(int length, string pool = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789") : this(IdValidator.Create(length, pool), length) { }
     public IdDbField() : this(10) { }
     public override string StringValue() => Value() ?? string.Empty;
-    
+
     public void GenerateValue() => Value(((IdValidator)Validator).GenerateValue());
 }
 

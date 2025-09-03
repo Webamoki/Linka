@@ -28,7 +28,11 @@ internal class UpdateQuery(string table, string? alias = null) : ConditionQuery
         if (!_set.IsEmpty()) _set.AddBody(",");
         _set.AddBody(column);
     }
-
+    
+    public override bool IsEmpty()
+    {
+        return base.IsEmpty() && _set.IsEmpty();
+    }
     internal override string Render(out List<object> values)
     {
         ResetBody();

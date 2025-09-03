@@ -8,11 +8,11 @@ public abstract class DbField(
     Validator validator,
     string sqlType)
 {
-    
+    internal Model? Model = null;
     internal bool IsPrimary { get; set; }
     internal bool IsUnique { get; set; }
     internal int Search { get; set; }
-    internal bool IsRequired { get;  set; } = true;
+    internal bool IsRequired { get; set; } = true;
     /// <summary>
     ///     Returns the SQL type of the field, e.g., varchar, int, tinyint, datetime, etc.
     /// </summary>
@@ -101,7 +101,11 @@ public abstract class RefDbField<T>(
         }
     }
 
-    public void Value(T? value) => _value = value;
+    public void Value(T? value)
+    {
+        _value = value;
+        Model?.ChangeField(Name, _value);
+    }
 
     public override bool IsValid(out string? message)
     {
@@ -141,6 +145,7 @@ public abstract class RefDbField<T>(
         queryValue = null;
         return $"'{value}'";
     }
+
 }
 
 /// <summary>
@@ -154,7 +159,11 @@ public abstract class StructDbField<T>(
 {
     private T? _value;
 
-    public void Value(T? value) => _value = value;
+    public void Value(T? value)
+    {
+        _value = value;
+        Model?.ChangeField(Name, _value);
+    }
 
     internal override void Value(object? value)
     {
@@ -189,6 +198,4 @@ public abstract class StructDbField<T>(
     }
 
     public static bool operator !=(StructDbField<T> left, T? right) => !(left == right);
-
-
 }

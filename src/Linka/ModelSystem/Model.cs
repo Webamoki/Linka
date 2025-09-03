@@ -17,11 +17,16 @@ public abstract class Model
             field.SetName(fieldName);
         }
     }
+
+    internal void ChangeReady()
+    {
+        if (DbService == null) return;
+        UpdateRequest ??= new(this);
+    }
     internal void ChangeField(string field, object? value)
     {
         if (DbService == null) return;
-        if (UpdateRequest == null) UpdateRequest = new(this);
-        UpdateRequest.AddSet(field, value);
+        UpdateRequest!.AddSet(field, value);
         DbService.UpdateModel(this);
     }
     public static string TableName<T>() where T : Model => TableName(typeof(T));

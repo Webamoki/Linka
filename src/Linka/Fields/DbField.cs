@@ -103,6 +103,7 @@ public abstract class RefDbField<T>(
 
     public void Value(T? value)
     {
+        Model?.ChangeReady();
         _value = value;
         Model?.ChangeField(Name, _value);
     }
@@ -161,6 +162,7 @@ public abstract class StructDbField<T>(
 
     public void Value(T? value)
     {
+        Model?.ChangeReady();
         _value = value;
         Model?.ChangeField(Name, _value);
     }

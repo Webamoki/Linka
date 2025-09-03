@@ -7,6 +7,7 @@ internal class InsertQuery(string table) : Query
     private int _values;
     public void AddColumn(string column) => _columns.Add(column);
 
+    public override bool IsEmpty() => base.IsEmpty() && _columns.Count == 0 && _valueMarkers.Count == 0;
     public override void AddValues(List<object> values)
     {
         _values++;

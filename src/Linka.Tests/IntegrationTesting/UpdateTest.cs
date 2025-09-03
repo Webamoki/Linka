@@ -64,4 +64,14 @@ public class UpdateTest
         Ensure.Equal(model2.Name.Value(),"Alice2");
         Ensure.Equal(model2.Rank.Value(),UserModel.RankEnum.User);
     }
+    
+    [Test]
+    public void DirectUpdatePrimaryKey_UserModel_ReturnsExpected()
+    {
+        using var db = new DbService<UserSchema>();
+        var model = db.Get<UserModel>(u => u.ID == "AAAAAAAAAA");
+        model.ID.Value("ZZZZZZZZZZ");
+        Ensure.Throws<Exception>(() => db.SaveChanges());
+    }
+    
 }

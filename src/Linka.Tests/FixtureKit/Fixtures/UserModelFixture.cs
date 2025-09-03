@@ -83,6 +83,7 @@ public class UserModelFixture : Fixture<UserSchema>, IFixture
         db.Insert(model3);
         db.Insert(model4);
         db.Insert(model5);
+        db.SaveChanges();
     }
 
 }

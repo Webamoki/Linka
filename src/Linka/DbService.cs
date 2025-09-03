@@ -178,7 +178,7 @@ public sealed class DbService<TSchema>(bool debug = false) : IDbService, IDispos
     public IncludeExpression<T, TSchema> Include<T>(Expression<Func<T, object>> expression) where T : Model, new() =>
         new(this, expression);
 
-    public DatabaseCode Insert<T>(T model) where T : Model
+    public void Insert<T>(T model) where T : Model
     {
         var info = ModelRegistry.Get<T>();
         var fieldIterator = model.GetFieldIterator();
@@ -204,46 +204,7 @@ public sealed class DbService<TSchema>(bool debug = false) : IDbService, IDispos
         {
             throw new InvalidOperationException($"Model validation failed: {string.Join(", ", validationErrors)}");
         }
-
-        // Create insert query
-        var insertQuery = new InsertQuery(info.TableName);
-        var values = new List<object>();
-
-        // Add columns and values for all set fields
-        foreach (var (fieldName, field) in fieldIterator.All())
-        {
-            // Only include fields that have been set and are not auto-generated primary keys
-            if (field.IsEmpty) continue;
-            var value = field.ObjectValue();
-            if (value is null) continue;
-            insertQuery.AddColumn(fieldName);
-
-            if (value is Enum)
-            {
-                var enumField = (IEnumDbField)field;
-                insertQuery.AddValueMarker($"'{value}'::\"{enumField.GetSchemaEnumName<TSchema>()}\"");
-            }
-            else
-            {
-                insertQuery.AddValueMarker();
-                values.Add(value);
-            }
-        }
-
-        if (values.Count == 0)
-        {
-            throw new InvalidOperationException("No fields have been set for insertion.");
-        }
-
-        insertQuery.AddValues(values);
-        var code = insertQuery.ExecuteTransaction(this);
-        if (code != DatabaseCode.Success)
-        {
-            throw new InvalidOperationException($"Insert failed with code {code}.");
-        }
-
-        AddModelToCache(model);
-        return code;
+        _toInsert.Add(model);
     }
 
     internal void AddModelToCache<T>(T model) where T : Model
@@ -279,9 +240,9 @@ public sealed class DbService<TSchema>(bool debug = false) : IDbService, IDispos
         return cache;
     }
     
-    public void SaveChanges()
+    public DatabaseCode SaveChanges()
     {
-        var updateTransaction = new Query();
+        var saveQuery = new Query();
         foreach (var model in _toUpdate)
         {
             if (model.DbService != this) throw new Exception("Model not managed by this database.");
@@ -294,12 +255,46 @@ public sealed class DbService<TSchema>(bool debug = false) : IDbService, IDispos
                 updateQuery.AddSet<TSchema>(info.Fields[field], value);
             }
             updateQuery.SetCondition(model.UpdateRequest.PrimaryKey, []);
-            if (!updateTransaction.IsEmpty()) updateTransaction.AddBody(";");
-            updateTransaction.AddBody(updateQuery);
+            if (!saveQuery.IsEmpty()) saveQuery.AddBody(";");
+            saveQuery.AddBody(updateQuery);
             model.UpdateRequest = null;
         }
-        updateTransaction.ExecuteTransaction(this);
+        foreach(var model in _toInsert)
+        {
+            var info = ModelRegistry.Get(model.GetType());
+            var insertQuery = new InsertQuery(info.TableName);
+            var values = new List<object>();
+            foreach (var (fieldName, field) in model.GetFieldIterator().All())
+            {
+                // Only include fields that have been set and are not auto-generated primary keys
+                if (field.IsEmpty) continue;
+                var value = field.ObjectValue();
+                if (value is null) continue;
+                insertQuery.AddColumn(fieldName);
+
+                if (value is Enum)
+                {
+                    var enumField = (IEnumDbField)field;
+                    insertQuery.AddValueMarker($"'{value}'::\"{enumField.GetSchemaEnumName<TSchema>()}\"");
+                }
+                else
+                {
+                    insertQuery.AddValueMarker();
+                    values.Add(value);
+                }
+            }
+            if (values.Count == 0)
+            {
+                throw new InvalidOperationException("No fields have been set for insertion.");
+            }
+            insertQuery.AddValues(values);
+            if (!saveQuery.IsEmpty()) saveQuery.AddBody(";");
+            saveQuery.AddBody(insertQuery);
+            AddModelToCache(model);
+        }
         _toUpdate.Clear();
+        _toInsert.Clear();
+        return saveQuery.ExecuteTransaction(this);
     }
     
 }

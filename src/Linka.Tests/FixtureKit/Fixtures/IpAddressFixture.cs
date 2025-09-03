@@ -13,5 +13,6 @@ public class IpAddressFixture : Fixture<UserSchema>, IFixture
             );
         using var db = new DbService<UserSchema>();
         db.Insert(model);
+        db.SaveChanges();
     }
 }

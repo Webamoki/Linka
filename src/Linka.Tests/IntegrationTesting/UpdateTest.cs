@@ -19,7 +19,7 @@ public class UpdateTest
             .Set(u => u.Name, "John2")
             .Set(u => u.Rank, UserModel.RankEnum.Admin)
             .Save();
-        
+
         using var db2 = new DbService<UserSchema>();
         var model = db2.Get<UserModel>(u => u.ID == "AAAAAAAAAA");
         Ensure.Equal("John2", model.Name.Value());
@@ -48,23 +48,23 @@ public class UpdateTest
         var model = db.Get<UserModel>(u => u.ID == "AAAAAAAAAA");
         model.Name.Value("John2");
         model.Rank.Value(UserModel.RankEnum.Admin);
-        
+
         var model2 = db.Get<UserModel>(u => u.ID == "BBBBBBBBBB");
         model2.Name.Value("Alice2");
         model2.Rank.Value(UserModel.RankEnum.User);
-        
+
         db.SaveChanges();
-        
+
         using var db2 = new DbService<UserSchema>();
         model = db2.Get<UserModel>(u => u.ID == "AAAAAAAAAA");
-        Ensure.Equal( model.Name.Value(),"John2");
-        Ensure.Equal(model.Rank.Value(),UserModel.RankEnum.Admin);
-        
+        Ensure.Equal(model.Name.Value(), "John2");
+        Ensure.Equal(model.Rank.Value(), UserModel.RankEnum.Admin);
+
         model2 = db2.Get<UserModel>(u => u.ID == "BBBBBBBBBB");
-        Ensure.Equal(model2.Name.Value(),"Alice2");
-        Ensure.Equal(model2.Rank.Value(),UserModel.RankEnum.User);
+        Ensure.Equal(model2.Name.Value(), "Alice2");
+        Ensure.Equal(model2.Rank.Value(), UserModel.RankEnum.User);
     }
-    
+
     [Test]
     public void DirectUpdatePrimaryKey_UserModel_ReturnsExpected()
     {
@@ -73,5 +73,5 @@ public class UpdateTest
         model.ID.Value("ZZZZZZZZZZ");
         Ensure.Throws<Exception>(() => db.SaveChanges());
     }
-    
+
 }

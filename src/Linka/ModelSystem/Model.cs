@@ -43,7 +43,7 @@ public abstract class Model
         var info = ModelRegistry.Get(GetType());
         return info.FieldIterator(this);
     }
-    
+
     public static void SetTableName<T>(string tableName)
     {
         var type = typeof(T);

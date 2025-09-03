@@ -147,6 +147,20 @@ public abstract class RefDbField<T>(
         return $"'{value}'";
     }
 
+    public override bool Equals(object obj)
+    {
+        if (ReferenceEquals(this, obj))
+        {
+            return true;
+        }
+
+        if (ReferenceEquals(obj, null))
+        {
+            return false;
+        }
+
+        throw new NotImplementedException();
+    }
 }
 
 /// <summary>
@@ -200,4 +214,19 @@ public abstract class StructDbField<T>(
     }
 
     public static bool operator !=(StructDbField<T> left, T? right) => !(left == right);
+
+    public override bool Equals(object obj)
+    {
+        if (ReferenceEquals(this, obj))
+        {
+            return true;
+        }
+
+        if (ReferenceEquals(obj, null))
+        {
+            return false;
+        }
+
+        throw new NotImplementedException();
+    }
 }

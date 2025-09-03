@@ -15,7 +15,7 @@ internal interface IDbService
 {
     NpgsqlDataReader Execute(string query, List<object> values);
     DatabaseCode ExecuteTransaction(string query, List<object> values);
-    
+
     Schema Schema { get; }
     void UpdateModel(Model model);
 }
@@ -27,7 +27,7 @@ public sealed class DbService<TSchema>(bool debug = false) : IDbService, IDispos
     private readonly bool _debug = debug || Linka.Debug;
     private readonly Dictionary<Type, IModelCache> _caches = [];
     private readonly HashSet<Model> _toUpdate = [];
-    private readonly HashSet<Model> _toInsert =[];
+    private readonly HashSet<Model> _toInsert = [];
     public Schema Schema => Schema.Get<TSchema>();
 
     public DatabaseCode ExecuteTransaction(string query, List<object> values)
@@ -225,7 +225,7 @@ public sealed class DbService<TSchema>(bool debug = false) : IDbService, IDispos
         model.DbService = this;
         cache.Add(model);
     }
-    public void UpdateModel(Model model) 
+    public void UpdateModel(Model model)
     {
         _toUpdate.Add(model);
     }
@@ -239,7 +239,7 @@ public sealed class DbService<TSchema>(bool debug = false) : IDbService, IDispos
         }
         return cache;
     }
-    
+
     public DatabaseCode SaveChanges()
     {
         var saveQuery = new Query();
@@ -259,7 +259,7 @@ public sealed class DbService<TSchema>(bool debug = false) : IDbService, IDispos
             saveQuery.AddBody(updateQuery);
             model.UpdateRequest = null;
         }
-        foreach(var model in _toInsert)
+        foreach (var model in _toInsert)
         {
             var info = ModelRegistry.Get(model.GetType());
             var insertQuery = new InsertQuery(info.TableName);
@@ -296,7 +296,7 @@ public sealed class DbService<TSchema>(bool debug = false) : IDbService, IDispos
         _toInsert.Clear();
         return saveQuery.ExecuteTransaction(this);
     }
-    
+
 }
 
 public enum DatabaseCode

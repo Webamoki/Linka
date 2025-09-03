@@ -74,12 +74,6 @@ public class TextDbField(Validator validator, int charSize)
 {
     public TextDbField(int maxLength = 255, int minLength = 1) : this(TextValidator.Create(minLength), maxLength) { }
     public override string StringValue() => Value() ?? throw new InvalidOperationException("Value is null");
-
-    public override object ObjectValue()
-    {
-        var value = Value() ?? throw new InvalidOperationException("Value is null");
-        return value;
-    }
 }
 
 public class NameDbField() : TextDbField(50);

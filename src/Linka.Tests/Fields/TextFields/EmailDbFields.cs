@@ -54,20 +54,13 @@ public class EmailDbFieldTest
     public void ChangesVerifyCorrectly()
     {
         var field = new EmailDbField();
-        Ensure.True(field.IsEmpty());
+        Ensure.True(field.IsEmpty);
         Ensure.Equal("VARCHAR(50)", field.SQLType);
         field.Value("test@gmail.com");
-        Ensure.False(field.IsEmpty());
-        Ensure.True(field.IsSet);
-        Ensure.False(field.IsChanged());
+        Ensure.False(field.IsEmpty);
         field.Value(null);
-        Ensure.True(field.IsEmpty());
-        Ensure.True(field.IsSet);
-        Ensure.True(field.IsChanged());
-        field.ResetChange();
-        Ensure.False(field.IsChanged());
+        Ensure.True(field.IsEmpty);
         Ensure.Equal(null, field.Value());
         field.Value("asd@gmail.com");
-        Ensure.True(field.IsChanged());
     }
 }

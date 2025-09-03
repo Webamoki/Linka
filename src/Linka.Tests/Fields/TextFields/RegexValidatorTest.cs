@@ -130,7 +130,7 @@ public class RegexValidatorTest
     public void HexColorDbField_ObjectValue_ThrowsIfUnset()
     {
         var field = new HexColorDbField();
-        Ensure.True(field.IsEmpty());
+        Ensure.True(field.IsEmpty);
         Ensure.Throws<InvalidOperationException>(() => _ = field.ObjectValue());
     }
 

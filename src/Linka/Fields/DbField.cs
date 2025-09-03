@@ -8,17 +8,16 @@ public abstract class DbField(
     Validator validator,
     string sqlType)
 {
-    public bool IsPrimary { get; internal set; }
-    public bool IsUnique { get; internal set; }
-    public int Search { get; internal set; }
-    public bool IsRequired { get; internal set; } = true;
-    public bool IsSet { get; protected set; }
-
+    
+    internal bool IsPrimary { get; set; }
+    internal bool IsUnique { get; set; }
+    internal int Search { get; set; }
+    internal bool IsRequired { get;  set; } = true;
     /// <summary>
     ///     Returns the SQL type of the field, e.g., varchar, int, tinyint, datetime, etc.
     /// </summary>
     /// <value>The SQL type as a string.</value>
-    public string SQLType { get; } = sqlType;
+    internal string SQLType { get; } = sqlType;
 
     public Validator Validator { get; } = validator;
 
@@ -53,7 +52,9 @@ public abstract class DbField(
     }
 
     public abstract string StringValue();
-    public abstract object ObjectValue();
+    internal abstract object ObjectValue();
+    internal abstract void Value(object? value);
+    public virtual bool IsEmpty => true;
 
     public bool IsValid(object? value, out string? message)
     {
@@ -72,9 +73,6 @@ public abstract class DbField(
         return Validator.IsValid(value ?? throw new InvalidOperationException(), out message);
     }
 
-    public abstract void LoadValue(object? value);
-    public abstract bool IsChanged();
-    public abstract void ResetChange();
     public abstract bool IsValid(out string? message);
 
     internal abstract ConditionEx<T> ParseEx<T>(string op, object value) where T : Model;
@@ -87,9 +85,8 @@ public abstract class RefDbField<T>(
     : DbField(validator, sqlType)
 {
     private T? _value;
-    private T? _oldValue;
 
-    public override void LoadValue(object? value)
+    internal override void Value(object? value)
     {
         switch (value)
         {
@@ -104,45 +101,23 @@ public abstract class RefDbField<T>(
         }
     }
 
-    public void Value(T? value)
-    {
-        if (!IsSet)
-        {
-            if (value != null)
-            {
-                _value = value;
-                _oldValue = value;
-            }
-
-            IsSet = true;
-        }
-        else
-        {
-            _value = value;
-        }
-    }
-
-    public override bool IsChanged() =>
-        !EqualityComparer<T>.Default.Equals(_value, _oldValue);
-
-    public override void ResetChange() => _oldValue = _value;
-
+    public void Value(T? value) => _value = value;
 
     public override bool IsValid(out string? message)
     {
-        if (!IsSet) throw new InvalidOperationException();
+        if (IsEmpty) throw new InvalidOperationException();
         return IsValid(_value, out message);
     }
 
-    public bool IsEmpty() => _value == null;
+    public override bool IsEmpty => _value == null;
     public T? Value() => _value;
 
-    public override object? ObjectValue() => _value;
+    internal override object ObjectValue() => _value ?? throw new InvalidOperationException("Value is null");
 
     public static bool operator ==(RefDbField<T> left, T? right)
     {
-        if (left.IsEmpty() && right == null) return true;
-        if (left.IsEmpty() || right == null) return false;
+        if (left.IsEmpty && right == null) return true;
+        if (left.IsEmpty || right == null) return false;
         return left.Value()!.Equals(right);
     }
 
@@ -166,26 +141,6 @@ public abstract class RefDbField<T>(
         queryValue = null;
         return $"'{value}'";
     }
-
-    public override bool Equals(object obj)
-    {
-        if (ReferenceEquals(this, obj))
-        {
-            return true;
-        }
-
-        if (ReferenceEquals(obj, null))
-        {
-            return false;
-        }
-
-        throw new NotImplementedException();
-    }
-
-    public override int GetHashCode()
-    {
-        throw new NotImplementedException();
-    }
 }
 
 /// <summary>
@@ -198,27 +153,10 @@ public abstract class StructDbField<T>(
     where T : struct
 {
     private T? _value;
-    private T? _oldValue;
 
-    public void Value(T? value)
-    {
-        if (!IsSet)
-        {
-            if (value != null)
-            {
-                _value = value;
-                _oldValue = value;
-            }
+    public void Value(T? value) => _value = value;
 
-            IsSet = true;
-        }
-        else
-        {
-            _value = value;
-        }
-    }
-
-    public override void LoadValue(object? value)
+    internal override void Value(object? value)
     {
         switch (value)
         {
@@ -226,54 +164,31 @@ public abstract class StructDbField<T>(
                 Value(t);
                 break;
             case null:
-                Value(default);
+                Value(null);
                 break;
             default:
                 throw new InvalidCastException($"Value is not of type {typeof(T).Name}");
         }
     }
-
-    public override bool IsChanged() => !Equals(_value, _oldValue);
-
-    public override void ResetChange() => _oldValue = _value;
-
     public override bool IsValid(out string? message)
     {
-        if (!IsSet) throw new InvalidOperationException();
+        if (IsEmpty) throw new InvalidOperationException();
         return IsValid(_value, out message);
     }
 
-    public bool IsEmpty() => _value == null;
-    public virtual T? Value() => _value;
+    public override bool IsEmpty => _value == null;
+    public T? Value() => _value;
 
-    public override object? ObjectValue() => _value;
+    internal override object ObjectValue() => _value ?? throw new InvalidOperationException("Value is null");
 
     public static bool operator ==(StructDbField<T> left, T? right)
     {
-        if (left.IsEmpty() && right == null) return true;
-        if (left.IsEmpty() || right == null) return false;
+        if (left.IsEmpty && right == null) return true;
+        if (left.IsEmpty || right == null) return false;
         return left.Value()!.Equals(right);
     }
 
     public static bool operator !=(StructDbField<T> left, T? right) => !(left == right);
 
-    public override bool Equals(object obj)
-    {
-        if (ReferenceEquals(this, obj))
-        {
-            return true;
-        }
 
-        if (ReferenceEquals(obj, null))
-        {
-            return false;
-        }
-
-        throw new NotImplementedException();
-    }
-
-    public override int GetHashCode()
-    {
-        throw new NotImplementedException();
-    }
 }

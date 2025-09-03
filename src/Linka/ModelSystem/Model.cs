@@ -7,6 +7,14 @@ public abstract class Model
 {
     private static readonly Dictionary<Type, string> TableNames = [];
 
+    // public Model()
+    // {
+    //     if (!ModelRegistry.HasModel(GetType())) return;
+    //     foreach (var (fieldName, field) in GetFieldIterator().All())
+    //     {
+    //         fieldGetter(this).ResetChange();
+    //     }
+    // }
     public static string TableName<T>() where T : Model => TableName(typeof(T));
     private static string TableName(Type type)
     {
@@ -42,7 +50,7 @@ public abstract class Model
             if (field.SQLType.StartsWith("ENUM")) value = reader.GetValue(reader.GetOrdinal(readerFieldName)).ToString();
             else value = reader[readerFieldName];
             if (value is DBNull) value = null;
-            field.LoadValue(value);
+            field.Value(value);
         }
     }
 
@@ -63,7 +71,7 @@ public abstract class Model
                 _ => throw new NotSupportedException(
                     $"Unsupported JSON value kind: {jsonElement.ValueKind} for field {fieldName} in model {type.Name}.")
             };
-            field.LoadValue(value);
+            field.Value(value);
         }
     }
 }

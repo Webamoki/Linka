@@ -18,13 +18,13 @@ public class Schema
     internal ISchemaGeneric? SchemaGeneric = null;
     internal readonly string Name;
 
-    public bool HasModel<T>() where T : Model => HasModel(typeof(T));
+    internal bool HasModel<T>() where T : Model => HasModel(typeof(T));
 
-    public bool HasModel(Type modelType) => Models.Contains(modelType);
+    internal bool HasModel(Type modelType) => Models.Contains(modelType);
 
-    public bool HasEnum<T>() where T : Enum => HasEnum(typeof(T));
-    public bool HasEnum(Type enumType) => Enums.ContainsKey(enumType);
-    public string GetEnumName<T>() where T : Enum => Enums[typeof(T)].Name;
+    internal bool HasEnum<T>() where T : Enum => HasEnum(typeof(T));
+    private bool HasEnum(Type enumType) => Enums.ContainsKey(enumType);
+    internal string GetEnumName<T>() where T : Enum => Enums[typeof(T)].Name;
 
     // ReSharper disable once MemberCanBeProtected.Global
     public Schema(string name)

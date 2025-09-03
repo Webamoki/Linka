@@ -53,7 +53,7 @@ internal interface IEnumDbField
 {
     string GetSchemaEnumName<TSchema>() where TSchema : Schema, new();
 }
-public class EnumDbField<T>() : StructDbField<T>(EnumValidator<T>.Create(), GetSqlType()), IEnumDbField
+public class EnumDbField<T>() : StructDbField<T>(EnumValidator<T>.Create(), "ENUM"), IEnumDbField
     where T : struct, Enum
 {
     public override string StringValue()
@@ -62,18 +62,13 @@ public class EnumDbField<T>() : StructDbField<T>(EnumValidator<T>.Create(), GetS
         return value.ToString();
     }
 
-    public override object ObjectValue()
+    internal override object ObjectValue()
     {
         var value = Value() ?? throw new InvalidOperationException("Value is null");
         return value;
     }
 
-    private static string GetSqlType()
-    {
-        return $"ENUM ({string.Join(",", Enum.GetNames(typeof(T)).Select(name => $"'{name}'"))})";
-    }
-
-    public override void LoadValue(object? value)
+    internal override void Value(object? value)
     {
         if (value is string strValue)
         {
@@ -85,7 +80,7 @@ public class EnumDbField<T>() : StructDbField<T>(EnumValidator<T>.Create(), GetS
             }
         }
 
-        base.LoadValue(value);
+        base.Value(value);
     }
 
     public string GetSchemaEnumName<TSchema>() where TSchema : Schema, new()

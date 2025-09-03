@@ -75,7 +75,7 @@ public class DateTimeDbFieldTest
     public void DateTimeDbField_StringValue_ThrowsIfUnset()
     {
         var field = new DateTimeDbField();
-        Ensure.True(field.IsEmpty());
+        Ensure.True(field.IsEmpty);
         Ensure.Throws<InvalidOperationException>(() => _ = field.StringValue());
     }
 
@@ -99,21 +99,14 @@ public class DateTimeDbFieldTest
     public void ChangesVerifyCorrectly()
     {
         var field = new DateDbField();
-        Ensure.True(field.IsEmpty());
+        Ensure.True(field.IsEmpty);
         Ensure.Equal("DATE", field.SQLType);
         field.Value("2025-04-22");
-        Ensure.False(field.IsEmpty());
-        Ensure.True(field.IsSet);
-        Ensure.False(field.IsChanged());
+        Ensure.False(field.IsEmpty);
         field.Value(null);
-        Ensure.True(field.IsEmpty());
-        Ensure.True(field.IsSet);
-        Ensure.True(field.IsChanged());
-        field.ResetChange();
-        Ensure.False(field.IsChanged());
+        Ensure.True(field.IsEmpty);
         Ensure.Equal(null, field.Value());
         field.Value("2021-04-22");
-        Ensure.True(field.IsChanged());
     }
 
     [Test]
@@ -128,8 +121,7 @@ public class DateTimeDbFieldTest
         var fieldValue = field.Value();
 
         Ensure.NotNull(fieldValue);
-        Ensure.True(field.IsSet);
-        Ensure.False(field.IsEmpty());
+        Ensure.False(field.IsEmpty);
 
         // Parse the field value to verify it's a valid datetime
         var parsedDateTime = DateTime.ParseExact(fieldValue!, "yyyy-MM-dd HH:mm:ss", null);
@@ -139,31 +131,6 @@ public class DateTimeDbFieldTest
         Ensure.True(parsedDateTime <= afterCall.AddSeconds(1));
     }
 
-    [Test]
-    public void SetNow_SetsFieldAsChanged_WhenPreviouslySet()
-    {
-        var field = new DateTimeDbField();
-        field.Value("2020-01-01 00:00:00");
-        field.ResetChange(); // Reset change tracking
-
-        Ensure.False(field.IsChanged());
-
-        field.SetNow();
-
-        Ensure.True(field.IsChanged());
-    }
-
-    [Test]
-    public void SetNow_SetsFieldAsNotChanged_WhenFirstTimeSet()
-    {
-        var field = new DateTimeDbField();
-        Ensure.True(field.IsEmpty());
-
-        field.SetNow();
-
-        Ensure.False(field.IsChanged()); // First time setting should not be marked as changed
-        Ensure.True(field.IsSet);
-    }
 
     [Test]
     public void SetNow_OverwritesPreviousValue()
@@ -179,7 +146,6 @@ public class DateTimeDbFieldTest
         var newValue = field.Value();
 
         Ensure.NotEqual(originalValue!, newValue!);
-        Ensure.True(field.IsSet);
     }
 
     [Test]
@@ -219,7 +185,6 @@ public class DateTimeDbFieldTest
         field.SetNow();
 
         // The field should be set but validation should fail
-        Ensure.True(field.IsSet);
         Ensure.False(field.IsValid(out var message));
         Ensure.Null(message);
     }
@@ -254,8 +219,7 @@ public class DateTimeDbFieldTest
         var fieldValue = field.Value();
 
         Ensure.NotNull(fieldValue);
-        Ensure.True(field.IsSet);
-        Ensure.False(field.IsEmpty());
+        Ensure.False(field.IsEmpty);
 
         // Parse the field value to verify it's a valid date
         var parsedDate = DateTime.ParseExact(fieldValue!, "yyyy-MM-dd", null);
@@ -288,13 +252,7 @@ public class DateTimeDbFieldTest
     {
         var field = new DateDbField();
         field.Value("2020-01-01");
-        field.ResetChange(); // Reset change tracking
-
-        Ensure.False(field.IsChanged());
-
         field.SetNow();
-
-        Ensure.True(field.IsChanged());
     }
 
     [Test]
@@ -321,7 +279,6 @@ public class DateTimeDbFieldTest
         var newValue = field.Value();
 
         Ensure.NotEqual(originalValue!, newValue!);
-        Ensure.True(field.IsSet);
 
         // New value should be today's date
         var today = DateTime.Now.ToString("yyyy-MM-dd");
@@ -332,7 +289,7 @@ public class DateTimeDbFieldTest
     public void DateTimeDbField_ObjectValue_ThrowsIfUnset()
     {
         var field = new DateTimeDbField();
-        Ensure.True(field.IsEmpty());
+        Ensure.True(field.IsEmpty);
         Ensure.Throws<InvalidOperationException>(() => _ = field.ObjectValue());
     }
 
@@ -349,7 +306,7 @@ public class DateTimeDbFieldTest
     public void DateDbField_ObjectValue_ThrowsIfUnset()
     {
         var field = new DateDbField();
-        Ensure.True(field.IsEmpty());
+        Ensure.True(field.IsEmpty);
         Ensure.Throws<InvalidOperationException>(() => _ = field.ObjectValue());
     }
 

@@ -55,7 +55,7 @@ public class IntDbFieldTest
     public void IntDbField_ObjectValue_ThrowsIfUnset()
     {
         var field = new IntDbField(0, 100);
-        Ensure.True(field.IsEmpty());
+        Ensure.True(field.IsEmpty);
         Ensure.Throws<InvalidOperationException>(() => _ = field.ObjectValue());
     }
 

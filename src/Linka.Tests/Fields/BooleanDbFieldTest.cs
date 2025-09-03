@@ -62,7 +62,7 @@ public class BooleanDbFieldTest
     public void BooleanDbField_ObjectValue_ThrowsIfUnset()
     {
         var field = new BooleanDbField();
-        Ensure.True(field.IsEmpty());
+        Ensure.True(field.IsEmpty);
         Ensure.Throws<InvalidOperationException>(() => _ = field.ObjectValue());
     }
 
@@ -77,20 +77,13 @@ public class BooleanDbFieldTest
     public void ChangesVerifyCorrectly()
     {
         var field = new BooleanDbField();
-        Ensure.True(field.IsEmpty());
+        Ensure.True(field.IsEmpty);
         Ensure.Equal("BOOLEAN", field.SQLType);
         field.Value(true);
-        Ensure.False(field.IsEmpty());
-        Ensure.True(field.IsSet);
-        Ensure.False(field.IsChanged());
+        Ensure.False(field.IsEmpty);
         field.Value(null);
-        Ensure.True(field.IsEmpty());
-        Ensure.True(field.IsSet);
-        Ensure.True(field.IsChanged());
-        field.ResetChange();
-        Ensure.False(field.IsChanged());
+        Ensure.True(field.IsEmpty);
         Ensure.Equal(null, field.Value());
         field.Value(false);
-        Ensure.True(field.IsChanged());
     }
 }

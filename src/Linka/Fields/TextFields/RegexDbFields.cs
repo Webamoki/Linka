@@ -20,12 +20,6 @@ public static class HexColorValidator
 public class HexColorDbField() : RefDbField<string>(HexColorValidator.Create(), "VARCHAR(6)")
 {
     public override string StringValue() => Value() ?? throw new InvalidOperationException("Value is null");
-
-    public override object ObjectValue()
-    {
-        var value = Value() ?? throw new InvalidOperationException("Value is null");
-        return value;
-    }
 }
 
 // Phone Field

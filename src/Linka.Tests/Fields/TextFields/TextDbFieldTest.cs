@@ -56,28 +56,21 @@ public class TextDbFieldTest
     public void ChangesVerifyCorrectly()
     {
         var field = new TextDbField(100, 10);
-        Ensure.True(field.IsEmpty());
+        Ensure.True(field.IsEmpty);
         Ensure.Equal("VARCHAR(100)", field.SQLType);
         field.Value("hello");
-        Ensure.False(field.IsEmpty());
-        Ensure.True(field.IsSet);
-        Ensure.False(field.IsChanged());
+        Ensure.False(field.IsEmpty);
         field.Value(null);
-        Ensure.True(field.IsEmpty());
-        Ensure.True(field.IsSet);
-        Ensure.True(field.IsChanged());
-        field.ResetChange();
-        Ensure.False(field.IsChanged());
+        Ensure.True(field.IsEmpty);
         Ensure.Equal(null, field.Value());
         field.Value("hello2");
-        Ensure.True(field.IsChanged());
     }
 
     [Test]
     public void NameDbField_ConstructsCorrectly()
     {
         var nameField = new NameDbField();
-        Ensure.True(nameField.IsEmpty());
+        Ensure.True(nameField.IsEmpty);
         Ensure.Equal("VARCHAR(50)", nameField.SQLType);
     }
 
@@ -85,7 +78,7 @@ public class TextDbFieldTest
     public void TextDbField_ObjectValue_ThrowsIfUnset()
     {
         var field = new TextDbField();
-        Ensure.True(field.IsEmpty());
+        Ensure.True(field.IsEmpty);
         Ensure.Throws<InvalidOperationException>(() => _ = field.ObjectValue());
     }
 

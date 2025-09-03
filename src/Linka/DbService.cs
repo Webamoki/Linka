@@ -183,7 +183,7 @@ public sealed class DbService<TSchema>(bool debug = false) : IDbService, IDispos
         var validationErrors = new List<string>();
         foreach (var (fieldName, field) in fieldIterator.All())
         {
-            if (!field.IsSet)
+            if (field.IsEmpty)
             {
                 if (info.Fields[fieldName].IsRequired)
                 {
@@ -210,22 +210,20 @@ public sealed class DbService<TSchema>(bool debug = false) : IDbService, IDispos
         foreach (var (fieldName, field) in fieldIterator.All())
         {
             // Only include fields that have been set and are not auto-generated primary keys
-            if (field.IsSet)
-            {
-                var value = field.ObjectValue();
-                if (value is null) continue;
-                insertQuery.AddColumn(fieldName);
+            if (field.IsEmpty) continue;
+            var value = field.ObjectValue();
+            if (value is null) continue;
+            insertQuery.AddColumn(fieldName);
 
-                if (value is Enum)
-                {
-                    var enumField = (IEnumDbField)field;
-                    insertQuery.AddValueMarker($"'{value}'::\"{enumField.GetSchemaEnumName<TSchema>()}\"");
-                }
-                else
-                {
-                    insertQuery.AddValueMarker();
-                    values.Add(value);
-                }
+            if (value is Enum)
+            {
+                var enumField = (IEnumDbField)field;
+                insertQuery.AddValueMarker($"'{value}'::\"{enumField.GetSchemaEnumName<TSchema>()}\"");
+            }
+            else
+            {
+                insertQuery.AddValueMarker();
+                values.Add(value);
             }
         }
 

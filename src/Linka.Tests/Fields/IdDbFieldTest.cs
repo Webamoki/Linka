@@ -57,7 +57,7 @@ public class IdDbFieldTest
     {
         var field = new IdDbField();
         Ensure.Equal("VARCHAR(10)", field.SQLType);
-        Ensure.True(field.IsEmpty());
+        Ensure.True(field.IsEmpty);
     }
 
     [Test]
@@ -76,12 +76,6 @@ public class IdDbFieldTest
         Ensure.Equal(value, field.StringValue());
     }
 
-    [Test]
-    public void IdDbField_ObjectValue_ReturnsEmptyIfUnset()
-    {
-        var field = new IdDbField();
-        Ensure.Equal(null, field.ObjectValue());
-    }
 
     [TestCase("ABCDEF1234")]
     [TestCase("XYZ9998888")]
@@ -113,22 +107,15 @@ public class IdDbFieldTest
     public void ChangesVerifyCorrectly()
     {
         var field = new ShortIdDbField();
-        Ensure.True(field.IsEmpty());
+        Ensure.True(field.IsEmpty);
         Ensure.Equal("VARCHAR(5)", field.SQLType);
         field.Value("AAAAA");
-        Ensure.False(field.IsEmpty());
+        Ensure.False(field.IsEmpty);
         Ensure.True(field.IsValid(out _));
-        Ensure.True(field.IsSet);
-        Ensure.False(field.IsChanged());
         field.Value(null);
-        Ensure.True(field.IsEmpty());
-        Ensure.True(field.IsSet);
-        Ensure.True(field.IsChanged());
-        field.ResetChange();
-        Ensure.False(field.IsChanged());
+        Ensure.True(field.IsEmpty);
         Ensure.Equal(null, field.Value());
         field.GenerateValue();
-        Ensure.True(field.IsChanged());
         Ensure.True(field.IsValid(out _));
     }
 }

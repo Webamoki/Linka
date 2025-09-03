@@ -20,7 +20,7 @@ internal class ModelCache<T> : IModelCache where T : Model
 
         foreach (var (fieldKey, field) in info.UniqueFields)
         {
-            if (!field.IsSet) continue;
+            if (field.IsEmpty) continue;
             var uniqueKey = GetUniqueKey((T)model, fieldKey);
             _uniqueCache[uniqueKey] = (T)model;
         }
@@ -52,7 +52,7 @@ internal class ModelCache<T> : IModelCache where T : Model
         _primaryCache.Remove(primaryKey);
         foreach (var (fieldKey, field) in info.UniqueFields)
         {
-            if (!field.IsSet) continue;
+            if (field.IsEmpty) continue;
             var uniqueKey = GetUniqueKey(model, fieldKey);
             _uniqueCache.Remove(uniqueKey);
         }
@@ -93,8 +93,7 @@ internal class ModelCache<T> : IModelCache where T : Model
         foreach (var (fieldKey, fieldValue) in setFields)
         {
             var field = info.FieldGetters[fieldKey](model);
-            field.LoadValue(fieldValue);
-            field.ResetChange();
+            field.Value(fieldValue);
         }
     }
 }

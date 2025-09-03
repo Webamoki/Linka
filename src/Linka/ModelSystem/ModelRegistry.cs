@@ -17,9 +17,8 @@ internal static class ModelRegistry
 
         throw new KeyNotFoundException($"The model {type.Name} was not loaded.");
     }
-
-    public static Model GetModel<T>() where T : Model => Get<T>().Model;
-
+    
+    public static bool HasModel(Type type) => ModelInfos.ContainsKey(type);
 
     private static BaseNavigationAttribute GetNavigationAttribute(FieldInfo field)
     {
@@ -42,11 +41,10 @@ internal static class ModelRegistry
     /// Executed after all models are injected.
     /// </summary>
     /// <typeparam name="T"></typeparam>
-    public static bool ApplyNavigations<T>(Schema schema) where T : Model, new()
+    public static void ApplyNavigations<T>(Schema schema) where T : Model, new()
     {
         var info = Get<T>();
-        if (info.Navigations.Count > 0 || info.NavigationLists.Count > 0)
-            return false;
+        if (info.Navigations.Count > 0 || info.NavigationLists.Count > 0) return;
         var navigations = typeof(T).GetFields();
         foreach (var navReflectionInfo in navigations)
         {
@@ -72,7 +70,7 @@ internal static class ModelRegistry
             {
                 if (targetInfo.PrimaryField == null)
                     throw new Exception(
-                        $"Model {targetInfo.Model.GetType().Namespace} has more than one primary key.");
+                        $"Model {targetInfo.TableName} has more than one primary key.");
                 targetFieldName = targetInfo.PrimaryField!.Name;
             }
             else if (navAttribute is PkNavigationListAttribute)
@@ -123,8 +121,6 @@ internal static class ModelRegistry
                 ));
             }
         }
-
-        return true;
     }
 
 
@@ -138,7 +134,7 @@ internal static class ModelRegistry
         var type = typeof(T);
         var model = new T();
 
-        var info = new ModelInfo<T>(model);
+        var info = new ModelInfo<T>();
         var fields = model.GetType().GetProperties();
 
         foreach (var propertyInfo in fields)
@@ -185,7 +181,6 @@ internal static class ModelRegistry
 
 internal interface IModelInfo
 {
-    Model Model { get; }
     Type ModelType { get; }
 
     Dictionary<string, DbField> Fields { get; }
@@ -204,9 +199,8 @@ internal interface IModelInfo
     FieldIterator FieldIterator(Model model);
 }
 
-internal class ModelInfo<T>(Model model) : IModelInfo where T : Model, new()
+internal class ModelInfo<T> : IModelInfo where T : Model, new()
 {
-    public Model Model { get; } = model;
     public Type ModelType => typeof(T);
     public Dictionary<string, DbField> Fields { get; } = [];
     public Dictionary<string, Func<Model, DbField>> FieldGetters { get; } = [];

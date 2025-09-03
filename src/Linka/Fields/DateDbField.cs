@@ -99,13 +99,13 @@ public class DateTimeDbField : RefDbField<string>
     public DateTimeDbField(DateTime? minDate = null, DateTime? maxDate = null) : this(minDate, maxDate, false) { }
     public override string StringValue() => Value() ?? throw new InvalidOperationException("Value is null");
 
-    public override object ObjectValue()
+    internal override object ObjectValue()
     {
         var value = Value() ?? throw new InvalidOperationException("Value is null");
         return DateTime.Parse(value);
     }
 
-    public override void LoadValue(object? value)
+    internal override void Value(object? value)
     {
         switch (value)
         {
@@ -151,7 +151,7 @@ public class DateTimeDbField : RefDbField<string>
 
 public class DateDbField(DateTime? minDate = null, DateTime? maxDate = null) : DateTimeDbField(minDate, maxDate, true)
 {
-    public override void LoadValue(object? value)
+    internal override void Value(object? value)
     {
         if (value is DateTime dateTime)
         {
@@ -167,7 +167,7 @@ public class DateDbField(DateTime? minDate = null, DateTime? maxDate = null) : D
         Value(DateTime.Now.ToString("yyyy-MM-dd"));
     }
 
-    public override object ObjectValue()
+    internal override object ObjectValue()
     {
         var value = Value() ?? throw new InvalidOperationException("Value is null");
         return DateTime.Parse(value).Date;

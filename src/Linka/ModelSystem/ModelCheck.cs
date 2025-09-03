@@ -41,14 +41,7 @@ public static class ModelCheck
                                         WHEN t.typname = 'bpchar' THEN 'char(' || (a.atttypmod - 4) || ')'
                                         WHEN t.typname = 'numeric' THEN 'numeric(' || ((a.atttypmod - 4) >> 16) || ',' || ((a.atttypmod - 4) & 65535) || ')'
                                         ELSE t.typname
-                                    END) AS ColumnType,
-                                    CASE
-                                        WHEN t.typtype = 'e' THEN (
-                                            SELECT string_agg(quote_literal(enumlabel), ',')
-                                            FROM pg_enum
-                                            WHERE enumtypid = t.oid
-                                        )
-                                    END AS EnumValues
+                                    END) AS ColumnType
                                 FROM pg_attribute a
                                 JOIN pg_class c ON a.attrelid = c.oid
                                 JOIN pg_namespace n ON c.relnamespace = n.oid
@@ -87,9 +80,14 @@ public static class ModelCheck
             Assert(field.IsPrimary, reader["IsPrimary"], $"Column {fieldName} in table {tableName} needs to be a primary key.");
             Assert(field.IsUnique, reader["IsUnique"], $"Column {fieldName} in table {tableName} needs to be unique.");
             Assert(!field.IsRequired, reader["IsNullable"], $"Column {fieldName} in table {tableName} needs to be nullable.");
-            var enumValues = reader["EnumValues"];
-            var expectedType = enumValues == DBNull.Value ? reader["ColumnType"] : $"ENUM ({enumValues})";
-            Assert(field.SQLType, expectedType, $"Column {fieldName} in table {tableName} has unexpected type. Expected: {field.SQLType}, got: {expectedType}.");
+            var expectedType = reader["ColumnType"];
+            var sqlType = field.SQLType;
+            if (field is IEnumDbField enumField)
+            {
+                sqlType = $"{enumField.GetSchemaEnumName<T>()}";
+                sqlType = sqlType.ToUpper();
+            }
+            Assert(sqlType, expectedType, $"Column {fieldName} in table {tableName} has unexpected type. Expected: {field.SQLType}, got: {expectedType}.");
         }
         if (fieldNames.Count > 0)
             throw new Exception($"Fields {string.Join(", ", fieldNames)} do not exist in table: {tableName}.");

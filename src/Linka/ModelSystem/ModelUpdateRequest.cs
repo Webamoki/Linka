@@ -1,13 +1,12 @@
-﻿using Webamoki.Linka.Expressions;
-using Webamoki.Linka.Fields;
+﻿using Webamoki.Linka.Fields;
 using Webamoki.Linka.Queries;
 
 namespace Webamoki.Linka.ModelSystem;
 
 internal class ModelUpdateRequest
 {
-    internal readonly Query PrimaryKey = new();
     internal readonly Dictionary<string, object?> ChangedFields = [];
+    internal readonly Query PrimaryKey = new();
     public ModelUpdateRequest(Model model)
     {
         var schema = model.DbService!.Schema;
@@ -18,13 +17,9 @@ internal class ModelUpdateRequest
             var field = info.FieldGetters[fieldKey](model);
             if (!PrimaryKey.IsEmpty()) PrimaryKey.AddBody("AND");
             if (field.IsEmpty)
-            {
                 PrimaryKey.AddBody($"\"{tableName}\".\"{fieldKey}\" IS NULL");
-            }
             else if (field is IEnumDbField enumField)
-            {
                 PrimaryKey.AddBody($"\"{tableName}\".\"{fieldKey}\" = '{field.StringValue()}'::\"{enumField.GetSchemaEnumName(schema)}\"");
-            }
             else
             {
                 PrimaryKey.AddBody($"\"{fieldKey}\" = ?");
@@ -32,8 +27,5 @@ internal class ModelUpdateRequest
             }
         }
     }
-    public void AddSet(string field, object? value)
-    {
-        ChangedFields[field] = value;
-    }
+    public void AddSet(string field, object? value) => ChangedFields[field] = value;
 }

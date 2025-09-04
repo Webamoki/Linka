@@ -1,5 +1,4 @@
-﻿
-using Webamoki.Linka.SchemaSystem;
+﻿using Webamoki.Linka.SchemaSystem;
 
 namespace Webamoki.Linka.Testing;
 
@@ -16,8 +15,5 @@ public abstract class Fixture<T> : IFixture where T : Schema, new()
 
     public Schema Schema() => SchemaSystem.Schema.Get<T>();
 
-    public void TryCompile()
-    {
-        Linka.TryCompile<T>();
-    }
+    public void TryCompile() => Linka.TryCompile<T>();
 }

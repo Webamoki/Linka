@@ -36,11 +36,7 @@ public class DeleteTest
         var logs = Logging.GetHeldLogs("PostgreSQL: Query");
         Ensure.Count(logs, 0);
 
-
-
         Logging.Hold("PostgreSQL: Query");
-
-
 
         model = db.GetOrNull<UserModel>(u => u.ID == "AAAAAAAAAA");
         Ensure.Null(model);

@@ -4,10 +4,11 @@ namespace Webamoki.Linka;
 
 public static class Linka
 {
-    public static bool Debug { internal get; set; }
     private static readonly HashSet<Type> CompiledSchemas = [];
     private static readonly Dictionary<string, string> DatabaseConnections = [];
     private static readonly Dictionary<string, string> SchemaDatabases = [];
+
+    public static bool Debug { internal get; set; }
 
     internal static string ConnectionString<T>() where T : Schema, new()
     {
@@ -37,10 +38,7 @@ public static class Linka
         if (schemaAttributes.Count == 0)
             throw new Exception($"No ModelAttribute found for Schema {typeof(T).Name}. " +
                                 "Please add a ModelAttribute to the constructor of the Schema class.");
-        foreach (var attribute in schemaAttributes)
-        {
-            attribute.CompileConnections<T>();
-        }
+        foreach (var attribute in schemaAttributes) attribute.CompileConnections<T>();
 
         return true;
     }

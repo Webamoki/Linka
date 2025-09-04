@@ -9,8 +9,8 @@ namespace Webamoki.Linka.Expressions;
 public class UpdateExpression<T, TSchema> where T : Model, new() where TSchema : Schema, new()
 {
     private readonly DbService<TSchema> _dbService;
-    private readonly UpdateQuery _query;
     private readonly IEx<T> _expression;
+    private readonly UpdateQuery _query;
     private readonly Dictionary<string, object?> _setFields = [];
     public UpdateExpression(DbService<TSchema> db, Expression<Func<T, bool>> expression)
     {
@@ -31,24 +31,21 @@ public class UpdateExpression<T, TSchema> where T : Model, new() where TSchema :
         {
             var fieldName = fieldExpr.Member.Name;
             var fieldObj = ModelRegistry.Get<T>().Fields.TryGetValue(fieldName, out var f) ? f : throw new Exception($"Field {fieldName} not found in model {typeof(T).Name}");
-            if (!fieldObj.IsValid(value, out var message))
-            {
-                throw new FormatException($"Invalid value for field {fieldName}: {message}");
-            }
+            if (!fieldObj.IsValid(value, out var message)) throw new FormatException($"Invalid value for field {fieldName}: {message}");
+
             if (!_setFields.TryAdd(fieldName, value)) throw new Exception($"Field {fieldName} already set.");
             _query.AddSet<TSchema>(fieldObj, value);
         }
         else throw new Exception($"Invalid set expression: {field}");
+
         return this;
     }
 
     public void Save()
     {
         var code = _query.ExecuteTransaction(_dbService);
-        if (code != DatabaseCode.Success)
-        {
-            throw new InvalidOperationException($"Update failed with code {code}.");
-        }
+        if (code != DatabaseCode.Success) throw new InvalidOperationException($"Update failed with code {code}.");
+
         var cache = (ModelCache<T>)_dbService.GetModelCache<T>();
         cache.Update(_expression, _setFields);
     }

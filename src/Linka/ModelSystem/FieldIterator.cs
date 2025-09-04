@@ -3,8 +3,8 @@
 namespace Webamoki.Linka.ModelSystem;
 
 /// <summary>
-/// Custom iterator for model field getters that provides efficient iteration
-/// without directly accessing the underlying dictionary each time.
+///     Custom iterator for model field getters that provides efficient iteration
+///     without directly accessing the underlying dictionary each time.
 /// </summary>
 internal class FieldIterator
 {
@@ -18,7 +18,7 @@ internal class FieldIterator
     }
 
     /// <summary>
-    /// Iterates through all fields in the model.
+    ///     Iterates through all fields in the model.
     /// </summary>
     public IEnumerable<(string FieldName, DbField Field)> All()
     {

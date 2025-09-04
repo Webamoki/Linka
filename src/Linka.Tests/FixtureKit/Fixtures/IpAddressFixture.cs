@@ -10,9 +10,9 @@ public class IpAddressFixture : Fixture<UserSchema>, IFixture
         var model = new IpAddressModel(
             "AAAAAAAAAA",
             "127.0.0.1"
-            );
+        );
         using var db = new DbService<UserSchema>();
         db.Insert(model);
-        db.SaveChanges();
+        _ = db.SaveChanges();
     }
 }

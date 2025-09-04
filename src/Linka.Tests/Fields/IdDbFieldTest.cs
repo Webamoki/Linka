@@ -18,10 +18,7 @@ public class IdDbFieldTest
 
     [TestCase(0)]
     [TestCase(-1)]
-    public void IdValidator_InvalidLength_Throws(int length)
-    {
-        Assert.Throws<ArgumentOutOfRangeException>(() => _ = IdValidator.Create(length, DefaultPool));
-    }
+    public void IdValidator_InvalidLength_Throws(int length) => Assert.Throws<ArgumentOutOfRangeException>(() => _ = IdValidator.Create(length, DefaultPool));
 
     [TestCase("ABAB", 4, "AB", true)]
     [TestCase("ABA", 4, "AB", false)]
@@ -75,7 +72,6 @@ public class IdDbFieldTest
         field.Value(value);
         Ensure.Equal(value, field.StringValue());
     }
-
 
     [TestCase("ABCDEF1234")]
     [TestCase("XYZ9998888")]

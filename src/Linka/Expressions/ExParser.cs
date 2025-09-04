@@ -6,8 +6,8 @@ using Webamoki.Linka.ModelSystem;
 namespace Webamoki.Linka.Expressions;
 
 /// <summary>
-/// This class is used to build SQL queries for given Model Classes.
-/// Contains methods to create Select queries and to parse conditions.
+///     This class is used to build SQL queries for given Model Classes.
+///     Contains methods to create Select queries and to parse conditions.
 /// </summary>
 internal static class ExParser
 {
@@ -25,7 +25,6 @@ internal static class ExParser
         }
     }
 
-
     private static IEx<T> ParseBinaryExpression<T>(BinaryExpression expr) where T : Model
     {
         var op = GetOperator(expr.NodeType);
@@ -35,10 +34,8 @@ internal static class ExParser
             if (!ModelRegistry.Get<T>().Fields.TryGetValue(fieldName, out var field))
                 throw new NotSupportedException($"Field {fieldName} not found in model {typeof(T).Name}");
             var value = ParseValueExpression(expr.Right);
-            if (!field.IsValid(value, out var message))
-            {
-                throw new FormatException($"Invalid value for field {fieldName}: {message}");
-            }
+            if (!field.IsValid(value, out var message)) throw new FormatException($"Invalid value for field {fieldName}: {message}");
+
             return ParseCondition<T>(fieldName, field, op, value);
         }
 
@@ -63,7 +60,7 @@ internal static class ExParser
         DbField field,
         string op,
         object? value
-        ) where T : Model
+    ) where T : Model
     {
         if (value is null)
         {
@@ -79,11 +76,6 @@ internal static class ExParser
 
         return field.ParseEx<T>(op, value);
     }
-
-
-
-
-
 
     private static string GetOperator(ExpressionType nodeType)
     {
@@ -118,6 +110,7 @@ internal static class ExParser
             case ConstantExpression constant:
                 return constant.Value!;
         }
+
         throw new NotSupportedException("Invalid Value Expression");
     }
 }

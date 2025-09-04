@@ -17,7 +17,6 @@ public class TextDbFieldTest
         Ensure.NotEqual(v1, v3);
     }
 
-
     [TestCase("hello", true)]
     [TestCase("", false)]
     [TestCase(null, false)]
@@ -28,22 +27,19 @@ public class TextDbFieldTest
         Ensure.Equal(expected, validator.IsValid(input, out _));
     }
 
-
-    [TestCase("hi", true)]         // within 2-5
-    [TestCase("hello", true)]      // boundary max
-    [TestCase("h", false)]         // below min
-    [TestCase("too long", false)]  // above max
-
-    [TestCase("he", true)]         // exactly min
-    [TestCase("hell", true)]       // just under max
-    [TestCase("toolong", false)]   // still too long
-    [TestCase("a", false)]         // still too short
+    [TestCase("hi", true)] // within 2-5
+    [TestCase("hello", true)] // boundary max
+    [TestCase("h", false)] // below min
+    [TestCase("too long", false)] // above max
+    [TestCase("he", true)] // exactly min
+    [TestCase("hell", true)] // just under max
+    [TestCase("toolong", false)] // still too long
+    [TestCase("a", false)] // still too short
     public void CreateValidator_CustomRange_ValidatesProperly(object input, bool expected)
     {
         var validator = TextValidator.Create(2, 5);
         Ensure.Equal(expected, validator.IsValid(input, out _));
     }
-
 
     [Test]
     public void Constructor_InvalidMinLength_Throws()

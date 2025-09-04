@@ -1,9 +1,9 @@
-﻿
-namespace Webamoki.Linka.Queries;
+﻿namespace Webamoki.Linka.Queries;
 
 internal class ConditionQuery : Query
 {
     private Query? _condition;
+
     protected Query Condition => _condition ??= new Query();
 
     public void SetCondition(BaseQuery condition, List<object> values)
@@ -39,9 +39,6 @@ internal class ConditionQuery : Query
     //     AddCondition("AND", condition, value);
     // }
 
-
-
-
     // public void OrIn(AbstractModel|string $model, string $column, SelectQuery $query)
     // {
     //     $table = $model::TableName();
@@ -54,6 +51,3 @@ internal class ConditionQuery : Query
     //     $this->orCondition($inQuery);
     // }
 }
-
-
-

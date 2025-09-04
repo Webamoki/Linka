@@ -53,7 +53,7 @@ public class UpdateTest
         model2.Name.Value("Alice2");
         model2.Rank.Value(UserModel.RankEnum.User);
 
-        db.SaveChanges();
+        _ = db.SaveChanges();
 
         using var db2 = new DbService<UserSchema>();
         model = db2.Get<UserModel>(u => u.ID == "AAAAAAAAAA");
@@ -73,5 +73,4 @@ public class UpdateTest
         model.ID.Value("ZZZZZZZZZZ");
         Ensure.Throws<Exception>(() => db.SaveChanges());
     }
-
 }

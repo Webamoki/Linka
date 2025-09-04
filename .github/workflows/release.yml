@@ -6,14 +6,14 @@ on:
       - "v*"
 
 jobs:
-  format-check:
+  testing:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
 
       - name: Run dotnet format check
-        uses: ./.github/actions/dotnet-format
+        uses: ./.github/actions/dotnet-test
 
   publish:
     runs-on: ubuntu-latest

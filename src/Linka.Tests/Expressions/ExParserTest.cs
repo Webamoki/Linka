@@ -1,5 +1,5 @@
-﻿using System.Linq.Expressions;
-using NUnit.Framework;
+﻿using NUnit.Framework;
+using System.Linq.Expressions;
 using Tests.FixtureKit;
 using Webamoki.Linka.Expressions;
 using Webamoki.Linka.Testing;
@@ -11,7 +11,6 @@ namespace Tests.Expressions;
 [CompileSchema<UserSchema>]
 public class ExParserTest
 {
-
     private static string QuoteQuery(string query) =>
         query.Replace("`", "\"");
 
@@ -19,14 +18,13 @@ public class ExParserTest
     public void GetQuery_RendersExpected()
     {
         var query = GetExpression<UserModel, UserSchema>.GetQuery();
-        const string text = "SELECT `User`.`ID` as `User.ID` , `User`.`Name` as `User.Name` , `User`.`Email` as `User.Email` , `User`.`Phone` as `User.Phone` , `User`.`Rank`::text as `User.Rank` , `User`.`Session` as `User.Session` , `User`.`Password` as `User.Password` , `User`.`CartToken` as `User.CartToken` , `User`.`Created` as `User.Created` , `User`.`Verified` as `User.Verified` , `User`.`Login` as `User.Login` , `User`.`Credit` as `User.Credit` FROM `User`";
-
+        const string text =
+            "SELECT `User`.`ID` as `User.ID` , `User`.`Name` as `User.Name` , `User`.`Email` as `User.Email` , `User`.`Phone` as `User.Phone` , `User`.`Rank`::text as `User.Rank` , `User`.`Session` as `User.Session` , `User`.`Password` as `User.Password` , `User`.`CartToken` as `User.CartToken` , `User`.`Created` as `User.Created` , `User`.`Verified` as `User.Verified` , `User`.`Login` as `User.Login` , `User`.`Credit` as `User.Credit` FROM `User`";
         Ensure.Equal(QuoteQuery(text),
-            query.Render(out var values));
-        Logging.WriteLog(query.Render(out values));
+            query.Render(out _));
+        Logging.WriteLog(query.Render(out var values));
         Ensure.Empty(values);
     }
-
 
     [Test]
     public void ConditionSimple_RightFormat_RendersExpected()
@@ -55,9 +53,7 @@ public class ExParserTest
                 Ensure.Equal(expectedValue, values[0]);
             }
             else
-            {
                 Ensure.Empty(values);
-            }
 
             Ensure.Null(error);
         }
@@ -96,9 +92,7 @@ public class ExParserTest
                 Ensure.Equal(expectedValue, values[0]);
             }
             else
-            {
                 Ensure.Empty(values);
-            }
 
             Ensure.Null(error);
         }
@@ -109,8 +103,7 @@ public class ExParserTest
     {
         var valuesToCheck = new List<(Expression<Func<UserModel, bool>> expression, string error)>
         {
-            (a => a.ID == "F", "Invalid value for field ID: Value length is not 10"),
-            (a => a.ID == null, "Invalid value for field ID: Value cannot be null")
+            (a => a.ID == "F", "Invalid value for field ID: Value length is not 10"), (a => a.ID == null, "Invalid value for field ID: Value cannot be null")
         };
         foreach (var (expression, expectedError) in valuesToCheck)
         {
@@ -119,7 +112,6 @@ public class ExParserTest
             Ensure.Equal(expectedError, error);
         }
     }
-
 
     [Test]
     public void Condition_Layered_RendersExpected()
@@ -137,8 +129,8 @@ public class ExParserTest
             (a => a.ID == "AAAAAAAAAA" || a.ID == "BBBBBBBBBB" && a.ID != "CCCCCCCCCC", "(`User`.`ID` = 'AAAAAAAAAA' OR (`User`.`ID` = 'BBBBBBBBBB' AND `User`.`ID` != 'CCCCCCCCCC'))", null),
             (a => a.ID != "AAAAAAAAAA" && a.ID != "BBBBBBBBBB" || a.ID == "CCCCCCCCCC", "((`User`.`ID` != 'AAAAAAAAAA' AND `User`.`ID` != 'BBBBBBBBBB') OR `User`.`ID` = 'CCCCCCCCCC')", null),
             (a => a.ID != "AAAAAAAAAA" && (a.ID != "BBBBBBBBBB" || a.ID == "CCCCCCCCCC"), "(`User`.`ID` != 'AAAAAAAAAA' AND (`User`.`ID` != 'BBBBBBBBBB' OR `User`.`ID` = 'CCCCCCCCCC'))", null),
-            (a => a.Session == null || (a.Session != "sfffaaaaa" && a.Session == "sfffaaaaa"), "(`User`.`Session` IS NULL OR (`User`.`Session` != 'sfffaaaaa' AND `User`.`Session` = 'sfffaaaaa'))", null),
-            (a => a.Name == "Fred" || (a.Name == "George" && a.Name == "John"), "(`User`.`Name` = ? OR (`User`.`Name` = ? AND `User`.`Name` = ?))", ["Fred", "George", "John"])
+            (a => a.Session == null || a.Session != "sfffaaaaa" && a.Session == "sfffaaaaa", "(`User`.`Session` IS NULL OR (`User`.`Session` != 'sfffaaaaa' AND `User`.`Session` = 'sfffaaaaa'))", null),
+            (a => a.Name == "Fred" || a.Name == "George" && a.Name == "John", "(`User`.`Name` = ? OR (`User`.`Name` = ? AND `User`.`Name` = ?))", ["Fred", "George", "John"])
         };
         foreach (var (expression, expected, expectedValues) in valuesToCheck)
         {
@@ -148,15 +140,10 @@ public class ExParserTest
             if (expectedValues != null)
             {
                 Ensure.Count(values, expectedValues.Count);
-                for (var i = 0; i < expectedValues.Count; i++)
-                {
-                    Ensure.Equal(values[i], expectedValues[i]);
-                }
+                for (var i = 0; i < expectedValues.Count; i++) Ensure.Equal(values[i], expectedValues[i]);
             }
             else
-            {
                 Ensure.Empty(values);
-            }
 
             Ensure.Null(error);
         }

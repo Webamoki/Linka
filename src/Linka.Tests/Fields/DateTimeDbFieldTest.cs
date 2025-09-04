@@ -1,4 +1,5 @@
 ﻿using NUnit.Framework;
+using System.Globalization;
 using Webamoki.Linka.Fields;
 using Webamoki.Utils.Testing;
 
@@ -23,7 +24,7 @@ public class DateTimeDbFieldTest
         var min = DateTime.Today.AddDays(1);
         var max = DateTime.Today;
 
-        Assert.Throws<ArgumentException>(() =>
+        _ = Assert.Throws<ArgumentException>(() =>
             _ = DateTimeValidator.Create(min, max, true));
     }
 
@@ -31,7 +32,7 @@ public class DateTimeDbFieldTest
     [TestCase("2025-12-31", true)]
     [TestCase("2031-01-01", false)] // too late
     [TestCase("2019-12-31", false)] // too early
-    [TestCase("22-04-25", false)]   // wrong format
+    [TestCase("22-04-25", false)] // wrong format
     [TestCase("2022/04/25", false)] // wrong delimiter
     public void Validator_ValidatesCorrectDateOnlyFormat(string input, bool expected)
     {
@@ -45,11 +46,11 @@ public class DateTimeDbFieldTest
     [TestCase("2022-04-25 10:30:00", true)]
     [TestCase("2020-01-01 00:00:00", true)]
     [TestCase("2030-01-01 23:59:59", false)]
-    [TestCase("2022-04-25", true)]             // missing time but okay
-    [TestCase("2022/04/25 10:30:00", false)]    // wrong delimiter
-    [TestCase("2022-04-25T10:30:00", false)]    // incorrect format
-    [TestCase("2019-12-31 23:59:59", false)]    // too early
-    [TestCase("2035-01-01 00:00:00", false)]    // too late
+    [TestCase("2022-04-25", true)] // missing time but okay
+    [TestCase("2022/04/25 10:30:00", false)] // wrong delimiter
+    [TestCase("2022-04-25T10:30:00", false)] // incorrect format
+    [TestCase("2019-12-31 23:59:59", false)] // too early
+    [TestCase("2035-01-01 00:00:00", false)] // too late
     public void Validator_ValidatesCorrectDateTimeFormat(string input, bool expected)
     {
         var min = new DateTime(2020, 1, 1);
@@ -61,7 +62,7 @@ public class DateTimeDbFieldTest
 
     [TestCase("2022-04-25 10:30:00", false)] // too late
     [TestCase("2019-12-31 23:59:59", false)] // too early
-    [TestCase("2020-06-01 12:00:00", true)]  // in range
+    [TestCase("2020-06-01 12:00:00", true)] // in range
     public void Validator_RejectsOutOfRangeDates(string input, bool expected)
     {
         var min = new DateTime(2020, 1, 1);
@@ -131,7 +132,6 @@ public class DateTimeDbFieldTest
         Ensure.True(parsedDateTime <= afterCall.AddSeconds(1));
     }
 
-
     [Test]
     public void SetNow_OverwritesPreviousValue()
     {
@@ -158,7 +158,7 @@ public class DateTimeDbFieldTest
 
         // Verify the string value matches the expected format
         Ensure.True(DateTime.TryParseExact(stringValue, "yyyy-MM-dd HH:mm:ss", null,
-            System.Globalization.DateTimeStyles.None, out _));
+            DateTimeStyles.None, out _));
     }
 
     [Test]
@@ -240,7 +240,7 @@ public class DateTimeDbFieldTest
         // Verify the format is date-only (yyyy-MM-dd)
         Ensure.Equal(fieldValue, stringValue);
         Ensure.True(DateTime.TryParseExact(stringValue, "yyyy-MM-dd", null,
-            System.Globalization.DateTimeStyles.None, out _));
+            DateTimeStyles.None, out _));
 
         // Ensure it doesn't contain time information
         Ensure.False(stringValue.Contains(" "));

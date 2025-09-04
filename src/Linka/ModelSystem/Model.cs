@@ -1,5 +1,5 @@
+﻿using Npgsql;
 using System.Text.Json;
-using Npgsql;
 
 namespace Webamoki.Linka.ModelSystem;
 
@@ -7,7 +7,7 @@ public abstract class Model
 {
     private static readonly Dictionary<Type, string> TableNames = [];
     internal IDbService? DbService = null;
-    internal ModelUpdateRequest? UpdateRequest = null;
+    internal ModelUpdateRequest? UpdateRequest;
     protected Model()
     {
         if (!ModelRegistry.HasModel(GetType())) return;
@@ -51,7 +51,7 @@ public abstract class Model
             throw new Exception($"Table name for {type.Name} already set.");
     }
 
-    internal void Load<T>(NpgsqlDataReader reader) where T : Model { Load(typeof(T), reader); }
+    internal void Load<T>(NpgsqlDataReader reader) where T : Model => Load(typeof(T), reader);
 
     internal void Load(Type type, NpgsqlDataReader reader)
     {
@@ -60,9 +60,7 @@ public abstract class Model
         foreach (var (fieldName, field) in fieldIterator.All())
         {
             var readerFieldName = $"{info.TableName}.{fieldName}";
-            object? value;
-            if (field.SQLType.StartsWith("ENUM")) value = reader.GetValue(reader.GetOrdinal(readerFieldName)).ToString();
-            else value = reader[readerFieldName];
+            var value = field.SQLType.StartsWith("ENUM") ? reader.GetValue(reader.GetOrdinal(readerFieldName)).ToString() : reader[readerFieldName];
             if (value is DBNull) value = null;
             field.Value(value);
         }

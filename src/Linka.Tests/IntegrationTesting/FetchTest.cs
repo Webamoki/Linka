@@ -38,10 +38,7 @@ public class FetchTest
         using var db = new DbService<UserSchema>();
         var model = db.GetOrNull<UserModel>(u => u.ID == "AAAAAAAAAA");
         Ensure.NotNull(model);
-        if (model != null)
-        {
-            Ensure.Equal("John", model.Name.Value());
-        }
+        if (model != null) Ensure.Equal("John", model.Name.Value());
         model = db.GetOrNull<UserModel>(u => u.ID == "ZZZZZZZZZZ");
         Ensure.Null(model);
     }

@@ -1,8 +1,5 @@
 ﻿namespace Webamoki.Linka.SchemaSystem;
 
-
-
-
 [AttributeUsage(AttributeTargets.Constructor, AllowMultiple = true)]
 public class EnumAttribute<T> : Attribute, ISchemaCompileAttribute
     where T : Enum, new()
@@ -18,11 +15,8 @@ public class EnumAttribute<T> : Attribute, ISchemaCompileAttribute
             name += "Enum";
         schema.Enums.Add(typeof(T), (name, GetSqlType()));
     }
-    private static string GetSqlType()
-    {
-        return $"ENUM ({string.Join(",", Enum.GetNames(typeof(T)).Select(name => $"'{name}'"))})";
-    }
     public void CompileConnections<TSchema>() where TSchema : Schema, new()
     {
     }
+    private static string GetSqlType() => $"ENUM ({string.Join(",", Enum.GetNames(typeof(T)).Select(name => $"'{name}'"))})";
 }

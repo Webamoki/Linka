@@ -21,7 +21,6 @@ public class EnumValidatorTest
         Ensure.Equal(validator1, validator2);
     }
 
-
     [TestCase(TestEnum.Alpha)]
     [TestCase("Alpha")]
     [TestCase(TestEnum.Gamma)]
@@ -82,6 +81,6 @@ public class EnumValidatorTest
     public void EnumDbField_StringValue_ThrowsWhenUnset()
     {
         var field = new EnumDbField<TestEnum>();
-        Ensure.Throws<Exception>(() => field.StringValue());
+        Ensure.Throws<Exception>(field.StringValue);
     }
 }

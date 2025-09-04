@@ -14,7 +14,6 @@ public static class ModelCheck
         CheckFulltext<T>(modelType);
     }
 
-
     private static void CheckFields<T>(Type modelType) where T : Schema, new()
     {
         var schema = Schema.Get<T>();
@@ -67,7 +66,7 @@ public static class ModelCheck
         var reader = query.Execute(dbService);
         HashSet<string> fieldNames = [];
         foreach (var (fieldName, _) in ModelRegistry.Get(modelType).Fields)
-            fieldNames.Add(fieldName);
+            _ = fieldNames.Add(fieldName);
 
         var fields = ModelRegistry.Get(modelType).Fields;
         while (reader.Read())
@@ -75,7 +74,7 @@ public static class ModelCheck
             if (fieldNames.Count == 0) throw new Exception("Table has more fields than expected.");
             var fieldName = reader.GetString(0);
             Logging.WriteLog($"--- Verifying field {fieldName} in model {tableName}");
-            fieldNames.Remove(fieldName);
+            _ = fieldNames.Remove(fieldName);
             if (!fields.TryGetValue(fieldName, out var field)) throw new Exception($"Field {fieldName} does not exist in model: {tableName}.");
             Assert(field.IsPrimary, reader["IsPrimary"], $"Column {fieldName} in table {tableName} needs to be a primary key.");
             Assert(field.IsUnique, reader["IsUnique"], $"Column {fieldName} in table {tableName} needs to be unique.");
@@ -87,8 +86,10 @@ public static class ModelCheck
                 sqlType = $"{enumField.GetSchemaEnumName<T>()}";
                 sqlType = sqlType.ToUpper();
             }
+
             Assert(sqlType, expectedType, $"Column {fieldName} in table {tableName} has unexpected type. Expected: {field.SQLType}, got: {expectedType}.");
         }
+
         if (fieldNames.Count > 0)
             throw new Exception($"Fields {string.Join(", ", fieldNames)} do not exist in table: {tableName}.");
     }
@@ -115,7 +116,7 @@ public static class ModelCheck
                                     AND i.relname = ?
                                     AND am.amname = 'gin'
                                     AND ix.indisvalid = true
-                                
+
                                 """;
 
         var query = new Query(sqlQuery);
@@ -144,6 +145,7 @@ public static class ModelCheck
             Assert(definition, databaseDefinition, $"FullText index for model {tableName} does index all fields {fields}.");
             return;
         }
+
         throw new Exception($"FullText index for model {tableName} does not exist in schema {schema.Name}.");
     }
 
@@ -173,7 +175,7 @@ public static class ModelCheck
                                     tc.constraint_type = 'FOREIGN KEY'
                                     AND tc.table_schema = ?
                                     AND tc.table_name = ?;
-                                
+
                                 """;
 
         var query = new Query(sqlQuery);
@@ -187,7 +189,7 @@ public static class ModelCheck
         HashSet<string> navigationNames = [];
 
         foreach (var (navigationName, _) in ModelRegistry.Get(modelType).Navigations)
-            navigationNames.Add(navigationName);
+            _ = navigationNames.Add(navigationName);
 
         var navInfos = ModelRegistry.Get(modelType).Navigations;
         while (reader.Read())
@@ -199,7 +201,7 @@ public static class ModelCheck
                 throw new Exception($"Constraint {navigationName} does not match expected prefix {constraintPrefix} for table: {tableName}.");
             navigationName = navigationName[constraintPrefix.Length..];
             Logging.WriteLog($"Verifying navigation {navigationName} in model: {tableName}");
-            navigationNames.Remove(navigationName);
+            _ = navigationNames.Remove(navigationName);
             var navInfo = navInfos[navigationName];
             Assert(navInfo.Field, reader["Column"], $"Navigation {navigationName} in model {tableName} does not match expected field: {navInfo.Field}.");
             Assert(navInfo.TargetModelInfo.TableName, reader["TargetTable"], $"Navigation {navigationName} in model {tableName} does not match expected target table: {navInfo.TargetModelInfo.TableName}.");
@@ -207,6 +209,7 @@ public static class ModelCheck
             Assert(navInfo.Constraint.ToSqlString(), reader["OnDelete"], $"Navigation {navigationName} in model {tableName} does not match expected OnDelete action: {navInfo.Constraint.ToSqlString()}.");
             Assert("RESTRICT", reader["OnUpdate"], $"Navigation {navigationName} in model {tableName} does not match expected OnUpdate action: RESTRICT.");
         }
+
         if (navigationNames.Count > 0)
             throw new Exception($"Navigations {string.Join(", ", navigationNames)} do not exist in table: {tableName}.");
     }

@@ -59,8 +59,8 @@ public class BooleanDbField() : StructDbField<bool>(BooleanValueValidator.Create
         queryValue = null;
         return $"{value}";
     }
-
 }
+
 internal record BoolEx<T>(string Name, bool IsEqual, bool Value) : ConditionEx<T>(Name) where T : Model
 {
     public override string ToQuery(out List<object> values)

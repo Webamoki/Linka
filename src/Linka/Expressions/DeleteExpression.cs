@@ -8,8 +8,8 @@ namespace Webamoki.Linka.Expressions;
 internal class DeleteExpression<T, TSchema> where T : Model, new() where TSchema : Schema, new()
 {
     private readonly DbService<TSchema> _dbService;
-    private readonly DeleteQuery _query;
     private readonly IEx<T> _expression;
+    private readonly DeleteQuery _query;
     public DeleteExpression(DbService<TSchema> db, Expression<Func<T, bool>> expression)
     {
         var schema = Schema.Get<TSchema>();
@@ -24,16 +24,12 @@ internal class DeleteExpression<T, TSchema> where T : Model, new() where TSchema
         _dbService = db;
     }
 
-
     public void Delete()
     {
         var code = _query.ExecuteTransaction(_dbService);
-        if (code != DatabaseCode.Success)
-        {
-            throw new InvalidOperationException($"Delete failed with code {code}.");
-        }
+        if (code != DatabaseCode.Success) throw new InvalidOperationException($"Delete failed with code {code}.");
+
         var cache = (ModelCache<T>)_dbService.GetModelCache<T>();
         cache.Delete(_expression);
-
     }
 }

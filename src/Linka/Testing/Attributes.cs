@@ -15,10 +15,7 @@ public class FixturesAttribute<T> : Attribute, ITestAction where T : IFixture, n
         var testClass = test.ClassName!;
         var fixtureManager = FixtureManager.Get(testClass);
 
-        if (!fixtureManager.IsComplete())
-        {
-            fixtureManager.Add(new T());
-        }
+        if (!fixtureManager.IsComplete()) fixtureManager.Add(new T());
 
         var testClassAttributes = test.Fixture?.GetType().GetCustomAttributes(true) ?? [];
         var fixtureCount = testClassAttributes.Length;
@@ -40,18 +37,13 @@ public class FixturesAttribute<T> : Attribute, ITestAction where T : IFixture, n
     public ActionTargets Targets => ActionTargets.Test;
 }
 
-
 [AttributeUsage(AttributeTargets.Class)]
 public class CompileSchemaAttribute<T> : Attribute, ITestAction where T : Schema, new()
 {
-    public void BeforeTest(ITest test)
-    {
-        Linka.TryCompile<T>();
-    }
+    public void BeforeTest(ITest test) => Linka.TryCompile<T>();
 
     public void AfterTest(ITest test)
     {
-
     }
 
     public ActionTargets Targets => ActionTargets.Suite;

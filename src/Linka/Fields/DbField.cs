@@ -8,11 +8,17 @@ public abstract class DbField(
     Validator validator,
     string sqlType)
 {
+    private string? _name;
     internal Model? Model = null;
+
     internal bool IsPrimary { get; set; }
+
     internal bool IsUnique { get; set; }
+
     internal int Search { get; set; }
+
     internal bool IsRequired { get; set; } = true;
+
     /// <summary>
     ///     Returns the SQL type of the field, e.g., varchar, int, tinyint, datetime, etc.
     /// </summary>
@@ -21,8 +27,9 @@ public abstract class DbField(
 
     public Validator Validator { get; } = validator;
 
-    private string? _name;
     public string Name => _name ?? throw new InvalidOperationException("Name has not been set.");
+
+    public virtual bool IsEmpty => true;
 
     internal void SetName(string name)
     {
@@ -54,7 +61,6 @@ public abstract class DbField(
     public abstract string StringValue();
     internal abstract object ObjectValue();
     internal abstract void Value(object? value);
-    public virtual bool IsEmpty => true;
 
     public bool IsValid(object? value, out string? message)
     {
@@ -86,6 +92,8 @@ public abstract class RefDbField<T>(
 {
     private T? _value;
 
+    public override bool IsEmpty => _value == null;
+
     internal override void Value(object? value)
     {
         switch (value)
@@ -113,8 +121,6 @@ public abstract class RefDbField<T>(
         if (IsEmpty) throw new InvalidOperationException();
         return IsValid(_value, out message);
     }
-
-    public override bool IsEmpty => _value == null;
     public T? Value() => _value;
 
     internal override object ObjectValue() => _value ?? throw new InvalidOperationException("Value is null");
@@ -143,28 +149,25 @@ public abstract class RefDbField<T>(
             queryValue = value;
             return "?";
         }
+
         queryValue = null;
         return $"'{value}'";
     }
 
     public override bool Equals(object obj)
     {
-        if (ReferenceEquals(this, obj))
-        {
-            return true;
-        }
+        if (ReferenceEquals(this, obj)) return true;
 
-        if (ReferenceEquals(obj, null))
-        {
-            return false;
-        }
+        if (obj is null) return false;
 
         throw new NotImplementedException();
     }
+
+    public override int GetHashCode() => throw new NotImplementedException();
 }
 
 /// <summary>
-/// Same as AbstractDbField, but for structs like Boolean and Enum
+///     Same as AbstractDbField, but for structs like Boolean and Enum
 /// </summary>
 public abstract class StructDbField<T>(
     Validator validator,
@@ -173,6 +176,8 @@ public abstract class StructDbField<T>(
     where T : struct
 {
     private T? _value;
+
+    public override bool IsEmpty => _value == null;
 
     public void Value(T? value)
     {
@@ -200,8 +205,6 @@ public abstract class StructDbField<T>(
         if (IsEmpty) throw new InvalidOperationException();
         return IsValid(_value, out message);
     }
-
-    public override bool IsEmpty => _value == null;
     public T? Value() => _value;
 
     internal override object ObjectValue() => _value ?? throw new InvalidOperationException("Value is null");
@@ -217,16 +220,12 @@ public abstract class StructDbField<T>(
 
     public override bool Equals(object obj)
     {
-        if (ReferenceEquals(this, obj))
-        {
-            return true;
-        }
+        if (ReferenceEquals(this, obj)) return true;
 
-        if (ReferenceEquals(obj, null))
-        {
-            return false;
-        }
+        if (obj is null) return false;
 
         throw new NotImplementedException();
     }
+
+    public override int GetHashCode() => throw new NotImplementedException();
 }

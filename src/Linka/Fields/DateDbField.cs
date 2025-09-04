@@ -6,9 +6,9 @@ namespace Webamoki.Linka.Fields;
 
 public class DateTimeValidator : Validator
 {
-    private readonly DateTime _minDate;
-    private readonly DateTime _maxDate;
     private readonly bool _isDateOnly;
+    private readonly DateTime _maxDate;
+    private readonly DateTime _minDate;
 
     private DateTimeValidator(DateTime minDate, DateTime maxDate, bool isDateOnly)
     {
@@ -50,9 +50,10 @@ public class DateTimeValidator : Validator
         const string fallbackFormat = "yyyy-MM-dd"; // allow date-only even if expecting datetime
 
         if (DateTime.TryParseExact(str, primaryFormat, CultureInfo.InvariantCulture, DateTimeStyles.None,
-                out var parsed)
-            || (!_isDateOnly && DateTime.TryParseExact(str, fallbackFormat, CultureInfo.InvariantCulture,
-                DateTimeStyles.None, out parsed)))
+                out var parsed) ||
+            !_isDateOnly &&
+            DateTime.TryParseExact(str, fallbackFormat, CultureInfo.InvariantCulture,
+                DateTimeStyles.None, out parsed))
         {
         }
 
@@ -94,7 +95,8 @@ public class DateTimeDbField : RefDbField<string>
     protected DateTimeDbField(DateTime? minDate, DateTime? maxDate, bool isDateOnly)
         : base(
             DateTimeValidator.Create(minDate, maxDate, isDateOnly), isDateOnly ? "DATE" : "TIMESTAMP(0)")
-    { }
+    {
+    }
 
     public DateTimeDbField(DateTime? minDate = null, DateTime? maxDate = null) : this(minDate, maxDate, false) { }
     public override string StringValue() => Value() ?? throw new InvalidOperationException("Value is null");
@@ -113,7 +115,7 @@ public class DateTimeDbField : RefDbField<string>
                 Value(dateTime.ToString("yyyy-MM-dd HH:mm:ss"));
                 return;
             case string str:
-                Validator.IsValid(str, out _);
+                _ = Validator.IsValid(str, out _);
                 Value(str);
                 return;
             default:
@@ -121,10 +123,7 @@ public class DateTimeDbField : RefDbField<string>
         }
     }
 
-    public void SetNow()
-    {
-        Value(DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss"));
-    }
+    public void SetNow() => Value(DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss"));
     public static bool operator <=(DateTimeDbField left, string right) =>
         DateTimeValidator.LessThanOrEqual(left.Value() ?? throw new InvalidOperationException("Value is null"), right);
 
@@ -146,7 +145,6 @@ public class DateTimeDbField : RefDbField<string>
             _ => throw new NotSupportedException($"Operator {op} is not supported for datetime fields.")
         };
     }
-
 }
 
 public class DateDbField(DateTime? minDate = null, DateTime? maxDate = null) : DateTimeDbField(minDate, maxDate, true)
@@ -162,10 +160,7 @@ public class DateDbField(DateTime? minDate = null, DateTime? maxDate = null) : D
         throw new Exception("Value is not a valid datetime string");
     }
 
-    public new void SetNow()
-    {
-        Value(DateTime.Now.ToString("yyyy-MM-dd"));
-    }
+    public new void SetNow() => Value(DateTime.Now.ToString("yyyy-MM-dd"));
 
     internal override object ObjectValue()
     {
@@ -175,7 +170,6 @@ public class DateDbField(DateTime? minDate = null, DateTime? maxDate = null) : D
 
     internal override ConditionEx<TU> ParseEx<TU>(string op, object value) =>
         new DateEx<TU>(Name, op, DateTime.Parse(value.ToString()!));
-
 }
 
 internal record DateTimeEx<T>(string Name, string Op, DateTime Value) : ConditionEx<T>(Name) where T : Model
@@ -201,7 +195,6 @@ internal record DateTimeEx<T>(string Name, string Op, DateTime Value) : Conditio
             _ => throw new NotSupportedException($"Operator {Op} is not supported for datetime fields.")
         };
     }
-
 }
 
 internal record DateEx<T>(string Name, string Op, DateTime Value) : DateTimeEx<T>(Name, Op, Value) where T : Model

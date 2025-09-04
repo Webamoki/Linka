@@ -9,25 +9,25 @@
     </PropertyGroup>
 
     <ItemGroup>
-      <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.14.1" />
-      <PackageReference Include="NUnit" Version="4.4.0" />
-      <PackageReference Include="Webamoki.Utils" Version="1.0.6" />
+        <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.14.1"/>
+        <PackageReference Include="NUnit" Version="4.4.0"/>
+        <PackageReference Include="Webamoki.Utils" Version="1.0.6"/>
     </ItemGroup>
 
     <ItemGroup>
-      <ProjectReference Include="..\Linka\Linka.csproj" />
+        <ProjectReference Include="..\Linka\Linka.csproj"/>
     </ItemGroup>
 
     <ItemGroup>
-      <Compile Remove="Models\**" />
+        <Compile Remove="Models\**"/>
     </ItemGroup>
 
     <ItemGroup>
-      <EmbeddedResource Remove="Models\**" />
+        <EmbeddedResource Remove="Models\**"/>
     </ItemGroup>
 
     <ItemGroup>
-      <None Remove="Models\**" />
+        <None Remove="Models\**"/>
     </ItemGroup>
 
 </Project>

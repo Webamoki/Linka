@@ -25,7 +25,6 @@ public class BooleanDbFieldTest
         Ensure.Equal(expected, validator.IsValid(input, out _));
     }
 
-
     [Test]
     public void BooleanDbField_StringValue_True()
     {
@@ -70,7 +69,7 @@ public class BooleanDbFieldTest
     public void BooleanDbField_StringValue_ThrowsIfUnset()
     {
         var field = new BooleanDbField();
-        Assert.Throws<InvalidOperationException>(() => _ = field.StringValue());
+        _ = Assert.Throws<InvalidOperationException>(() => _ = field.StringValue());
     }
 
     [Test]

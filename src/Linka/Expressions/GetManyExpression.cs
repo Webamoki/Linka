@@ -6,10 +6,7 @@ namespace Webamoki.Linka.Expressions;
 public class GetManyExpression<T, TSchema> where T : Model, new() where TSchema : Schema, new()
 {
     private readonly GetExpression<T, TSchema> _getExpression;
-    internal GetManyExpression(GetExpression<T, TSchema> getExpression)
-    {
-        _getExpression = getExpression;
-    }
+    internal GetManyExpression(GetExpression<T, TSchema> getExpression) => _getExpression = getExpression;
     public int Count()
     {
         _getExpression.Query.IsCount = true;
@@ -23,10 +20,8 @@ public class GetManyExpression<T, TSchema> where T : Model, new() where TSchema 
         _getExpression.Query.IsCount = false;
         var reader = _getExpression.Query.Execute(_getExpression.DbService);
         List<T> models = [];
-        while (reader.Read())
-        {
-            models.Add(_getExpression.ReadModel(reader));
-        }
+        while (reader.Read()) models.Add(_getExpression.ReadModel(reader));
+
         reader.Close();
 
         return models;

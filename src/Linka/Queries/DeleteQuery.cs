@@ -1,5 +1,4 @@
-﻿
-namespace Webamoki.Linka.Queries;
+﻿namespace Webamoki.Linka.Queries;
 
 internal class DeleteQuery(string table, string? alias = null) : ConditionQuery
 {
@@ -9,10 +8,7 @@ internal class DeleteQuery(string table, string? alias = null) : ConditionQuery
     {
         ResetBody();
         AddBody($"DELETE FROM {_table}");
-        if (!Condition.IsEmpty())
-        {
-            AddBody("WHERE", Condition);
-        }
+        if (!Condition.IsEmpty()) AddBody("WHERE", Condition);
 
         return base.Render(out values);
     }

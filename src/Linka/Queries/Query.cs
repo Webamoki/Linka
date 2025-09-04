@@ -1,4 +1,4 @@
-using Npgsql;
+﻿using Npgsql;
 
 namespace Webamoki.Linka.Queries;
 
@@ -20,7 +20,6 @@ internal class Query : BaseQuery
     private readonly List<object> _values = [];
     private List<BaseQuery> _body = [];
 
-
     public Query() { }
 
     public Query(string query) : this()
@@ -40,15 +39,11 @@ internal class Query : BaseQuery
         return true;
     }
 
-    public void ResetBody() { _body = []; }
+    public void ResetBody() => _body = [];
 
     public void AddValue(object value) => _values.Add(value);
     public virtual void AddValues(List<object> value) => _values.AddRange(value);
     public void PrependValue(string value) => _values.Insert(0, value);
-
-
-
-
 
     public void AddBody(params BaseQuery[] bodies)
     {

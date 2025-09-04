@@ -5,8 +5,8 @@ namespace Webamoki.Linka.Fields.NumericFields;
 
 public class IntValidator : Validator
 {
-    private readonly int _min;
     private readonly int _max;
+    private readonly int _min;
 
     private IntValidator(int min, int max)
     {
@@ -45,6 +45,7 @@ public class IntValidator : Validator
         return true;
     }
 }
+
 public class IntDbField(int min, int max) : StructDbField<int>(IntValidator.Create(min, max),
     $"{GetSqlType(min, max)}")
 {

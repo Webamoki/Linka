@@ -51,7 +51,6 @@ public class PriceTests
         Ensure.Equal("-1.234,56", price.Display(false));
     }
 
-
     [TestCase(1000, 2000, 3000)] // USD addition
     [TestCase(500, -200, 300)] // With negative
     [TestCase(0, 1500, 1500)] // Adding to zero

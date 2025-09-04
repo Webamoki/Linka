@@ -1,7 +1,7 @@
+﻿using Npgsql;
 using System.Data;
 using System.Linq.Expressions;
 using System.Text;
-using Npgsql;
 using Webamoki.Linka.Expressions;
 using Webamoki.Linka.Fields;
 using Webamoki.Linka.ModelSystem;
@@ -13,21 +13,23 @@ namespace Webamoki.Linka;
 
 internal interface IDbService
 {
+    Schema Schema { get; }
+
     NpgsqlDataReader Execute(string query, List<object> values);
     DatabaseCode ExecuteTransaction(string query, List<object> values);
 
-    Schema Schema { get; }
     void UpdateModel(Model model);
 }
 
 public sealed class DbService<TSchema>(bool debug = false) : IDbService, IDisposable
     where TSchema : Schema, new()
 {
+    private readonly Dictionary<Type, IModelCache> _caches = [];
     private readonly NpgsqlConnection _connection = new(Linka.ConnectionString<TSchema>());
     private readonly bool _debug = debug || Linka.Debug;
-    private readonly Dictionary<Type, IModelCache> _caches = [];
-    private readonly HashSet<Model> _toUpdate = [];
     private readonly HashSet<Model> _toInsert = [];
+    private readonly HashSet<Model> _toUpdate = [];
+
     public Schema Schema => Schema.Get<TSchema>();
 
     public DatabaseCode ExecuteTransaction(string query, List<object> values)
@@ -42,10 +44,11 @@ public sealed class DbService<TSchema>(bool debug = false) : IDbService, IDispos
                 Logging.WriteDebug($"Executing transaction: {query}", "PostgreSQL: Transaction");
                 Logging.WriteDebug($"With Params: {string.Join(", ", values.Select(value => value))}", "PostgreSQL: Transaction");
             }
+
             using var transaction = _connection.BeginTransaction();
             using var command = CreateCommand(query, values);
 
-            command.ExecuteNonQuery();
+            _ = command.ExecuteNonQuery();
             transaction.Commit();
         }
         catch (NpgsqlException ex)
@@ -56,42 +59,7 @@ public sealed class DbService<TSchema>(bool debug = false) : IDbService, IDispos
             }
             catch (Exception transactionEx)
             {
-                if (_debug)
-                {
-                    Logging.WriteLog($"Transaction Rollback Error: {transactionEx.Message}");
-                }
-            }
-
-            result = ProcessError(ex);
-        }
-        finally
-        {
-            _connection.Close();
-        }
-
-        return result;
-    }
-
-    internal DatabaseCode ExecuteScript(string script)
-    {
-        var result = DatabaseCode.Success;
-
-        try
-        {
-            _connection.Open();
-            if (_debug)
-            {
-                Logging.WriteDebug($"Executing full SQL script {script}", "PostgreSQL: Script");
-            }
-
-            using var command = CreateCommand(script, []);
-            command.ExecuteNonQuery();
-        }
-        catch (NpgsqlException ex)
-        {
-            if (_debug)
-            {
-                Logging.WriteLog($"SQL Script Execution Error: {ex.Message}");
+                if (_debug) Logging.WriteLog($"Transaction Rollback Error: {transactionEx.Message}");
             }
 
             result = ProcessError(ex);
@@ -113,28 +81,51 @@ public sealed class DbService<TSchema>(bool debug = false) : IDbService, IDispos
             Logging.WriteDebug($"Executing query: {query}", "PostgreSQL: Query");
             Logging.WriteDebug($"With Params: {string.Join(", ", values.Select(value => value))}", "PostgreSQL: Query");
         }
+
         using var cmd = CreateCommand(query, values);
 
         return cmd.ExecuteReader(CommandBehavior.CloseConnection);
     }
+    public void UpdateModel(Model model) => _toUpdate.Add(model);
+
+    public void Dispose() => _connection.Dispose();
+
+    internal DatabaseCode ExecuteScript(string script)
+    {
+        var result = DatabaseCode.Success;
+
+        try
+        {
+            _connection.Open();
+            if (_debug) Logging.WriteDebug($"Executing full SQL script {script}", "PostgreSQL: Script");
+
+            using var command = CreateCommand(script, []);
+            _ = command.ExecuteNonQuery();
+        }
+        catch (NpgsqlException ex)
+        {
+            if (_debug) Logging.WriteLog($"SQL Script Execution Error: {ex.Message}");
+
+            result = ProcessError(ex);
+        }
+        finally
+        {
+            _connection.Close();
+        }
+
+        return result;
+    }
 
     private DatabaseCode ProcessError(NpgsqlException ex)
     {
-        if (_debug)
-        {
-            Logging.WriteDebug($"Transaction Error: {ex.Message}");
-        }
+        if (_debug) Logging.WriteDebug($"Transaction Error: {ex.Message}");
 
-        if (!int.TryParse(ex.SqlState, out var errorCode))
-        {
-            throw new Exception($"Error Code: {ex.Message}");
-        }
+        if (!int.TryParse(ex.SqlState, out var errorCode)) throw new Exception($"Error Code: {ex.Message}");
 
         foreach (DatabaseCode code in Enum.GetValues(typeof(DatabaseCode)))
-        {
             if ((int)code == errorCode)
                 return code;
-        }
+
         throw ex;
     }
 
@@ -143,11 +134,7 @@ public sealed class DbService<TSchema>(bool debug = false) : IDbService, IDispos
         var paramIndex = 0;
         var result = new StringBuilder();
 
-        foreach (var c in query)
-        {
-            if (c == '?') result.Append($"@p{paramIndex++}");
-            else result.Append(c);
-        }
+        foreach (var c in query) _ = c == '?' ? result.Append($"@p{paramIndex++}") : result.Append(c);
 
         query = result.ToString();
         var cmd = transaction == null
@@ -155,12 +142,9 @@ public sealed class DbService<TSchema>(bool debug = false) : IDbService, IDispos
             : new NpgsqlCommand(query, _connection, transaction);
         paramIndex = 0;
         foreach (var value in values)
-            cmd.Parameters.AddWithValue($"@p{paramIndex++}", value);
+            _ = cmd.Parameters.AddWithValue($"@p{paramIndex++}", value);
         return cmd;
     }
-
-
-    public void Dispose() { _connection.Dispose(); }
 
     public T Get<T>(Expression<Func<T, bool>> expression) where T : Model, new() =>
         new GetExpression<T, TSchema>(this, expression).Get();
@@ -188,23 +172,17 @@ public sealed class DbService<TSchema>(bool debug = false) : IDbService, IDispos
         {
             if (field.IsEmpty)
             {
-                if (info.Fields[fieldName].IsRequired)
-                {
-                    validationErrors.Add($"Field '{fieldName}' is required.");
-                }
+                if (info.Fields[fieldName].IsRequired) validationErrors.Add($"Field '{fieldName}' is required.");
+
                 continue;
             }
-            if (!field.IsValid(out var message))
-            {
-                validationErrors.Add($"Field '{fieldName}': {message}");
-            }
+
+            if (!field.IsValid(out var message)) validationErrors.Add($"Field '{fieldName}': {message}");
         }
 
-        if (validationErrors.Count > 0)
-        {
-            throw new InvalidOperationException($"Model validation failed: {string.Join(", ", validationErrors)}");
-        }
-        _toInsert.Add(model);
+        if (validationErrors.Count > 0) throw new InvalidOperationException($"Model validation failed: {string.Join(", ", validationErrors)}");
+
+        _ = _toInsert.Add(model);
     }
 
     internal void AddModelToCache<T>(T model) where T : Model
@@ -212,22 +190,13 @@ public sealed class DbService<TSchema>(bool debug = false) : IDbService, IDispos
         var type = model.GetType();
         if (!_caches.TryGetValue(type, out var cache))
         {
-            if (typeof(T) == type)
-            {
-                cache = new ModelCache<T>();
-            }
-            else
-            {
-                cache = ModelRegistry.Get(type).CreateCache;
-            }
+            cache = typeof(T) == type ? new ModelCache<T>() : ModelRegistry.Get(type).CreateCache;
+
             _caches[type] = cache;
         }
+
         model.DbService = this;
         cache.Add(model);
-    }
-    public void UpdateModel(Model model)
-    {
-        _toUpdate.Add(model);
     }
 
     internal IModelCache GetModelCache<T>() where T : Model
@@ -237,6 +206,7 @@ public sealed class DbService<TSchema>(bool debug = false) : IDbService, IDispos
             cache = new ModelCache<T>();
             _caches[typeof(T)] = cache;
         }
+
         return cache;
     }
 
@@ -250,15 +220,14 @@ public sealed class DbService<TSchema>(bool debug = false) : IDbService, IDispos
             if (model.UpdateRequest.ChangedFields.Count == 0) throw new Exception("No changes to save.");
             var info = ModelRegistry.Get(model.GetType());
             var updateQuery = new UpdateQuery(info.TableName);
-            foreach (var (field, value) in model.UpdateRequest.ChangedFields)
-            {
-                updateQuery.AddSet<TSchema>(info.Fields[field], value);
-            }
+            foreach (var (field, value) in model.UpdateRequest.ChangedFields) updateQuery.AddSet<TSchema>(info.Fields[field], value);
+
             updateQuery.SetCondition(model.UpdateRequest.PrimaryKey, []);
             if (!saveQuery.IsEmpty()) saveQuery.AddBody(";");
             saveQuery.AddBody(updateQuery);
             model.UpdateRequest = null;
         }
+
         foreach (var model in _toInsert)
         {
             var info = ModelRegistry.Get(model.GetType());
@@ -283,20 +252,19 @@ public sealed class DbService<TSchema>(bool debug = false) : IDbService, IDispos
                     values.Add(value);
                 }
             }
-            if (values.Count == 0)
-            {
-                throw new InvalidOperationException("No fields have been set for insertion.");
-            }
+
+            if (values.Count == 0) throw new InvalidOperationException("No fields have been set for insertion.");
+
             insertQuery.AddValues(values);
             if (!saveQuery.IsEmpty()) saveQuery.AddBody(";");
             saveQuery.AddBody(insertQuery);
             AddModelToCache(model);
         }
+
         _toUpdate.Clear();
         _toInsert.Clear();
         return saveQuery.ExecuteTransaction(this);
     }
-
 }
 
 public enum DatabaseCode

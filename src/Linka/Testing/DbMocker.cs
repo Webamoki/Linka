@@ -31,7 +31,7 @@ public static class DbMocker
 
         using var db = new DbService<T>();
         var script = CreateSchemaQuery<T>(schema);
-        db.ExecuteScript(script);
+        _ = db.ExecuteScript(script);
         return container;
     }
 
@@ -41,7 +41,6 @@ public static class DbMocker
         var tableQueries = "";
         var constraintQueries = "";
 
-
         foreach (var modelType in schema.Models)
         {
             var info = ModelRegistry.Get(modelType);
@@ -49,24 +48,20 @@ public static class DbMocker
             constraintQueries += CreateConstraintQuery(info) + "\n";
         }
 
-        foreach (var (_, (name, enumString)) in schema.Enums)
-        {
-            enumQueries += $"CREATE TYPE \"{name}\" AS {enumString};";
-        }
+        foreach (var (_, (name, enumString)) in schema.Enums) enumQueries += $"CREATE TYPE \"{name}\" AS {enumString};";
 
         return $"""
                 BEGIN;
                 CREATE SCHEMA IF NOT EXISTS "{schema.Name}";
-                
+
                 SET search_path TO "{schema.Name}";
-                
+
                 {enumQueries}
                 {tableQueries}
                 {constraintQueries}
                 COMMIT;
                 """;
     }
-
 
     private static string CreateTableQuery<T>(IModelInfo info) where T : Schema, new()
     {
@@ -85,20 +80,13 @@ public static class DbMocker
 
             columns += $"\t\"{fieldName}\" {sqlType}{nullable},\n";
 
-            if (field is { IsPrimary: false, IsUnique: true })
-            {
-                keys += $"ALTER TABLE \"{info.TableName}\" ADD CONSTRAINT \"{Appendix.UniqueKey(fieldName)}\" UNIQUE (\"{fieldName}\");\n";
-            }
+            if (field is { IsPrimary: false, IsUnique: true }) keys += $"ALTER TABLE \"{info.TableName}\" ADD CONSTRAINT \"{Appendix.UniqueKey(fieldName)}\" UNIQUE (\"{fieldName}\");\n";
 
-            if (field.Search != 0)
-            {
-                fullTextColumns.Add(fieldName);
-            }
+            if (field.Search != 0) fullTextColumns.Add(fieldName);
         }
 
         var fullText = "";
         if (fullTextColumns.Count > 0)
-        {
             fullText = $"""
                         CREATE INDEX "FT_{info.TableName}"
                         ON "{info.TableName}"
@@ -106,16 +94,15 @@ public static class DbMocker
                           to_tsvector('english', {string.Join(" || ' ' || ", fullTextColumns.Select(c => $"\"{c}\""))})
                         );
                         """;
-        }
 
         var query = $"""
-                      CREATE TABLE "{info.TableName}" (
-                        {columns}
-                        PRIMARY KEY ({string.Join(", ", info.PrimaryFields.Select(c => $"\"{c.Key}\""))})
-                      );
-                      {keys}
-                      {fullText}
-                      """;
+                     CREATE TABLE "{info.TableName}" (
+                       {columns}
+                       PRIMARY KEY ({string.Join(", ", info.PrimaryFields.Select(c => $"\"{c.Key}\""))})
+                     );
+                     {keys}
+                     {fullText}
+                     """;
 
         return query;
     }
@@ -125,7 +112,6 @@ public static class DbMocker
         var tableName = info.TableName;
         var constraints = "";
         foreach (var (navigationName, navigation) in info.Navigations)
-        {
             constraints += $"""
                             ALTER TABLE "{tableName}"
                             ADD CONSTRAINT "{Appendix.Constraint(tableName, navigationName)}"
@@ -133,7 +119,6 @@ public static class DbMocker
                             REFERENCES "{navigation.TargetModelInfo.TableName}" ("{navigation.TargetField}")
                             ON DELETE {navigation.Constraint.ToSqlString()} ON UPDATE RESTRICT;
                             """;
-        }
 
         return constraints;
     }

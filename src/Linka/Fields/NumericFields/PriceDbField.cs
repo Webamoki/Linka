@@ -4,19 +4,14 @@ namespace Webamoki.Linka.Fields.NumericFields;
 
 public class Price<T> where T : ICurrency
 {
-    public override int GetHashCode() =>
-        MinorUnits;
-
     public readonly int MinorUnits;
-    public Price(int minorUnits = 0) { MinorUnits = minorUnits; }
+    public Price(int minorUnits = 0) => MinorUnits = minorUnits;
 
     protected Price(string value)
     {
         if (value.Contains('.'))
-        {
             if (float.TryParse(value, out var f))
                 MinorUnits = ConvertFloat(f);
-        }
 
         if (int.TryParse(value, out var i))
             MinorUnits = i;
@@ -24,20 +19,25 @@ public class Price<T> where T : ICurrency
         MinorUnits = 0;
     }
 
-    protected Price(float value) { MinorUnits = ConvertFloat(value); }
+    protected Price(float value) => MinorUnits = ConvertFloat(value);
 
-    protected Price(double value) { MinorUnits = ConvertFloat((float)value); }
+    protected Price(double value) => MinorUnits = ConvertFloat((float)value);
+
+    public string IsoCode => T.IsoCode;
+
+    public float MajorUnits =>
+        MinorUnits / MathF.Pow(10f, T.DecimalPlaces);
+
+    public bool IsEmpty => MinorUnits == 0;
+
+    public override int GetHashCode() =>
+        MinorUnits;
 
     public string Display(bool includeSymbol = true)
     {
         var value = MajorUnits;
 
-        var format = new NumberFormatInfo
-        {
-            NumberDecimalSeparator = T.DecimalSeparator.ToString(),
-            NumberGroupSeparator = T.ThousandsSeparator.ToString(),
-            NumberDecimalDigits = T.DecimalPlaces
-        };
+        var format = new NumberFormatInfo { NumberDecimalSeparator = T.DecimalSeparator.ToString(), NumberGroupSeparator = T.ThousandsSeparator.ToString(), NumberDecimalDigits = T.DecimalPlaces };
 
         var numberString = value.ToString("N", format);
 
@@ -49,14 +49,7 @@ public class Price<T> where T : ICurrency
             : $"{numberString}{T.Symbol}";
     }
 
-    public string IsoCode => T.IsoCode;
-
     private static int ConvertFloat(float input) => (int)Math.Round(input * MathF.Pow(10, T.DecimalPlaces));
-
-    public float MajorUnits =>
-        MinorUnits / MathF.Pow(10f, T.DecimalPlaces);
-
-    public bool IsEmpty => MinorUnits == 0;
 
     public static Price<T> operator +(Price<T> price, int minorUnits) =>
         new(price.MinorUnits + minorUnits);

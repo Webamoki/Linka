@@ -6,7 +6,7 @@ namespace Webamoki.Linka.SchemaSystem;
 public static class SchemaCheck
 {
     /// <summary>
-    /// Verifies that the database schema matches the expected Schema definition.
+    ///     Verifies that the database schema matches the expected Schema definition.
     /// </summary>
     /// <typeparam name="T">The Schema type to verify</typeparam>
     public static void Check<T>() where T : Schema, new()
@@ -18,7 +18,7 @@ public static class SchemaCheck
     }
 
     /// <summary>
-    /// Verifies that all enums defined in the schema exist in the database with correct values.
+    ///     Verifies that all enums defined in the schema exist in the database with correct values.
     /// </summary>
     /// <typeparam name="T">The Schema type</typeparam>
     /// <param name="schema">The schema instance</param>
@@ -53,10 +53,7 @@ public static class SchemaCheck
 
         // Create a set of expected enum names for tracking
         var expectedEnums = new Dictionary<string, string>();
-        foreach (var (_, (enumName, enumType)) in schema.Enums)
-        {
-            expectedEnums[enumName] = enumType[6..^1].Replace("'", "");
-        }
+        foreach (var (_, (enumName, enumType)) in schema.Enums) expectedEnums[enumName] = enumType[6..^1].Replace("'", "");
 
         // Verify each enum found in the database
         var foundEnums = new HashSet<string>();
@@ -65,19 +62,16 @@ public static class SchemaCheck
             var enumName = reader["EnumName"].ToString()!;
             var enumValues = reader["EnumValues"].ToString()!;
 
-
             if (!expectedEnums.TryGetValue(enumName, out var expectedType))
-            {
                 throw new Exception($"Unexpected enum '{enumName}' found in database schema '{schema.Name}'. " +
-                                  "This enum is not defined in the Schema class.");
-            }
+                                    "This enum is not defined in the Schema class.");
 
             Assert(expectedType, enumValues, $"Enum {enumName} in schema {schema.Name} has unexpected values. Expected: {expectedType}, got: {enumValues}.");
 
-            foundEnums.Add(enumName);
+            _ = foundEnums.Add(enumName);
             Logging.WriteLog($"--- Verifying enum {enumName} in schema {schema.Name}");
-
         }
+
         if (expectedEnums.Count != foundEnums.Count)
         {
             var missingEnums = expectedEnums.Keys.Except(foundEnums);

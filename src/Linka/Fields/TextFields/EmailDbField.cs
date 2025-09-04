@@ -1,8 +1,7 @@
-﻿using System.Text.RegularExpressions;
+﻿using System.Net.Mail;
+using System.Text.RegularExpressions;
 
 namespace Webamoki.Linka.Fields.TextFields;
-
-using System.Net.Mail;
 
 public partial class EmailValidator : TextValidator
 {

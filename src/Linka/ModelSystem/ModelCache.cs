@@ -2,7 +2,7 @@
 
 namespace Webamoki.Linka.ModelSystem;
 
-interface IModelCache
+internal interface IModelCache
 {
     void Add(Model model);
 }
@@ -29,32 +29,29 @@ internal class ModelCache<T> : IModelCache where T : Model
     {
         // improve algorithm
         foreach (var (_, model) in _primaryCache)
-        {
             if (ex.Verify(model))
                 return model;
-        }
+
         return null;
     }
 
     internal void Delete(IEx<T> ex)
     {
         foreach (var (_, model) in _primaryCache)
-        {
             if (ex.Verify(model))
                 Delete(model);
-        }
     }
 
     private void Delete(T model)
     {
         var info = ModelRegistry.Get<T>();
         var primaryKey = GetPrimaryKey(model);
-        _primaryCache.Remove(primaryKey);
+        _ = _primaryCache.Remove(primaryKey);
         foreach (var (fieldKey, field) in info.UniqueFields)
         {
             if (field.IsEmpty) continue;
             var uniqueKey = GetUniqueKey(model, fieldKey);
-            _uniqueCache.Remove(uniqueKey);
+            _ = _uniqueCache.Remove(uniqueKey);
         }
     }
 
@@ -67,6 +64,7 @@ internal class ModelCache<T> : IModelCache where T : Model
             var fieldValue = info.FieldGetters[fieldKey](model).StringValue();
             primaryKeys[fieldKey] = fieldValue;
         }
+
         // turn primaryKeys dictionary into string using both keys and values
         return string.Join(",", primaryKeys.Select(kvp => kvp.Key + "=" + kvp.Value));
     }
@@ -81,10 +79,8 @@ internal class ModelCache<T> : IModelCache where T : Model
     internal void Update(IEx<T> ex, Dictionary<string, object?> setFields)
     {
         foreach (var (_, model) in _primaryCache)
-        {
             if (ex.Verify(model))
                 Update(model, setFields);
-        }
     }
 
     private void Update(T model, Dictionary<string, object?> setFields)

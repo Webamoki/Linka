@@ -1,17 +1,19 @@
-﻿
-namespace Webamoki.Linka.Queries;
+﻿namespace Webamoki.Linka.Queries;
 
 internal class ConditionQuery : Query
 {
     private Query? _condition;
+
     protected Query Condition => _condition ??= new Query();
 
-    public void SetCondition(IQuery condition, List<object> values)
+    public void SetCondition(BaseQuery condition, List<object> values)
     {
         Condition.ResetBody();
         Condition.AddBody(condition);
         Condition.AddValues(values);
     }
+
+    public override bool IsEmpty() => base.IsEmpty() && Condition.IsEmpty();
     // private void AddCondition(string op, IQuery condition, string? value = null)
     // {
     //     var conditionQuery = Condition;
@@ -37,9 +39,6 @@ internal class ConditionQuery : Query
     //     AddCondition("AND", condition, value);
     // }
 
-    
-
-    
     // public void OrIn(AbstractModel|string $model, string $column, SelectQuery $query)
     // {
     //     $table = $model::TableName();
@@ -52,6 +51,3 @@ internal class ConditionQuery : Query
     //     $this->orCondition($inQuery);
     // }
 }
-
-
-

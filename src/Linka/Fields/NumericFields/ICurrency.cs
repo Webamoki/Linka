@@ -25,10 +25,15 @@ public interface ICurrency
 public class Jpy : ICurrency
 {
     public static string Symbol => "¥";
+
     public static string IsoCode => "JPY";
+
     public static int DecimalPlaces => 0; // No subunits
+
     public static bool SymbolPrefixed => true;
+
     public static char DecimalSeparator => '.';
+
     public static char ThousandsSeparator => ',';
 }
 
@@ -36,10 +41,15 @@ public class Jpy : ICurrency
 public class Eur : ICurrency
 {
     public static string Symbol => "€";
+
     public static string IsoCode => "EUR";
+
     public static int DecimalPlaces => 2;
+
     public static bool SymbolPrefixed => false; // Euro symbol after amount in many EU countries
+
     public static char DecimalSeparator => ',';
+
     public static char ThousandsSeparator => '.';
 }
 
@@ -47,10 +57,15 @@ public class Eur : ICurrency
 public class Gbp : ICurrency
 {
     public static string Symbol => "£";
+
     public static string IsoCode => "GBP";
+
     public static int DecimalPlaces => 2;
+
     public static bool SymbolPrefixed => true;
+
     public static char DecimalSeparator => '.';
+
     public static char ThousandsSeparator => ',';
 }
 
@@ -58,9 +73,14 @@ public class Gbp : ICurrency
 public class Usd : ICurrency
 {
     public static string Symbol => "$";
+
     public static string IsoCode => "USD";
+
     public static int DecimalPlaces => 2;
+
     public static bool SymbolPrefixed => true;
+
     public static char DecimalSeparator => '.';
+
     public static char ThousandsSeparator => ',';
 }

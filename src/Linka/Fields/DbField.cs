@@ -1,25 +1,35 @@
-﻿namespace Webamoki.Linka.Fields;
+﻿using Webamoki.Linka.Expressions;
+using Webamoki.Linka.ModelSystem;
+using Webamoki.Linka.SchemaSystem;
+
+namespace Webamoki.Linka.Fields;
 
 public abstract class DbField(
     Validator validator,
     string sqlType)
 {
-    public bool IsPrimary { get; private set; }
-    public bool IsUnique { get; set; }
-    public int Search { get; private set; }
-    public bool IsRequired { get; private set; } = true;
-    public bool IsSet { get; protected set; }
+    private string? _name;
+    internal Model? Model = null;
+
+    internal bool IsPrimary { get; set; }
+
+    internal bool IsUnique { get; set; }
+
+    internal int Search { get; set; }
+
+    internal bool IsRequired { get; set; } = true;
 
     /// <summary>
     ///     Returns the SQL type of the field, e.g., varchar, int, tinyint, datetime, etc.
     /// </summary>
     /// <value>The SQL type as a string.</value>
-    public string SQLType { get; } = sqlType;
+    internal string SQLType { get; } = sqlType;
 
     public Validator Validator { get; } = validator;
 
-    private string? _name;
     public string Name => _name ?? throw new InvalidOperationException("Name has not been set.");
+
+    public virtual bool IsEmpty => true;
 
     internal void SetName(string name)
     {
@@ -49,6 +59,8 @@ public abstract class DbField(
     }
 
     public abstract string StringValue();
+    internal abstract object ObjectValue();
+    internal abstract void Value(object? value);
 
     public bool IsValid(object? value, out string? message)
     {
@@ -67,10 +79,10 @@ public abstract class DbField(
         return Validator.IsValid(value ?? throw new InvalidOperationException(), out message);
     }
 
-    public abstract void LoadValue(object? value);
-    public abstract bool IsChanged();
-    public abstract void ResetChange();
     public abstract bool IsValid(out string? message);
+
+    internal abstract ConditionEx<T> ParseEx<T>(string op, object value) where T : Model;
+    internal abstract string GetUpdateSetQuery<TSchema>(object value, out object? queryValue) where TSchema : Schema, new();
 }
 
 public abstract class RefDbField<T>(
@@ -79,9 +91,10 @@ public abstract class RefDbField<T>(
     : DbField(validator, sqlType)
 {
     private T? _value;
-    private T? _oldValue;
 
-    public override void LoadValue(object? value)
+    public override bool IsEmpty => _value == null;
+
+    internal override void Value(object? value)
     {
         switch (value)
         {
@@ -98,50 +111,63 @@ public abstract class RefDbField<T>(
 
     public void Value(T? value)
     {
-        if (!IsSet)
-        {
-            if (value != null)
-            {
-                _value = value;
-                _oldValue = value;
-            }
-
-            IsSet = true;
-        }
-        else
-        {
-            _value = value;
-        }
+        Model?.ChangeReady();
+        _value = value;
+        Model?.ChangeField(Name, _value);
     }
-
-    public override bool IsChanged() =>
-        !EqualityComparer<T>.Default.Equals(_value, _oldValue);
-
-    public override void ResetChange() => _oldValue = _value;
-
 
     public override bool IsValid(out string? message)
     {
-        if (!IsSet) throw new InvalidOperationException();
+        if (IsEmpty) throw new InvalidOperationException();
         return IsValid(_value, out message);
     }
+    public T? Value() => _value;
 
-    public bool IsEmpty() => _value == null;
-    public virtual T? Value() => _value;
-    protected virtual T OldValue() => _oldValue ?? throw new InvalidOperationException();
+    internal override object ObjectValue() => _value ?? throw new InvalidOperationException("Value is null");
 
     public static bool operator ==(RefDbField<T> left, T? right)
     {
-        if (left.IsEmpty() && right == null) return true;
-        if (left.IsEmpty() || right == null) return false;
+        if (left.IsEmpty && right == null) return true;
+        if (left.IsEmpty || right == null) return false;
         return left.Value()!.Equals(right);
     }
 
     public static bool operator !=(RefDbField<T> left, T? right) => !(left == right);
+    internal override ConditionEx<TU> ParseEx<TU>(string op, object value)
+    {
+        return op switch
+        {
+            "=" => new StringEx<TU>(Name, true, (string)value, Validator.IsInjectable),
+            "!=" => new StringEx<TU>(Name, false, (string)value, Validator.IsInjectable),
+            _ => throw new NotSupportedException($"Operator {op} is not supported for field {Name}")
+        };
+    }
+    internal override string GetUpdateSetQuery<TSchema>(object value, out object? queryValue)
+    {
+        if (Validator.IsInjectable)
+        {
+            queryValue = value;
+            return "?";
+        }
+
+        queryValue = null;
+        return $"'{value}'";
+    }
+
+    public override bool Equals(object obj)
+    {
+        if (ReferenceEquals(this, obj)) return true;
+
+        if (obj is null) return false;
+
+        throw new NotImplementedException();
+    }
+
+    public override int GetHashCode() => throw new NotImplementedException();
 }
 
 /// <summary>
-/// Same as AbstractDbField, but for structs like Boolean and Enum
+///     Same as AbstractDbField, but for structs like Boolean and Enum
 /// </summary>
 public abstract class StructDbField<T>(
     Validator validator,
@@ -150,27 +176,17 @@ public abstract class StructDbField<T>(
     where T : struct
 {
     private T? _value;
-    private T? _oldValue;
 
-    public virtual void Value(T? value)
+    public override bool IsEmpty => _value == null;
+
+    public void Value(T? value)
     {
-        if (!IsSet)
-        {
-            if (value != null)
-            {
-                _value = value;
-                _oldValue = value;
-            }
-
-            IsSet = true;
-        }
-        else
-        {
-            _value = value;
-        }
+        Model?.ChangeReady();
+        _value = value;
+        Model?.ChangeField(Name, _value);
     }
 
-    public override void LoadValue(object? value)
+    internal override void Value(object? value)
     {
         switch (value)
         {
@@ -178,33 +194,38 @@ public abstract class StructDbField<T>(
                 Value(t);
                 break;
             case null:
-                Value(default);
+                Value(null);
                 break;
             default:
                 throw new InvalidCastException($"Value is not of type {typeof(T).Name}");
         }
     }
-
-    public override bool IsChanged() => !Equals(_value, _oldValue);
-
-    public override void ResetChange() => _oldValue = _value;
-
     public override bool IsValid(out string? message)
     {
-        if (!IsSet) throw new InvalidOperationException();
+        if (IsEmpty) throw new InvalidOperationException();
         return IsValid(_value, out message);
     }
+    public T? Value() => _value;
 
-    public bool IsEmpty() => _value == null;
-    public virtual T? Value() => _value;
-    protected virtual T OldValue() => _oldValue ?? throw new InvalidOperationException();
+    internal override object ObjectValue() => _value ?? throw new InvalidOperationException("Value is null");
 
     public static bool operator ==(StructDbField<T> left, T? right)
     {
-        if (left.IsEmpty() && right == null) return true;
-        if (left.IsEmpty() || right == null) return false;
+        if (left.IsEmpty && right == null) return true;
+        if (left.IsEmpty || right == null) return false;
         return left.Value()!.Equals(right);
     }
 
     public static bool operator !=(StructDbField<T> left, T? right) => !(left == right);
+
+    public override bool Equals(object obj)
+    {
+        if (ReferenceEquals(this, obj)) return true;
+
+        if (obj is null) return false;
+
+        throw new NotImplementedException();
+    }
+
+    public override int GetHashCode() => throw new NotImplementedException();
 }

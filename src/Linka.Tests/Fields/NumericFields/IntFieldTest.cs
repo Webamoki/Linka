@@ -50,4 +50,22 @@ public class IntDbFieldTest
         field.Value(42);
         Ensure.Equal(field.StringValue(), "42");
     }
+
+    [Test]
+    public void IntDbField_ObjectValue_ThrowsIfUnset()
+    {
+        var field = new IntDbField(0, 100);
+        Ensure.True(field.IsEmpty);
+        Ensure.Throws<InvalidOperationException>(() => _ = field.ObjectValue());
+    }
+
+    [TestCase(42)]
+    [TestCase(0)]
+    [TestCase(100)]
+    public void IntDbField_ObjectValue_ReturnsSetValue(int value)
+    {
+        var field = new IntDbField(0, 100);
+        field.Value(value);
+        Ensure.Equal(value, field.ObjectValue());
+    }
 }

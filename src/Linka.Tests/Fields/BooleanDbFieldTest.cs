@@ -25,7 +25,6 @@ public class BooleanDbFieldTest
         Ensure.Equal(expected, validator.IsValid(input, out _));
     }
 
-
     [Test]
     public void BooleanDbField_StringValue_True()
     {
@@ -43,30 +42,47 @@ public class BooleanDbFieldTest
     }
 
     [Test]
+    public void BooleanDbField_ObjectValue_True()
+    {
+        var field = new BooleanDbField();
+        field.Value(true);
+        Ensure.Equal(true, field.ObjectValue());
+    }
+
+    [Test]
+    public void BooleanDbField_ObjectValue_False()
+    {
+        var field = new BooleanDbField();
+        field.Value(false);
+        Ensure.Equal(false, field.ObjectValue());
+    }
+
+    [Test]
+    public void BooleanDbField_ObjectValue_ThrowsIfUnset()
+    {
+        var field = new BooleanDbField();
+        Ensure.True(field.IsEmpty);
+        Ensure.Throws<InvalidOperationException>(() => _ = field.ObjectValue());
+    }
+
+    [Test]
     public void BooleanDbField_StringValue_ThrowsIfUnset()
     {
         var field = new BooleanDbField();
-        Assert.Throws<InvalidOperationException>(() => _ = field.StringValue());
+        _ = Assert.Throws<InvalidOperationException>(() => _ = field.StringValue());
     }
-    
+
     [Test]
     public void ChangesVerifyCorrectly()
     {
         var field = new BooleanDbField();
-        Ensure.True(field.IsEmpty());
+        Ensure.True(field.IsEmpty);
         Ensure.Equal("BOOLEAN", field.SQLType);
         field.Value(true);
-        Ensure.False(field.IsEmpty());
-        Ensure.True(field.IsSet);
-        Ensure.False(field.IsChanged());
+        Ensure.False(field.IsEmpty);
         field.Value(null);
-        Ensure.True(field.IsEmpty());
-        Ensure.True(field.IsSet);
-        Ensure.True(field.IsChanged());
-        field.ResetChange();
-        Ensure.False(field.IsChanged());
+        Ensure.True(field.IsEmpty);
         Ensure.Equal(null, field.Value());
         field.Value(false);
-        Ensure.True(field.IsChanged());
     }
 }

@@ -1,0 +1,89 @@
+﻿using Npgsql;
+using System.Text.Json;
+
+namespace Webamoki.Linka.ModelSystem;
+
+public abstract class Model
+{
+    private static readonly Dictionary<Type, string> TableNames = [];
+    internal IDbService? DbService = null;
+    internal ModelUpdateRequest? UpdateRequest;
+    protected Model()
+    {
+        if (!ModelRegistry.HasModel(GetType())) return;
+        foreach (var (fieldName, field) in GetFieldIterator().All())
+        {
+            field.Model = this;
+            field.SetName(fieldName);
+        }
+    }
+
+    internal void ChangeReady()
+    {
+        if (DbService == null) return;
+        UpdateRequest ??= new(this);
+    }
+    internal void ChangeField(string field, object? value)
+    {
+        if (DbService == null) return;
+        UpdateRequest!.AddSet(field, value);
+        DbService.UpdateModel(this);
+    }
+    public static string TableName<T>() where T : Model => TableName(typeof(T));
+    private static string TableName(Type type)
+    {
+        if (TableNames.TryGetValue(type, out var tableName))
+            return tableName;
+        throw new Exception($"Table name for {type.Name} not set.");
+    }
+    public string TableName() => TableName(GetType());
+
+    internal FieldIterator GetFieldIterator()
+    {
+        var info = ModelRegistry.Get(GetType());
+        return info.FieldIterator(this);
+    }
+
+    public static void SetTableName<T>(string tableName)
+    {
+        var type = typeof(T);
+        if (!TableNames.TryAdd(type, tableName))
+            throw new Exception($"Table name for {type.Name} already set.");
+    }
+
+    internal void Load<T>(NpgsqlDataReader reader) where T : Model => Load(typeof(T), reader);
+
+    internal void Load(Type type, NpgsqlDataReader reader)
+    {
+        var info = ModelRegistry.Get(type);
+        var fieldIterator = GetFieldIterator();
+        foreach (var (fieldName, field) in fieldIterator.All())
+        {
+            var readerFieldName = $"{info.TableName}.{fieldName}";
+            var value = field.SQLType.StartsWith("ENUM") ? reader.GetValue(reader.GetOrdinal(readerFieldName)).ToString() : reader[readerFieldName];
+            if (value is DBNull) value = null;
+            field.Value(value);
+        }
+    }
+
+    internal void Load(Type type, Dictionary<string, JsonElement> reader)
+    {
+        var info = ModelRegistry.Get(type);
+        var fieldIterator = GetFieldIterator();
+        foreach (var (fieldName, field) in fieldIterator.All())
+        {
+            var jsonElement = reader[$"{info.TableName}.{fieldName}"];
+            object? value = jsonElement.ValueKind switch
+            {
+                JsonValueKind.String => jsonElement.GetString(),
+                JsonValueKind.Number => jsonElement.TryGetInt64(out var l) ? l : jsonElement.GetDouble(),
+                JsonValueKind.True => true,
+                JsonValueKind.False => false,
+                JsonValueKind.Null => null,
+                _ => throw new NotSupportedException(
+                    $"Unsupported JSON value kind: {jsonElement.ValueKind} for field {fieldName} in model {type.Name}.")
+            };
+            field.Value(value);
+        }
+    }
+}

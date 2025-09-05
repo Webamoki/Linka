@@ -1,8 +1,7 @@
-﻿using System.Text.RegularExpressions;
+﻿using System.Net.Mail;
+using System.Text.RegularExpressions;
 
 namespace Webamoki.Linka.Fields.TextFields;
-
-using System.Net.Mail;
 
 public partial class EmailValidator : TextValidator
 {
@@ -38,8 +37,9 @@ public partial class EmailValidator : TextValidator
         }
         catch
         {
-            
+            // ignored
         }
+
         message = "Value is not a valid email address";
         return false;
     }
@@ -47,4 +47,5 @@ public partial class EmailValidator : TextValidator
     [GeneratedRegex(@"^[^@\s]+\.[^@\s]+$")]
     private static partial Regex MyRegex();
 }
-public class EmailDbField(int maxLength = 50) : TextDbField(EmailValidator.Create(), maxLength) { }
+
+public class EmailDbField(int maxLength = 50) : TextDbField(EmailValidator.Create(), maxLength);

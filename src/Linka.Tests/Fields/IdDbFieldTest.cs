@@ -18,10 +18,7 @@ public class IdDbFieldTest
 
     [TestCase(0)]
     [TestCase(-1)]
-    public void IdValidator_InvalidLength_Throws(int length)
-    {
-        Assert.Throws<ArgumentOutOfRangeException>(() => _ = IdValidator.Create(length, DefaultPool));
-    }
+    public void IdValidator_InvalidLength_Throws(int length) => Assert.Throws<ArgumentOutOfRangeException>(() => _ = IdValidator.Create(length, DefaultPool));
 
     [TestCase("ABAB", 4, "AB", true)]
     [TestCase("ABA", 4, "AB", false)]
@@ -57,7 +54,7 @@ public class IdDbFieldTest
     {
         var field = new IdDbField();
         Ensure.Equal("VARCHAR(10)", field.SQLType);
-        Ensure.True(field.IsEmpty());
+        Ensure.True(field.IsEmpty);
     }
 
     [Test]
@@ -76,6 +73,15 @@ public class IdDbFieldTest
         Ensure.Equal(value, field.StringValue());
     }
 
+    [TestCase("ABCDEF1234")]
+    [TestCase("XYZ9998888")]
+    public void IdDbField_ObjectValue_ReturnsSetValue(string value)
+    {
+        var field = new IdDbField();
+        field.Value(value);
+        Ensure.Equal(value, field.ObjectValue());
+    }
+
     [TestCase("ABCDE")]
     public void ShortIdDbField_HasCorrectLength(string value)
     {
@@ -92,27 +98,20 @@ public class IdDbFieldTest
         field.Value(value);
         Ensure.Equal(value, field.StringValue());
     }
-    
+
     [Test]
     public void ChangesVerifyCorrectly()
     {
         var field = new ShortIdDbField();
-        Ensure.True(field.IsEmpty());
+        Ensure.True(field.IsEmpty);
         Ensure.Equal("VARCHAR(5)", field.SQLType);
         field.Value("AAAAA");
-        Ensure.False(field.IsEmpty());
+        Ensure.False(field.IsEmpty);
         Ensure.True(field.IsValid(out _));
-        Ensure.True(field.IsSet);
-        Ensure.False(field.IsChanged());
         field.Value(null);
-        Ensure.True(field.IsEmpty());
-        Ensure.True(field.IsSet);
-        Ensure.True(field.IsChanged());
-        field.ResetChange();
-        Ensure.False(field.IsChanged());
+        Ensure.True(field.IsEmpty);
         Ensure.Equal(null, field.Value());
         field.GenerateValue();
-        Ensure.True(field.IsChanged());
         Ensure.True(field.IsValid(out _));
     }
 }

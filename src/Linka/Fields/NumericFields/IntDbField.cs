@@ -1,9 +1,12 @@
-﻿namespace Webamoki.Linka.Fields.NumericFields;
+﻿using Webamoki.Linka.Expressions;
+using Webamoki.Linka.ModelSystem;
+
+namespace Webamoki.Linka.Fields.NumericFields;
 
 public class IntValidator : Validator
 {
-    private readonly int _min;
     private readonly int _max;
+    private readonly int _min;
 
     private IntValidator(int min, int max)
     {
@@ -18,7 +21,7 @@ public class IntValidator : Validator
         var hash = $"{min}:{max}";
         if (Load<IntValidator>(hash, out var validator))
             return validator!;
-        
+
         validator = new IntValidator(min, max);
         Register(hash, validator);
         return validator;
@@ -42,17 +45,20 @@ public class IntValidator : Validator
         return true;
     }
 }
+
 public class IntDbField(int min, int max) : StructDbField<int>(IntValidator.Create(min, max),
     $"{GetSqlType(min, max)}")
 {
     public override string StringValue() => Value().ToString() ?? throw new InvalidOperationException();
-    
+
+    internal override object ObjectValue() => Value() ?? throw new InvalidOperationException("Value is null");
+
     private static string GetSqlType(int min, int max)
     {
         var sqlType = (min, max) switch
         {
             //postgressql
-            (>= -32768, <= 32767) => "SMALLINT",
+            ( >= -32768, <= 32767) => "SMALLINT",
             _ => "INT"
         };
         return sqlType;
@@ -62,4 +68,36 @@ public class IntDbField(int min, int max) : StructDbField<int>(IntValidator.Crea
     public static bool operator >=(IntDbField left, int right) => (left.Value() ?? throw new InvalidOperationException()) >= right;
     public static bool operator >(IntDbField left, int right) => (left.Value() ?? throw new InvalidOperationException()) > right;
     public static bool operator <(IntDbField left, int right) => (left.Value() ?? throw new InvalidOperationException()) < right;
+
+    internal override ConditionEx<TU> ParseEx<TU>(string op, object value) =>
+        new IntEx<TU>(Name, op, (int)value);
+    internal override string GetUpdateSetQuery<TSchema>(object value, out object? queryValue)
+    {
+        queryValue = (int)value;
+        return $"{value}";
+    }
+}
+
+internal record IntEx<T>(string Name, string Op, int Value) : ConditionEx<T>(Name) where T : Model
+{
+    public override string ToQuery(out List<object> values)
+    {
+        values = [];
+        return $"{GetName()} {Op} {Value}";
+    }
+
+    public override bool Verify(T model)
+    {
+        var value = (int)GetValue(model);
+        return Op switch
+        {
+            "=" => value == Value,
+            "!=" => value != Value,
+            ">" => value > Value,
+            "<" => value < Value,
+            ">=" => value >= Value,
+            "<=" => value <= Value,
+            _ => throw new NotSupportedException($"Operator {Op} is not supported for int fields.")
+        };
+    }
 }

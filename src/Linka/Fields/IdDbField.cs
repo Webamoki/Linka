@@ -2,7 +2,6 @@
 
 namespace Webamoki.Linka.Fields;
 
-
 public class IdValidator : Validator
 {
     private readonly int _length;
@@ -13,7 +12,7 @@ public class IdValidator : Validator
     {
         if (length < 1) throw new ArgumentOutOfRangeException(nameof(length), "Length cannot be negative");
         _length = length;
-        _pool = new HashSet<char>(pool);
+        _pool = [.. pool];
         _poolArray = pool.ToCharArray();
         IsInjectable = false;
     }
@@ -40,17 +39,18 @@ public class IdValidator : Validator
             message = $"Value length is not {_length}";
             return false;
         }
-        
+
         foreach (var c in s)
         {
             if (_pool.Contains(c)) continue;
             message = $"Value contains invalid character {c}";
             return false;
         }
+
         message = null;
         return true;
     }
-    
+
     public string GenerateValue()
     {
         var sb = new StringBuilder(_length);
@@ -59,25 +59,25 @@ public class IdValidator : Validator
         for (var i = 0; i < _length; i++)
         {
             var index = rng.Next(_poolArray.Length);
-            sb.Append(_poolArray[index]);
+            _ = sb.Append(_poolArray[index]);
         }
 
         return sb.ToString();
     }
 }
 
-
 public class IdDbField(Validator validator, int charSize)
     : RefDbField<string>(validator, $"VARCHAR({charSize})")
 {
-    protected IdDbField(int length, string pool = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789") : this(IdValidator.Create(length,pool), length) { }
+    protected IdDbField(int length, string pool = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789") : this(IdValidator.Create(length, pool), length) { }
     public IdDbField() : this(10) { }
     public override string StringValue() => Value() ?? string.Empty;
 
     public void GenerateValue() => Value(((IdValidator)Validator).GenerateValue());
 }
 
-
 public class ShortIdDbField() : IdDbField(5);
-public class TokenDbField() : IdDbField(5,"ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789");
-public class CountryCodeDbField() : IdDbField(2,"ABCDEFGHIJKLMNOPQRSTUVWXYZ");
+
+public class TokenDbField() : IdDbField(5, "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789");
+
+public class CountryCodeDbField() : IdDbField(2, "ABCDEFGHIJKLMNOPQRSTUVWXYZ");

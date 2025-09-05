@@ -1,8 +1,9 @@
-﻿using System.Reflection;
-using Sigil;
+﻿using Sigil;
+using System.Reflection;
 using Webamoki.Linka.Fields;
+using Webamoki.Linka.SchemaSystem;
 
-namespace Webamoki.Linka.Models;
+namespace Webamoki.Linka.ModelSystem;
 
 internal static class ModelRegistry
 {
@@ -17,9 +18,8 @@ internal static class ModelRegistry
         throw new KeyNotFoundException($"The model {type.Name} was not loaded.");
     }
 
-    public static Model GetModel<T>() where T : Model => Get<T>().Model;
+    public static bool HasModel(Type type) => ModelInfos.ContainsKey(type);
 
-    
     private static BaseNavigationAttribute GetNavigationAttribute(FieldInfo field)
     {
         var attributes = field.GetCustomAttributes(false);
@@ -31,37 +31,33 @@ internal static class ModelRegistry
                 throw new Exception($"Model {field.DeclaringType?.Name} has multiple navigation attributes on field {field.Name}.");
             navAttribute = nav;
         }
+
         if (navAttribute == null)
             throw new KeyNotFoundException($"Invalid field {field.Name} in model {field.DeclaringType?.Name}.");
         return navAttribute;
     }
-    
+
     /// <summary>
-    /// Configures the model's navigation properties and their constraints.
-    /// Executed after all models are injected.
+    ///     Configures the model's navigation properties and their constraints.
+    ///     Executed after all models are injected.
     /// </summary>
     /// <typeparam name="T"></typeparam>
-    public static bool ApplyNavigations<T>(DbSchema schema) where T : Model, new()
+    public static void ApplyNavigations<T>(Schema schema) where T : Model, new()
     {
         var info = Get<T>();
-        if (info.Navigations.Count > 0 || info.NavigationLists.Count > 0)
-            return false;
+        if (info.Navigations.Count > 0 || info.NavigationLists.Count > 0) return;
         var navigations = typeof(T).GetFields();
         foreach (var navReflectionInfo in navigations)
         {
-            var navAttribute = GetNavigationAttribute(navReflectionInfo); 
+            var navAttribute = GetNavigationAttribute(navReflectionInfo);
             var navType = navReflectionInfo.FieldType;
-            if (navType.IsGenericType && navType.GetGenericTypeDefinition() == typeof(List<>))
-            {
-                navType = navType.GetGenericArguments()[0];
-            }
+            if (navType.IsGenericType && navType.GetGenericTypeDefinition() == typeof(List<>)) navType = navType.GetGenericArguments()[0];
 
             if (!typeof(Model).IsAssignableFrom(navType)) throw new Exception($"The model {navType} is not a Model.");
             if (!schema.HasModel(navType))
                 throw new Exception(
-                    $"Cannot navigate unrelated model {navType.Name} for database {schema.DatabaseName}.");
+                    $"Cannot navigate unrelated model {navType.Name} for schema {schema.Name}.");
             var targetInfo = Get(navType);
-
 
             // Load both field and target field.
             var targetFieldName = navAttribute.TargetField;
@@ -71,7 +67,7 @@ internal static class ModelRegistry
             {
                 if (targetInfo.PrimaryField == null)
                     throw new Exception(
-                        $"Model {targetInfo.Model.GetType().Namespace} has more than one primary key.");
+                        $"Model {targetInfo.TableName} has more than one primary key.");
                 targetFieldName = targetInfo.PrimaryField!.Name;
             }
             else if (navAttribute is PkNavigationListAttribute)
@@ -92,7 +88,7 @@ internal static class ModelRegistry
                     $"Field {fieldName} in model {typeof(T).Name} and field {targetFieldName} in model {navType.Name} have different validators.");
 
             if (navAttribute is NavigationAttribute &&
-                !targetInfo.UniqueFields.TryGetValue(targetFieldName, out var _))
+                !targetInfo.UniqueFields.TryGetValue(targetFieldName, out _))
                 throw new Exception(
                     $"Field {targetFieldName} in model {navType.Name} is not unique for navigation {navReflectionInfo.Name}.");
 
@@ -122,22 +118,19 @@ internal static class ModelRegistry
                 ));
             }
         }
-
-        return true;
     }
-
 
     /// <summary>
     ///     Stores a reference of the specified model type along with its associated
     ///     model information.
     /// </summary>
     /// <typeparam name="T">The type of the model to be injected, which must inherit from AbstractModel.</typeparam>
-    public static void InitialRegister<T>() where T : Model, new()
+    public static void InitialCompile<T>() where T : Model, new()
     {
         var type = typeof(T);
         var model = new T();
 
-        var info = new ModelInfo<T>(model);
+        var info = new ModelInfo<T>();
         var fields = model.GetType().GetProperties();
 
         foreach (var propertyInfo in fields)
@@ -170,7 +163,6 @@ internal static class ModelRegistry
             .LoadArgument(0)
             .CastClass(typeof(T)).Call(propertyInfo.GetGetMethod()!).Return().CreateDelegate();
 
-
     private static Action<Model, object> CreateSetter<T>(FieldInfo field, Type modelType) where T : Model =>
         Emit<Action<Model, object>>.NewDynamicMethod($"Set_{typeof(T).Name}_{field.Name}")
             .LoadArgument(0)
@@ -184,47 +176,70 @@ internal static class ModelRegistry
 
 internal interface IModelInfo
 {
-    Model Model { get; }
     Type ModelType { get; }
 
     Dictionary<string, DbField> Fields { get; }
+
     Dictionary<string, Func<Model, DbField>> FieldGetters { get; }
+
     Dictionary<string, DbField> PrimaryFields { get; }
+
     Dictionary<string, DbField> UniqueFields { get; }
+
     Dictionary<string, NavigationInfo> Navigations { get; }
+
     Dictionary<string, NavigationListInfo> NavigationLists { get; }
+
     DbField? PrimaryField { get; }
 
-    Model Create();
+    IModelCache CreateCache { get; }
+
     Type ListType { get; }
+
     string TableName { get; }
-    public void SetListNavigation(Action<Model, object> action, Model model, List<Model> models);
+
+    Model Create();
+
+    void SetListNavigation(Action<Model, object> action, Model model, List<Model> models);
+    FieldIterator FieldIterator(Model model);
 }
 
-internal class ModelInfo<T>(Model model) : IModelInfo where T : Model, new()
+internal class ModelInfo<T> : IModelInfo where T : Model, new()
 {
-    public Model Model { get; } = model;
     public Type ModelType => typeof(T);
+
     public Dictionary<string, DbField> Fields { get; } = [];
+
     public Dictionary<string, Func<Model, DbField>> FieldGetters { get; } = [];
+
     public Dictionary<string, DbField> PrimaryFields { get; } = [];
+
     public Dictionary<string, DbField> UniqueFields { get; } = [];
 
     public Dictionary<string, NavigationInfo> Navigations { get; } = [];
+
     public Dictionary<string, NavigationListInfo> NavigationLists { get; } = [];
+
     public DbField? PrimaryField { get; set; }
+
     public Model Create() => new T();
+
+    public IModelCache CreateCache => new ModelCache<T>();
+
     public Type ListType => typeof(List<T>);
+
     public string TableName => Model.TableName<T>();
+
     public void SetListNavigation(Action<Model, object> action, Model model, List<Model> models)
     {
         var list = models.Cast<T>().ToList();
         action.Invoke(model, list);
     }
+
+    public FieldIterator FieldIterator(Model model) => new(FieldGetters, model);
 }
 
-
-internal struct NavigationInfo(
+internal readonly struct NavigationInfo(
     string field,
     string targetField,
     Action<Model, object> setter,
@@ -239,14 +254,15 @@ internal struct NavigationInfo(
 }
 
 /// <summary>
-/// Used to store information about what navigation lists are available in a model.
-/// Setter is used to set the list field in the model.
+///     Used to store information about what navigation lists are available in a model.
+///     Setter is used to set the list field in the model.
 /// </summary>
 /// <param name="field"></param>
 /// <param name="targetField"></param>
-/// <param name="setter"></param> the object should be of type List&lt;T&gt; where T is the target model type.
+/// <param name="setter"></param>
+/// the object should be of type List&lt;T&gt; where T is the target model type.
 /// <param name="modelInfo"></param>
-internal struct NavigationListInfo(
+internal readonly struct NavigationListInfo(
     string field,
     string targetField,
     Action<Model, object> setter,

@@ -1,25 +1,24 @@
-using Npgsql;
+﻿using Npgsql;
 
 namespace Webamoki.Linka.Queries;
 
-internal abstract class IQuery
+internal abstract class BaseQuery
 {
     public abstract bool IsEmpty();
-    public static implicit operator IQuery(string s) => new RenderedQuery(s);
+    public static implicit operator BaseQuery(string s) => new RenderedQuery(s);
 }
 
-internal class RenderedQuery(string query) : IQuery
+internal class RenderedQuery(string query) : BaseQuery
 {
     public readonly string Query = query;
 
     public override bool IsEmpty() => string.IsNullOrEmpty(Query);
 }
 
-internal class Query : IQuery
+internal class Query : BaseQuery
 {
     private readonly List<object> _values = [];
-    private List<IQuery> _body = [];
-
+    private List<BaseQuery> _body = [];
 
     public Query() { }
 
@@ -40,17 +39,13 @@ internal class Query : IQuery
         return true;
     }
 
-    public void ResetBody() { _body = []; }
+    public void ResetBody() => _body = [];
 
-    public void AddValue(string value) => _values.Add(value);
+    public void AddValue(object value) => _values.Add(value);
     public virtual void AddValues(List<object> value) => _values.AddRange(value);
     public void PrependValue(string value) => _values.Insert(0, value);
 
-
-    
-
-
-    public void AddBody(params IQuery[] bodies)
+    public void AddBody(params BaseQuery[] bodies)
     {
         foreach (var body in bodies)
             if (!body.IsEmpty())
@@ -68,7 +63,7 @@ internal class Query : IQuery
         var query = Render(out var values);
         return service.Execute(query, values);
     }
-    
+
     internal virtual string Render(out List<object> values)
     {
         var query = "";

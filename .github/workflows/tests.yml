@@ -1,0 +1,17 @@
+﻿name: .NET Check Workflow
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+jobs:
+  testing:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Run dotnet check (build + test)
+        uses: ./.github/actions/dotnet-test

@@ -21,7 +21,6 @@ public class EnumValidatorTest
         Ensure.Equal(validator1, validator2);
     }
 
-
     [TestCase(TestEnum.Alpha)]
     [TestCase("Alpha")]
     [TestCase(TestEnum.Gamma)]
@@ -44,35 +43,44 @@ public class EnumValidatorTest
     public void ChangesVerifyCorrectly()
     {
         var field = new EnumDbField<TestEnum>();
-        Ensure.Equal("ENUM ('Alpha','Beta','Gamma')", field.SQLType);
         field.Value(TestEnum.Alpha);
-        Ensure.False(field.IsEmpty());
-        Ensure.True(field.IsSet);
-        Ensure.False(field.IsChanged());
+        Ensure.False(field.IsEmpty);
         field.Value(null);
-        Ensure.True(field.IsEmpty());
-        Ensure.True(field.IsSet);
-        Ensure.True(field.IsChanged());
-        field.ResetChange();
-        Ensure.False(field.IsChanged());
+        Ensure.True(field.IsEmpty);
         Ensure.Equal(null, field.Value());
         field.Value(TestEnum.Beta);
-        Ensure.True(field.IsChanged());
     }
 
     [Test]
     public void EnumDbField_StringValue_ReturnsCorrectEnumName()
     {
         var field = new EnumDbField<TestEnum>();
-        Ensure.True(field.IsEmpty());
+        Ensure.True(field.IsEmpty);
         field.Value(TestEnum.Beta);
         Ensure.Equal("Beta", field.StringValue());
+    }
+
+    [Test]
+    public void EnumDbField_ObjectValue_ReturnsCorrectEnumValue()
+    {
+        var field = new EnumDbField<TestEnum>();
+        Ensure.True(field.IsEmpty);
+        field.Value(TestEnum.Beta);
+        Ensure.Equal(TestEnum.Beta, field.ObjectValue());
+    }
+
+    [Test]
+    public void EnumDbField_ObjectValue_ThrowsIfUnset()
+    {
+        var field = new EnumDbField<TestEnum>();
+        Ensure.True(field.IsEmpty);
+        Ensure.Throws<InvalidOperationException>(() => _ = field.ObjectValue());
     }
 
     [Test]
     public void EnumDbField_StringValue_ThrowsWhenUnset()
     {
         var field = new EnumDbField<TestEnum>();
-        Ensure.Throws<Exception>(() => field.StringValue());
+        Ensure.Throws<Exception>(field.StringValue);
     }
 }

@@ -1,22 +1,22 @@
 ﻿using Webamoki.Linka.Fields;
 using Webamoki.Linka.Queries;
+using Webamoki.Linka.SchemaSystem;
 using Webamoki.Utils;
 
-namespace Webamoki.Linka.Models;
+namespace Webamoki.Linka.ModelSystem;
 
-public static class ModelVerifier
+public static class ModelCheck
 {
-    public static void Verify<T>(Type modelType) where T : DbSchema, new()
+    public static void Check<T>(Type modelType) where T : Schema, new()
     {
-        VerifyFields<T>(modelType);
-        VerifyRelations<T>(modelType);
-        VerifyFullText<T>(modelType);
+        CheckFields<T>(modelType);
+        CheckRelations<T>(modelType);
+        CheckFulltext<T>(modelType);
     }
 
-
-    private static void VerifyFields<T>(Type modelType) where T : DbSchema, new()
+    private static void CheckFields<T>(Type modelType) where T : Schema, new()
     {
-        var schema = DbSchema.Get<T>();
+        var schema = Schema.Get<T>();
         const string sqlQuery = """
                                 SELECT
                                     a.attname AS ColumnName,
@@ -40,14 +40,7 @@ public static class ModelVerifier
                                         WHEN t.typname = 'bpchar' THEN 'char(' || (a.atttypmod - 4) || ')'
                                         WHEN t.typname = 'numeric' THEN 'numeric(' || ((a.atttypmod - 4) >> 16) || ',' || ((a.atttypmod - 4) & 65535) || ')'
                                         ELSE t.typname
-                                    END) AS ColumnType,
-                                    CASE
-                                        WHEN t.typtype = 'e' THEN (
-                                            SELECT string_agg(quote_literal(enumlabel), ',')
-                                            FROM pg_enum
-                                            WHERE enumtypid = t.oid
-                                        )
-                                    END AS EnumValues
+                                    END) AS ColumnType
                                 FROM pg_attribute a
                                 JOIN pg_class c ON a.attrelid = c.oid
                                 JOIN pg_namespace n ON c.relnamespace = n.oid
@@ -65,38 +58,45 @@ public static class ModelVerifier
 
         var query = new Query(sqlQuery);
         var tableName = ModelRegistry.Get(modelType).TableName;
-        Logging.WriteLog($"Verifying model {tableName} in database {schema.DatabaseName}");
+        Logging.WriteLog($"Verifying model {tableName} in schema {schema.Name}");
         query.AddValue(tableName);
         query.AddValue(schema.Name);
-        
+
         using var dbService = new DbService<T>();
         var reader = query.Execute(dbService);
         HashSet<string> fieldNames = [];
         foreach (var (fieldName, _) in ModelRegistry.Get(modelType).Fields)
-            fieldNames.Add(fieldName);
+            _ = fieldNames.Add(fieldName);
 
         var fields = ModelRegistry.Get(modelType).Fields;
-        while(reader.Read())
+        while (reader.Read())
         {
             if (fieldNames.Count == 0) throw new Exception("Table has more fields than expected.");
             var fieldName = reader.GetString(0);
             Logging.WriteLog($"--- Verifying field {fieldName} in model {tableName}");
-            fieldNames.Remove(fieldName);
-            if(!fields.TryGetValue(fieldName, out var field)) throw new Exception($"Field {fieldName} does not exist in model: {tableName}.");
-            Assert(field.IsPrimary, reader["IsPrimary"], $"Column {fieldName} in table {tableName} needs to be a primary key."); 
+            _ = fieldNames.Remove(fieldName);
+            if (!fields.TryGetValue(fieldName, out var field)) throw new Exception($"Field {fieldName} does not exist in model: {tableName}.");
+            Assert(field.IsPrimary, reader["IsPrimary"], $"Column {fieldName} in table {tableName} needs to be a primary key.");
             Assert(field.IsUnique, reader["IsUnique"], $"Column {fieldName} in table {tableName} needs to be unique.");
             Assert(!field.IsRequired, reader["IsNullable"], $"Column {fieldName} in table {tableName} needs to be nullable.");
-            var enumValues = reader["EnumValues"];
-            var expectedType = enumValues == DBNull.Value ? reader["ColumnType"] : $"ENUM ({enumValues})";
-            Assert(field.SQLType, expectedType, $"Column {fieldName} in table {tableName} has unexpected type. Expected: {field.SQLType}, got: {expectedType}.");
+            var expectedType = reader["ColumnType"];
+            var sqlType = field.SQLType;
+            if (field is IEnumDbField enumField)
+            {
+                sqlType = $"{enumField.GetSchemaEnumName<T>()}";
+                sqlType = sqlType.ToUpper();
+            }
+
+            Assert(sqlType, expectedType, $"Column {fieldName} in table {tableName} has unexpected type. Expected: {field.SQLType}, got: {expectedType}.");
         }
+
         if (fieldNames.Count > 0)
             throw new Exception($"Fields {string.Join(", ", fieldNames)} do not exist in table: {tableName}.");
     }
-    
-    private static void VerifyFullText<T>(Type modelType) where T : DbSchema, new()
+
+    private static void CheckFulltext<T>(Type modelType) where T : Schema, new()
     {
-        var schema = DbSchema.Get<T>();
+        var schema = Schema.Get<T>();
         const string sqlQuery = """
                                 SELECT
                                     pg_get_indexdef(i.oid) AS Definition
@@ -116,12 +116,12 @@ public static class ModelVerifier
                                     AND i.relname = ?
                                     AND am.amname = 'gin'
                                     AND ix.indisvalid = true
-                                
+
                                 """;
-    
+
         var query = new Query(sqlQuery);
         var tableName = ModelRegistry.Get(modelType).TableName;
-        Logging.WriteLog($"Verifying model {tableName} full text columns in database {schema.DatabaseName}");
+        Logging.WriteLog($"Verifying model {tableName} full text columns in schema {schema.Name}");
         query.AddValue(tableName);
         query.AddValue(schema.Name);
         query.AddValue($"FT_{tableName}");
@@ -145,12 +145,13 @@ public static class ModelVerifier
             Assert(definition, databaseDefinition, $"FullText index for model {tableName} does index all fields {fields}.");
             return;
         }
-        throw new Exception($"FullText index for model {tableName} does not exist in database {schema.DatabaseName}.");
+
+        throw new Exception($"FullText index for model {tableName} does not exist in schema {schema.Name}.");
     }
-    
-    private static void VerifyRelations<T>(Type modelType) where T : DbSchema, new()
+
+    private static void CheckRelations<T>(Type modelType) where T : Schema, new()
     {
-        var schema = DbSchema.Get<T>();
+        var schema = Schema.Get<T>();
         const string sqlQuery = """
                                 SELECT
                                     tc.constraint_name,
@@ -174,22 +175,22 @@ public static class ModelVerifier
                                     tc.constraint_type = 'FOREIGN KEY'
                                     AND tc.table_schema = ?
                                     AND tc.table_name = ?;
-                                
+
                                 """;
-    
+
         var query = new Query(sqlQuery);
         var tableName = ModelRegistry.Get(modelType).TableName;
         Logging.WriteLog($"Verifying model {tableName} relations in database {schema.Name}");
         query.AddValue(schema.Name);
         query.AddValue(tableName);
-        
+
         using var dbService = new DbService<T>();
         var reader = query.Execute(dbService);
         HashSet<string> navigationNames = [];
-    
+
         foreach (var (navigationName, _) in ModelRegistry.Get(modelType).Navigations)
-            navigationNames.Add(navigationName);
-        
+            _ = navigationNames.Add(navigationName);
+
         var navInfos = ModelRegistry.Get(modelType).Navigations;
         while (reader.Read())
         {
@@ -200,7 +201,7 @@ public static class ModelVerifier
                 throw new Exception($"Constraint {navigationName} does not match expected prefix {constraintPrefix} for table: {tableName}.");
             navigationName = navigationName[constraintPrefix.Length..];
             Logging.WriteLog($"Verifying navigation {navigationName} in model: {tableName}");
-            navigationNames.Remove(navigationName);
+            _ = navigationNames.Remove(navigationName);
             var navInfo = navInfos[navigationName];
             Assert(navInfo.Field, reader["Column"], $"Navigation {navigationName} in model {tableName} does not match expected field: {navInfo.Field}.");
             Assert(navInfo.TargetModelInfo.TableName, reader["TargetTable"], $"Navigation {navigationName} in model {tableName} does not match expected target table: {navInfo.TargetModelInfo.TableName}.");
@@ -208,6 +209,7 @@ public static class ModelVerifier
             Assert(navInfo.Constraint.ToSqlString(), reader["OnDelete"], $"Navigation {navigationName} in model {tableName} does not match expected OnDelete action: {navInfo.Constraint.ToSqlString()}.");
             Assert("RESTRICT", reader["OnUpdate"], $"Navigation {navigationName} in model {tableName} does not match expected OnUpdate action: RESTRICT.");
         }
+
         if (navigationNames.Count > 0)
             throw new Exception($"Navigations {string.Join(", ", navigationNames)} do not exist in table: {tableName}.");
     }

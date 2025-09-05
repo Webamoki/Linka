@@ -1,0 +1,21 @@
+name: "Dotnet Test Action"
+description: "Restores, builds, and runs all dotnet tests"
+runs:
+  using: "composite"
+  steps:
+    - name: Setup .NET 9
+      uses: actions/setup-dotnet@v4
+      with:
+        dotnet-version: 9.0.x
+
+    - name: Restore dependencies
+      shell: bash
+      run: dotnet restore
+
+    - name: Build
+      shell: bash
+      run: dotnet build --no-restore --configuration Release
+
+    - name: Run tests
+      shell: bash
+      run: dotnet test --no-build --configuration Release --verbosity normal

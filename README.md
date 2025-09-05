@@ -245,20 +245,6 @@ public class IntegrationTests
 }
 ```
 
-## Caching
-
-Enable caching for improved performance:
-
-```csharp
-// Enable caching
-using var db = new DbService<UserSchema>(true);
-
-// First query hits database
-var user1 = db.Get<UserModel>(u => u.ID == "AAAAAAAAAA");
-
-// Second identical query uses cache
-var user2 = db.Get<UserModel>(u => u.ID == "AAAAAAAAAA");
-```
 
 ## Field Operations
 
@@ -288,49 +274,7 @@ else
 }
 ```
 
-### Change Tracking
-```csharp
-user.Name.Value("Original Name");
-user.Name.ResetChange(); // Mark as unchanged
 
-user.Name.Value("New Name");
-if (user.Name.IsChanged())
-{
-    Console.WriteLine("Name was modified");
-}
-```
-
-## Field Iterator
-
-Use the `FieldIterator` for efficient field operations:
-
-```csharp
-var fieldIterator = user.GetFieldIterator();
-
-// Iterate through all fields
-foreach (var (fieldName, field) in fieldIterator.AllFields())
-{
-    Console.WriteLine($"{fieldName}: {field.StringValue()}");
-}
-
-// Only changed fields
-foreach (var (fieldName, field) in fieldIterator.ChangedFields())
-{
-    Console.WriteLine($"Modified: {fieldName} = {field.StringValue()}");
-}
-
-// Only set fields
-foreach (var (fieldName, field) in fieldIterator.SetFields())
-{
-    Console.WriteLine($"Set: {fieldName} = {field.StringValue()}");
-}
-
-// Fields ready for database insertion
-foreach (var (fieldName, field) in fieldIterator.InsertableFields())
-{
-    Console.WriteLine($"Insertable: {fieldName} = {field.StringValue()}");
-}
-```
 
 ## Best Practices
 
@@ -338,17 +282,12 @@ foreach (var (fieldName, field) in fieldIterator.InsertableFields())
 2. **Use GetOrNull** when records might not exist
 3. **Use GetMany().Count()** for counting without loading data
 4. **Use GetMany().Load()** when you need the actual records
-5. **Enable caching** for read-heavy applications
 6. **Use fixtures** for comprehensive test data setup
-7. **Call SaveChanges()** after inserts to commit transactions
-8. **Use FieldIterator** for bulk field operations
+7. **Call SaveChanges()** after inserts or updates to commit transactions
 
 ## Requirements
 
-- .NET 8.0 or later
-- PostgreSQL 12.0 or later
-- NUnit 3.13+ (for testing)
-- Npgsql 8.0+ (PostgreSQL driver)
+- .NET 9.0 or later
 
 ## Installation
 

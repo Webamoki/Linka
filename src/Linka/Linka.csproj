@@ -9,14 +9,38 @@
 
         <!-- NuGet package metadata -->
         <PackageId>Linka</PackageId>
-        <Version>1.0.0</Version>
+        <!-- Version will be set dynamically from git tag via MSBuild -->
+        <Version Condition="'$(GitTag)' != ''">$(GitTag)</Version>
+        <Version Condition="'$(GitTag)' == ''">1.0.0</Version>
+        <AssemblyVersion Condition="'$(GitTag)' != ''">$(GitTag).0</AssemblyVersion>
+        <AssemblyVersion Condition="'$(GitTag)' == ''">1.0.0.0</AssemblyVersion>
+        <FileVersion Condition="'$(GitTag)' != ''">$(GitTag).0</FileVersion>
+        <FileVersion Condition="'$(GitTag)' == ''">1.0.0.0</FileVersion>
+
         <Authors>Webamoki</Authors>
         <Company>Webamoki</Company>
-        <Description>A simple C# PostgreSQL ORM for .NET projects</Description>
-        <PackageTags>ORM;Database;CSharp;EFCoreAlternative</PackageTags>
-        <RepositoryUrl>https://github.com/YourUsername/YourRepoName</RepositoryUrl>
-        <PackageLicenseExpression>MIT</PackageLicenseExpression> <!-- or Apache-2.0 -->
+        <Description>A modern, type-safe Object-Relational Mapping (ORM) framework for .NET with PostgreSQL</Description>
+        <PackageTags>ORM;Database;PostgreSQL;CSharp;DotNet;TypeSafe;Validation;ChangeTracking;Testing</PackageTags>
+        <RepositoryUrl>https://github.com/webamoki/linka-orm</RepositoryUrl>
+        <RepositoryType>git</RepositoryType>
+        <PackageProjectUrl>https://github.com/webamoki/linka-orm</PackageProjectUrl>
+        <PackageLicenseExpression>MIT</PackageLicenseExpression>
+
+        <!-- README and Documentation -->
+        <PackageReadmeFile>README.md</PackageReadmeFile>
+        <GenerateDocumentationFile>true</GenerateDocumentationFile>
+
+        <!-- Package Generation -->
+        <GeneratePackageOnBuild>false</GeneratePackageOnBuild>
+        <IncludeSymbols>true</IncludeSymbols>
+        <SymbolPackageFormat>snupkg</SymbolPackageFormat>
     </PropertyGroup>
+
+    <!-- Include README in package -->
+    <ItemGroup>
+        <None Include="..\..\README.md" Pack="true" PackagePath="\" />
+    </ItemGroup>
+
     <ItemGroup>
         <AssemblyAttribute Include="System.Runtime.CompilerServices.InternalsVisibleTo">
             <_Parameter1>Tests</_Parameter1>
